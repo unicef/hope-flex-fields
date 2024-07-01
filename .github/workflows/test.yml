@@ -69,9 +69,12 @@ jobs:
           key: venv-${{ runner.os }}-${{ steps.setup_python.outputs.python-version}}-${{ hashFiles('pdm.lock') }}
           path: .venv
       - name: Test
+        continue-on-error: true
         run: |
           pip install pdm
-          pdm venv create
+          pdm venv create -q
+      - name: Test
+        run: |
           pdm install
           pdm run pytest tests
       - name: Upload pytest test results
