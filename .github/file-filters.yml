@@ -1,8 +1,4 @@
 # This is used by the action https://github.com/dorny/paths-filter
-docker: &docker
-  - added|modified: './docker/**/*'
-  - added|modified: './docker/*'
-
 dependencies: &dependencies
   - 'pdm.lock'
   - 'pyproject.toml'
@@ -20,13 +16,8 @@ mypy:
   - *python
   - 'mypy.ini'
 
-docker_base:
-  - *docker
-  - *dependencies
-
 run_tests:
   - *python
-  - *docker
   - *dependencies
   - 'pytest.ini'
 

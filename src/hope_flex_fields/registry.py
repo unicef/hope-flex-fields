@@ -1,9 +1,6 @@
 from django import forms
-from django.core.exceptions import ObjectDoesNotExist
-
-from strategy_field.exceptions import StrategyAttributeError
 from strategy_field.registry import Registry
-from strategy_field.utils import fqn, import_by_name
+from strategy_field.utils import fqn
 
 
 class FieldRegistry(Registry):

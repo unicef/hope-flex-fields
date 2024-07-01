@@ -7,7 +7,6 @@ from django import forms
 
 from django_regex.fields import RegexField
 from django_regex.validators import RegexValidator
-from mypy.types import Type
 from strategy_field.fields import StrategyClassField
 
 from .forms import FieldsetForm
