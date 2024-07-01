@@ -1,0 +1,14 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% block action-content %}
+    {{ original }}
+
+    <table>
+        {% for k,v in arguments.items %}
+            <tr>
+                <th>{{ k }}</th>
+                <td>{{ v.default }}</td>
+                <td>{{ v.default }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

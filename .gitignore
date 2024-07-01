@@ -1,0 +1,13 @@
+.*
+~*
+dist/
+build/
+coverage.xml
+*.sqlite3
+!.github
+!.flake8
+!.mypy.ini
+!.pylintrc
+!.gitignore
+!.coveragerc
+!.pdm-python
