@@ -12,7 +12,7 @@ dependencies = [
     "django-admin-extra-buttons>=1.5.8",
     "django-jsoneditor>=0.2.4",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 readme = "README.md"
 license = {text = "MIT"}
 

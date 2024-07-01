@@ -21,10 +21,15 @@ permissions:
 jobs:
   changes:
     runs-on: ubuntu-latest
+    concurrency:
+      group: changes-group
+      cancel-in-progress: true
     timeout-minutes: 1
     defaults:
       run:
         shell: bash
+    outputs:
+      run_tests: ${{steps.changes.outputs.run_tests }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.7
@@ -38,14 +43,16 @@ jobs:
 
   ci:
     runs-on: ubuntu-latest
-    timeout-minutes: 1
+    name: Test py${{ matrix.python-version }}/dj${{matrix.django-version}}
     defaults:
       run:
         shell: bash
     strategy:
+      max-parallel: 1
       matrix:
-        python-version: [ "3.9", "3.11", "3.12" ]
-        django-version: [ "3", "4" ]
+        python-version: [ "3.11", "3.12" ]
+        django-version: [ "3.2", "4.2", "5.0" ]
+      fail-fast: true
     needs: [ changes ]
     if: needs.changes.outputs.run_tests || contains(github.event.head_commit.message, 'ci:release')
     steps:
@@ -56,6 +63,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: 'x64'
+      - name: Cache virtualenv
+        uses: actions/cache@v3
+        with:
+          key: venv-${{ runner.os }}-${{ steps.setup_python.outputs.python-version}}-${{ hashFiles('pdm.lock') }}
+          path: .venv
       - name: Test
         run: |
           pip install pdm
