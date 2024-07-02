@@ -20,7 +20,7 @@ def record(db):
 
 
 def test_fieldset_test(app, record):
-    url = reverse(f"admin:hope_flex_fields_fielddefinition_test", args=[record.pk])
+    url = reverse("admin:hope_flex_fields_fielddefinition_test", args=[record.pk])
     res = app.get(url)
     res.forms["test"]["IntField"] = ""
     res = res.forms["test"].submit()

@@ -72,6 +72,7 @@ dev = [
     "django-webtest>=1.9.11",
     "responses>=0.25.3",
     "django-csp>=3.8",
+    "bandit>=1.7.9",
 ]
 
 [tool.pdm.scripts]
