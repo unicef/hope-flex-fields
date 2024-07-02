@@ -2,6 +2,9 @@ from django import forms
 from django.urls import reverse
 
 import pytest
+from strategy_field.utils import fqn
+
+from hope_flex_fields.models import FieldDefinition
 
 pytestmark = [pytest.mark.admin, pytest.mark.smoke, pytest.mark.django_db]
 
@@ -19,7 +22,7 @@ def record(db):
     return fd1
 
 
-def test_fieldset_test(app, record):
+def test_field_test(app, record):
     url = reverse("admin:hope_flex_fields_fielddefinition_test", args=[record.pk])
     res = app.get(url)
     res.forms["test"]["IntField"] = ""
@@ -31,3 +34,19 @@ def test_fieldset_test(app, record):
     res = res.forms["test"].submit()
     messages = [s.message for s in res.context["messages"]]
     assert messages == ["Valid"]
+
+
+def test_fields_create(app, record):
+    url = reverse("admin:hope_flex_fields_fielddefinition_add")
+    res = app.get(url)
+    res.form["name"] = "Int"
+    res.form["field_type"] = fqn(forms.ChoiceField)
+    res = res.form.submit()
+    assert res.status_code == 302
+    obj: FieldDefinition = FieldDefinition.objects.get(name="int")
+    assert obj.attrs == {
+        "choices": [],
+        "required": False,
+        "label": None,
+        "help_text": "",
+    }

@@ -26,6 +26,10 @@ DEFAULT_ATTRS = {
 }
 
 
+def get_default_attrs():
+    return DEFAULT_ATTRS
+
+
 class TestForm(forms.Form):
     fieldset = None
 
@@ -39,7 +43,7 @@ class FieldDefinition(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(max_length=500, blank=True, null=True, default="")
     field_type = StrategyClassField(registry=field_registry)
-    attrs = models.JSONField(default=DEFAULT_ATTRS, blank=True)
+    attrs = models.JSONField(default=get_default_attrs, blank=True)
     regex = RegexField(blank=True, null=True, validators=[RegexValidator()])
     validation = models.TextField(blank=True, null=True)
     objects = FieldDefinitionManager()
@@ -59,17 +63,19 @@ class FieldDefinition(models.Model):
             raise ValidationError(e)
 
     def set_default_arguments(self):
-        if not isinstance(self.attrs, dict):
-            self.attrs = {}
-        stored = self.attrs
+        if self.attrs in [None, "null", ""]:
+            self.attrs = DEFAULT_ATTRS
+        elif isinstance(self.attrs, str):
+            self.attrs = DEFAULT_ATTRS
+
         sig: inspect.Signature = inspect.signature(self.field_type)
-        defaults = {
+        merged = {
             k.name: k.default
             for __, k in sig.parameters.items()
             if k.default not in [inspect.Signature.empty]
         }
-        defaults.update(**stored)
-        self.attrs = defaults
+        merged.update(**self.attrs)
+        self.attrs = merged
 
     @property
     def required(self):

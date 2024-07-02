@@ -61,6 +61,7 @@ class SuperUserFactory(UserFactory):
 class FieldDefinitionFactory(AutoRegisterModelFactory):
     name = factory.Sequence(lambda d: "FieldDefinition-%s" % d)
     field_type = factory.fuzzy.FuzzyChoice([forms.CharField, forms.IntegerField])
+    attrs = {}
 
     class Meta:
         model = FieldDefinition

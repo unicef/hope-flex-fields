@@ -27,6 +27,6 @@ router.register(r"fields", FieldDefinitionViewSet)
 
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
+    path("", admin.site.urls),
 ]
