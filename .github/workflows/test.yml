@@ -58,32 +58,42 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.7
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           architecture: 'x64'
+
       - name: Cache virtualenv
         uses: actions/cache@v3
         with:
           key: venv-${{ runner.os }}-${{ steps.setup_python.outputs.python-version}}-${{ hashFiles('pdm.lock') }}
           path: .venv
+
       - name: Test
         continue-on-error: true
         run: |
           pip install pdm
           pdm venv create -q
+          pdm install
+
+      - name: lint
+        run: |
+          isort src/ --check-only
+          flake8 src/
+
       - name: Test
         run: |
-          pdm install
           pdm run pytest tests
+
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
         with:
           name: pytest-results-${{ matrix.python-version }}
           path: junit/test-results-${{ matrix.python-version }}.xml
-        # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         if: ${{ always() }}
