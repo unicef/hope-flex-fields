@@ -23,6 +23,7 @@ exclude_lines =
     if __name__ == .__main__.:
     if DEBUG:
     except NoReverseMatch:
+    if TYPE_CHECKING:
 
 ignore_errors = True
 

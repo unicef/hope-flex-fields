@@ -1,0 +1,56 @@
+{#{% load strings %}#}
+<div id="{{ widget.attrs.id }}_container" class="cm-container" data-fieldId="{{ widget.attrs.id }}">
+    {% if widget.attrs.toolbar %}
+        <div class="cm-toolbar">
+            <a data-action="undo" class="button toolbutton" href="javascript:false">undo </a>
+            <a data-action="redo" class="button toolbutton" href="javascript:false">redo </a>
+            <a data-op="expand" class="button toolbutton" href="javascript:false"> fullscreen </a>
+            <a data-op="run" class="button toolbutton" href="javascript:false"> run </a>
+        </div>
+    {% endif %}
+    <textarea name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>{{ widget.value|default_if_none:"" }}</textarea>
+</div>
+<script>
+    (function ($) {
+        $(document).ready(function () {
+            var editor = CodeMirror.fromTextArea(document.getElementById('{{widget.attrs.id}}'), {
+                mode: "javascript",
+                autoCloseBrackets: true,
+                styleActiveSelected: true,
+                autoRefresh: true,
+                lineNumbers: true,
+                lineWrapping: true,
+                indentUnit: 4,
+                styleActiveLine: true,
+                theme: "{{ widget.attrs.theme }}",
+                foldGutter: true,
+                gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter", "CodeMirror-lint-markers"],
+                lint: {options: {esversion: 2021}},
+                extraKeys: {
+                    "Ctrl-S": function (cm) {
+                        cmToolBar.save(cm);
+                    },
+                    "Ctrl-Q": function (cm) {
+                        cm.foldCode(cm.getCursor());
+                    },
+                    "F3": function (cm) {
+                        cm.foldCode(cm.getCursor());
+                    },
+                    "F5": function (cm) {
+                       cmToolBar.run(cm);
+                    },
+                    "F11": function (cm) {
+                        cmToolBar.expand(cm);
+                    },
+                    "Esc": function (cm) {
+                        cmToolBar.expand(cm);
+                    }
+                }
+            });
+            editor.execCommand("unfoldAll");
+            editor.setOption('lint', {options: {bitwise: true}});
+            $('#{{widget.attrs.id}}').data('CodeMirror', editor);
+        });
+    })(django.jQuery);
+
+</script>

@@ -18,8 +18,8 @@ def config(db):
     )
     fs = Fieldset.objects.create(name="Fieldset")
 
-    FieldsetField.objects.create(label="int", field=fd1, fieldset=fs)
-    FieldsetField.objects.create(label="float", field=fd2, fieldset=fs)
+    FieldsetField.objects.create(name="int", field=fd1, fieldset=fs)
+    FieldsetField.objects.create(name="float", field=fd2, fieldset=fs)
     return {"fs": fs}
 
 

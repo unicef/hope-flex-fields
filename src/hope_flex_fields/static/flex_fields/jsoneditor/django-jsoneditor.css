@@ -1,0 +1,25 @@
+.outer_jsoneditor {
+  float: left;
+  width: 100%;
+  overflow: auto;
+  max-width: 100%;
+  min-height: 300px;
+  height: 300px;
+  resize: vertical;
+}
+/*.outer_jsoneditor .jsoneditor .jsoneditor-menu {*/
+/*  background-color: var(--primary);*/
+/*  border-bottom: 1px solid var(--breadcrumbs-bg);*/
+/*}*/
+/*.outer_jsoneditor .jsoneditor .jsoneditor-menu .jsoneditor-contextmenu {*/
+/*  background-color: var(--breadcrumbs-bg);*/
+/*}*/
+/*.outer_jsoneditor .jsoneditor .jsoneditor-menu .jsoneditor-contextmenu .jsoneditor-menu button {*/
+/*  color: white;*/
+/*  background-color: var(--breadcrumbs-bg);*/
+/*}*/
+/*.outer_jsoneditor .jsoneditor .jsoneditor-menu .jsoneditor-contextmenu .jsoneditor-menu button:hover {*/
+/*  background-color: var(--secondary);*/
+/*}*/
+
+/*!*# sourceMappingURL=django-jsoneditor.css.map *!*/

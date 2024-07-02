@@ -74,12 +74,23 @@ class FieldsetFactory(AutoRegisterModelFactory):
         model = Fieldset
         django_get_or_create = ("name",)
 
+    @factory.post_generation
+    def fields(self, create, extracted, **kwargs):
+        if not create:
+            # Simple build, or nothing to add, do nothing.
+            return
+        if extracted:
+            # Add the iterable of groups using bulk addition
+            self.fields.add(*extracted)
+        else:
+            self.fields.add(FieldsetFieldFactory(fieldset=self))
+
 
 class FieldsetFieldFactory(AutoRegisterModelFactory):
-    label = factory.Sequence(lambda d: "FieldsetField-%s" % d)
+    name = factory.Sequence(lambda d: "FieldsetField-%s" % d)
     fieldset = factory.SubFactory(FieldsetFactory)
     field = factory.SubFactory(FieldDefinitionFactory)
 
     class Meta:
         model = FieldsetField
-        django_get_or_create = ("label",)
+        django_get_or_create = ("name",)

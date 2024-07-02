@@ -1,0 +1,55 @@
+div.jsoneditor {
+  height: auto;
+  border: inherit;
+}
+div .outer_jsoneditor {
+    float: left;
+    width: 100%;
+    resize: both;
+    overflow: auto;
+    max-width: 100%;
+}
+
+//
+//.outer_jsoneditor {
+//  float: left;
+//  width: 100%;
+//  //resize: both;
+//  overflow: auto;
+//  max-width: 100%;
+//  min-height: 100px;
+//  height: 100px;
+//  resize: vertical;
+//
+//  .jsoneditor {
+//    .jsoneditor-menu {
+//      background-color: var(--primary);
+//      border-bottom: 1px solid var(--breadcrumbs-bg);
+//
+//      .jsoneditor-contextmenu {
+//        background-color: var(--breadcrumbs-bg);
+//
+//        .jsoneditor-menu {
+//          button {
+//            color: white;
+//            background-color: var(--breadcrumbs-bg);
+//
+//            &:hover {
+//              background-color: var(--secondary);
+//
+//            }
+//          }
+//        }
+//      }
+//    }
+//
+//    .jsoneditor-navigation-bar {
+//
+//    }
+//  }
+//}
+//
+//
+//.jsoneditor-contextmenu {
+//
+//}

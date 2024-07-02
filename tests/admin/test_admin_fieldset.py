@@ -18,13 +18,13 @@ def record(db):
     )
     fs = Fieldset.objects.create(name="Fieldset")
 
-    FieldsetField.objects.create(label="int", field=fd1, fieldset=fs)
-    FieldsetField.objects.create(label="float", field=fd2, fieldset=fs)
+    FieldsetField.objects.create(name="int", field=fd1, fieldset=fs)
+    FieldsetField.objects.create(name="float", field=fd2, fieldset=fs)
     return fs
 
 
 def test_fieldset_test(app, record):
-    url = reverse(f"admin:hope_flex_fields_fieldset_test", args=[record.pk])
+    url = reverse("admin:hope_flex_fields_fieldset_test", args=[record.pk])
     res = app.get(url)
     res.forms["test"]["int"] = "1"
     res = res.forms["test"].submit()

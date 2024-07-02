@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:9a551847f520e21b28b8564c9b01871a945d3baca1d6db1426777946d2364d4f"
+content_hash = "sha256:cedec7dc2b09d2f109f18dbdd69a3e918490353edd07de6ba626c33f26bbb81e"
 
 [[package]]
 name = "asgiref"
@@ -221,6 +221,19 @@ files = [
 ]
 
 [[package]]
+name = "django-csp"
+version = "3.8"
+summary = "Django Content Security Policy support."
+groups = ["dev"]
+dependencies = [
+    "Django>=3.2",
+]
+files = [
+    {file = "django_csp-3.8-py3-none-any.whl", hash = "sha256:19b2978b03fcd73517d7d67acbc04fbbcaec0facc3e83baa502965892d1e0719"},
+    {file = "django_csp-3.8.tar.gz", hash = "sha256:ef0f1a9f7d8da68ae6e169c02e9ac661c0ecf04db70e0d1d85640512a68471c0"},
+]
+
+[[package]]
 name = "django-factory-boy"
 version = "1.0.0"
 summary = "Uses factory_boy to supply test data factory classes for all stock Django models."
@@ -292,6 +305,20 @@ dependencies = [
 files = [
     {file = "django-webtest-1.9.11.tar.gz", hash = "sha256:9597d26ced599bc5d4d9366bb451469fc9707b4779f79543cdf401ae6c5aeb35"},
     {file = "django_webtest-1.9.11-py3-none-any.whl", hash = "sha256:e29baf8337e7fe7db41ce63ca6661f7b5c77fe56f506f48b305e09313f5475b4"},
+]
+
+[[package]]
+name = "djangorestframework"
+version = "3.15.1"
+requires_python = ">=3.6"
+summary = "Web APIs for Django, made easy."
+groups = ["default"]
+dependencies = [
+    "django>=3.0",
+]
+files = [
+    {file = "djangorestframework-3.15.1-py3-none-any.whl", hash = "sha256:3ccc0475bce968608cf30d07fb17d8e52d1d7fc8bfe779c905463200750cbca6"},
+    {file = "djangorestframework-3.15.1.tar.gz", hash = "sha256:f88fad74183dfc7144b2756d0d2ac716ea5b4c7c9840995ac3bfd8ec034333c1"},
 ]
 
 [[package]]

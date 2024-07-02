@@ -4,6 +4,10 @@
 
 
 ## Install
+    CSP_SCRIPT_SRC = [
+        ...
+        "cdnjs.cloudflare.com",
+    ]
 
     INSTALLED_APPS = [
         ...
