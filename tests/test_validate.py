@@ -11,7 +11,10 @@ def config(db):
     from hope_flex_fields.models import FieldDefinition, Fieldset, FieldsetField
 
     fd1 = FieldDefinition.objects.create(
-        name="IntField", field_type=forms.IntegerField, attrs={"min_value": 1}
+        name="IntField",
+        field_type=forms.IntegerField,
+        attrs={"min_value": 1},
+        validation="",
     )
     fd2 = FieldDefinition.objects.create(
         name="FloatField", field_type=forms.FloatField, attrs={"min_value": 1}
@@ -24,7 +27,6 @@ def config(db):
 
 
 def test_validate_row(config):
-    #  try to validate json formatted data against a FieldSet
     data = {"int": 1, "float": 1.1, "str": "string"}
     fs: Fieldset = config["fs"]
 

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from django import forms
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.text import slugify
 
 from django_regex.fields import RegexField
 from django_regex.validators import RegexValidator
@@ -53,11 +54,14 @@ class FieldDefinition(models.Model):
         try:
             self.set_default_arguments()
             self.get_field()
+            self.name = slugify(str(self.name))
         except TypeError as e:
             raise ValidationError(e)
 
     def set_default_arguments(self):
-        stored = self.attrs or {}
+        if not isinstance(self.attrs, dict):
+            self.attrs = {}
+        stored = self.attrs
         sig: inspect.Signature = inspect.signature(self.field_type)
         defaults = {
             k.name: k.default

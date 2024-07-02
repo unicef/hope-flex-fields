@@ -1,7 +1,7 @@
 # HOPR FlexFields
 
 [![Test](https://github.com/unicef/hope-flex-fields/actions/workflows/test.yml/badge.svg)](https://github.com/unicef/hope-flex-fields/actions/workflows/test.yml)
-
+[![codecov](https://codecov.io/gh/unicef/hope-flex-fields/graph/badge.svg?token=GSYAH4IEUK)](https://codecov.io/gh/unicef/hope-flex-fields)
 
 ## Install
     CSP_SCRIPT_SRC = [
