@@ -88,13 +88,13 @@ jobs:
       - name: Test
         if: needs.changes.outputs.run_tests
         run: |
-          pdm run pytest tests
+          pdm run pytest tests --junit-xml junit-${{ matrix.python-version }}-${{matrix.django-version}}.xml
 
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
         with:
-          name: pytest-results-${{ matrix.python-version }}
-          path: junit/test-results-${{ matrix.python-version }}.xml
+          name: pytest-results-${{ matrix.python-version }}-${{matrix.django-version}}
+          path: junit-${{ matrix.python-version }}-${{matrix.django-version}}.xml
         if: ${{ always() }}
 
       - name: Upload coverage to Codecov
