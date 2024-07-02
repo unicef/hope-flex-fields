@@ -14,6 +14,7 @@ from strategy_field.fields import StrategyClassField
 
 from .fields import FlexField
 from .registry import field_registry
+from .validators import JsValidator, ReValidator
 
 if TYPE_CHECKING:
     from .forms import FieldsetForm
@@ -88,6 +89,13 @@ class FieldDefinition(models.Model):
     def get_field(self) -> "FlexField":
         try:
             kwargs = dict(self.attrs)
+            validators = []
+            if self.validation:
+                validators.append(JsValidator(self.validation))
+            if self.regex:
+                validators.append(ReValidator(self.regex))
+
+            kwargs["validators"] = validators
             field_class = type(f"{self.name}Field", (FlexField, self.field_type), {})
             fld = field_class(**kwargs)
         except Exception as e:  # pragma: no cover
@@ -129,6 +137,7 @@ class Fieldset(models.Model):
         if form.is_valid():
             return True
         else:
+            self.errors = form.errors
             raise ValidationError(form.errors)
 
 

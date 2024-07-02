@@ -84,7 +84,7 @@ def test_fields_default_attrs_if_error(app, record):
     res.form["name"] = "Int"
     res.form["field_type"] = fqn(forms.IntegerField)
     res.form["attrs"] = "{aaa}"
-    res = res.form.submit("_continue").follow()
+    res.form.submit("_continue").follow()
     obj: FieldDefinition = FieldDefinition.objects.get(name="int")
     assert obj.attrs == {
         "max_value": None,
