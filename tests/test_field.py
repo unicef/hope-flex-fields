@@ -10,8 +10,8 @@ def test_validate_attributes(db):
     fd = FieldDefinition(
         name="IntField", field_type=forms.IntegerField, attrs={"cccc": "abc"}
     )
-    with pytest.raises(TypeError):
-        fd.save()
+    with pytest.raises(ValidationError):
+        fd.clean()
 
 
 def test_configuration(db):

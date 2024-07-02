@@ -1,7 +1,6 @@
-import inspect
-
 from django import forms
-from django.contrib.admin import ModelAdmin, register
+from django.contrib import messages
+from django.contrib.admin import ModelAdmin, TabularInline, register
 from django.db.models import JSONField
 from django.shortcuts import render
 
@@ -9,7 +8,7 @@ from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 from jsoneditor.forms import JSONEditor
 
-from hope_flex_fields.models import FieldDefinition, Fieldset, FieldsetField
+from .models import FieldDefinition, Fieldset, FieldsetField
 
 
 @register(FieldDefinition)
@@ -34,29 +33,57 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
         }
         flexForm = type("TestFlexForm", (forms.Form,), form_class_attrs)
         ctx["form"] = flexForm
-        return render(request, "flex_fields/test.html", ctx)
+        return render(request, "flex_fields/fielddefinition/test.html", ctx)
 
     @button()
     def inspect(self, request, pk):
         ctx = self.get_common_context(request, pk)
         fd: FieldDefinition = ctx["original"]
-        stored = fd.attrs or {}
-        sig: inspect.Signature = inspect.signature(fd.field_type)
-        defaults = {
-            k.name: k.default
-            for __, k in sig.parameters.items()
-            if k.default not in [inspect.Signature.empty]
-        }
-        defaults.update(**stored)
-        fd.attrs = defaults
+        fd.set_default_arguments()
         fd.save()
+
+
+class FieldsetFieldTabularInline(TabularInline):
+    model = FieldsetField
+    fields = (
+        "label",
+        "field",
+    )
 
 
 @register(Fieldset)
 class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
     list_display = ("name",)
+    inlines = [FieldsetFieldTabularInline]
+
+    @button()
+    def test(self, request, pk):
+        ctx = self.get_common_context(request, pk)
+        fs: Fieldset = ctx["original"]
+        form_class = fs.get_form()
+        if request.method == "POST":
+            form = form_class(request.POST)
+            if form.is_valid():
+                self.message_user(request, "Valid", messages.SUCCESS)
+            else:
+                self.message_user(
+                    request, "Please correct the errors below", messages.ERROR
+                )
+        else:
+            form = form_class()
+
+        ctx["form"] = form
+        return render(request, "flex_fields/fieldset/test.html", ctx)
 
 
 @register(FieldsetField)
 class FieldsetFieldAdmin(ExtraButtonsMixin, ModelAdmin):
     list_display = ("fieldset", "field", "label")
+    formfield_overrides = {
+        JSONField: {
+            "widget": JSONEditor(
+                init_options={"mode": "code", "modes": ["text", "code", "tree"]},
+                ace_options={"readOnly": False},
+            )
+        }
+    }

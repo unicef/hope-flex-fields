@@ -1,9 +1,10 @@
+import inspect
 import logging
 from typing import cast
 
+from django import forms
 from django.core.exceptions import ValidationError
 from django.db import models
-from django import forms
 
 from django_regex.fields import RegexField
 from django_regex.validators import RegexValidator
@@ -32,11 +33,23 @@ class FieldDefinition(models.Model):
     def __str__(self):
         return self.name
 
-    def save(
-        self, force_insert=False, force_update=False, using=None, update_fields=None
-    ):
-        self.get_field()
-        super().save(force_insert, force_update, using, update_fields)
+    def clean(self):
+        try:
+            self.set_default_arguments()
+            self.get_field()
+        except TypeError as e:
+            raise ValidationError(e)
+
+    def set_default_arguments(self):
+        stored = self.attrs or {}
+        sig: inspect.Signature = inspect.signature(self.field_type)
+        defaults = {
+            k.name: k.default
+            for __, k in sig.parameters.items()
+            if k.default not in [inspect.Signature.empty]
+        }
+        defaults.update(**stored)
+        self.attrs = defaults
 
     @property
     def required(self):
@@ -54,6 +67,9 @@ class FieldDefinition(models.Model):
 
 class Fieldset(models.Model):
     name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
 
     def get_form(self) -> type[FieldsetForm]:
         fields: dict[str, forms.Field] = {}

@@ -1,4 +1,5 @@
 from django import forms
+
 from strategy_field.registry import Registry
 from strategy_field.utils import fqn
 
@@ -15,17 +16,22 @@ class FieldRegistry(Registry):
             )
         return self._choices
 
-    # def __contains__(self, y):
-    #     if isinstance(y, str):
-    #         return y in [fqn(s) for s in self]
-    #     try:
-    #         return super().__contains__(y)
-    #     except StrategyAttributeError:
-    #         return get_custom_field(y)
-
 
 field_registry = FieldRegistry(forms.Field)
+
+field_registry.register(forms.BooleanField)
 field_registry.register(forms.CharField)
+field_registry.register(forms.ChoiceField)
 field_registry.register(forms.DateField)
+field_registry.register(forms.DateTimeField)
 field_registry.register(forms.DecimalField)
+field_registry.register(forms.DurationField)
+field_registry.register(forms.EmailField)
+field_registry.register(forms.FloatField)
 field_registry.register(forms.IntegerField)
+field_registry.register(forms.MultipleChoiceField)
+field_registry.register(forms.RegexField)
+field_registry.register(forms.TimeField)
+field_registry.register(forms.URLField)
+field_registry.register(forms.UUIDField)
+field_registry.register(forms.JSONField)
