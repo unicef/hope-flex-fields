@@ -1,4 +1,5 @@
 import inspect
+import json
 import logging
 from typing import TYPE_CHECKING
 
@@ -66,7 +67,10 @@ class FieldDefinition(models.Model):
         if self.attrs in [None, "null", ""]:
             self.attrs = DEFAULT_ATTRS
         elif isinstance(self.attrs, str):
-            self.attrs = DEFAULT_ATTRS
+            try:
+                self.attrs = json.loads(self.attrs)
+            except json.JSONDecodeError:
+                self.attrs = DEFAULT_ATTRS
 
         sig: inspect.Signature = inspect.signature(self.field_type)
         merged = {
