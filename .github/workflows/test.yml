@@ -30,6 +30,7 @@ jobs:
         shell: bash
     outputs:
       run_tests: ${{steps.changes.outputs.run_tests }}
+      lint: ${{steps.changes.outputs.lint }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.7
@@ -54,7 +55,7 @@ jobs:
         django-version: [ "3.2", "4.2", "5.0" ]
       fail-fast: true
     needs: [ changes ]
-    if: needs.changes.outputs.run_tests || contains(github.event.head_commit.message, 'ci:release')
+    if: needs.changes.outputs.run_tests || needs.changes.outputs.lint
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.7
@@ -79,11 +80,13 @@ jobs:
           pdm install
 
       - name: lint
+        if: needs.changes.outputs.lint
         run: |
-          isort src/ --check-only
-          flake8 src/
+          pdm run isort src/ --check-only
+          pdm run flake8 src/
 
       - name: Test
+        if: needs.changes.outputs.run_tests
         run: |
           pdm run pytest tests
 

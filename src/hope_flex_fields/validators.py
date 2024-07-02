@@ -21,11 +21,6 @@ class JsValidator(BaseValidator):
         ctx.eval(base)
         ret = ctx.eval(self.code)
 
-        # try:
-        #     ret = jsonpickle.decode(result)
-        # except (JSONDecodeError, TypeError):
-        #     ret = result
-
         if isinstance(ret, JSArray):
             raise ValidationError(list(ret))
 
