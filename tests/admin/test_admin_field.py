@@ -45,7 +45,7 @@ def test_fields_create(app, record):
     res.form["field_type"] = fqn(forms.ChoiceField)
     res = res.form.submit()
     assert res.status_code == 302
-    obj: FieldDefinition = FieldDefinition.objects.get(name="Int")
+    obj: FieldDefinition = FieldDefinition.objects.get(name="int")
     assert obj.attrs == {
         "choices": [],
         "required": False,

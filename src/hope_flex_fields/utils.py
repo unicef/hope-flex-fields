@@ -1,3 +1,5 @@
+import inspect
+
 from django.utils.text import slugify
 
 
@@ -10,3 +12,12 @@ def camelcase(value):
         value = value.replace("-", " ").replace("_", " ")
         return "".join(x for x in value.title() if not x.isspace())
     return value.capitalize()
+
+
+def get_kwargs_for_field(field):
+    sig: inspect.Signature = inspect.signature(field)
+    return {
+        k.name: k.default
+        for __, k in sig.parameters.items()
+        if k.default not in [inspect.Signature.empty]
+    }

@@ -1,4 +1,3 @@
-import inspect
 import json
 import logging
 
@@ -7,9 +6,10 @@ from django.utils.translation import gettext as _
 
 from strategy_field.fields import StrategyClassField
 
+from hope_flex_fields.utils import get_kwargs_for_field
+
 from ..fields import FlexField
 from ..registry import field_registry
-from ..utils import camelcase
 from ..validators import JsValidator, ReValidator
 from .base import DEFAULT_ATTRS, AbstractField
 
@@ -34,7 +34,7 @@ class FieldDefinition(AbstractField):
 
     def clean(self):
         self.set_default_arguments()
-        self.name = camelcase(str(self.name))
+        self.name = str(self.name)
         try:
             self.get_field()
         except TypeError:
@@ -54,14 +54,9 @@ class FieldDefinition(AbstractField):
         if not isinstance(self.attrs, dict) or not self.attrs:
             self.attrs = DEFAULT_ATTRS
         if self.field_type:
-            sig: inspect.Signature = inspect.signature(self.field_type)
-            merged = {
-                k.name: k.default
-                for __, k in sig.parameters.items()
-                if k.default not in [inspect.Signature.empty]
-            }
-            merged.update(**self.attrs)
-            self.attrs = merged
+            attrs = get_kwargs_for_field(self.field_type)
+            attrs.update(**self.attrs)
+            self.attrs = attrs
 
     @property
     def required(self):

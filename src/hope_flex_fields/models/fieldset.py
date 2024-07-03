@@ -8,7 +8,7 @@ from django.utils.translation import gettext as _
 from .base import TestForm
 
 if TYPE_CHECKING:
-    from ..forms import FieldsetForm
+    from ..forms import FieldDefinitionForm
     from .field import FieldsetField
 
 
@@ -31,7 +31,7 @@ class Fieldset(models.Model):
     def natural_key(self):
         return (self.name,)
 
-    def get_form(self) -> "type[FieldsetForm]":
+    def get_form(self) -> "type[FieldDefinitionForm]":
         fields: dict[str, forms.Field] = {}
         field: "FieldsetField"
         for field in self.fields.filter():
@@ -42,7 +42,7 @@ class Fieldset(models.Model):
 
     def validate(self, data):
         form_class = self.get_form()
-        form: "FieldsetForm" = form_class(data=data)
+        form: "FieldDefinitionForm" = form_class(data=data)
         if form.is_valid():
             return True
         else:
