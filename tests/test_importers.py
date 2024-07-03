@@ -1,9 +1,10 @@
 from django import forms
 
 import pytest
+from testutils.factories import DataCheckerFactory, DataCheckerFieldsetFactory
 
 from hope_flex_fields.importers import validate_json
-from hope_flex_fields.models import Fieldset
+from hope_flex_fields.models import DataChecker, Fieldset
 
 
 @pytest.fixture
@@ -28,7 +29,9 @@ def config(db):
         {"int": 2, "float": 2.2},
         {"int": -3, "float": 2.1},
     ]
-    return {"fs": fs, "data": data}
+    dc = DataCheckerFactory()
+    DataCheckerFieldsetFactory(checker=dc, fieldset=fs)
+    return {"fs": fs, "data": data, "dc": dc}
 
 
 def test_validate_json(config):
@@ -38,4 +41,19 @@ def test_validate_json(config):
         {"float": ["Insert an odd number"]},
         "Ok",
         {"int": ["Ensure this value is greater than or equal to 1."]},
+    ]
+
+
+def test_validate_json2(config):
+    dc: DataChecker = config["dc"]
+    data = [
+        {"aaa_int": 1, "aaa_float": 2.0},
+        {"aaa_int": 2, "aaa_float": 2.2},
+        {"aaa_int": -3, "aaa_float": 2.1},
+    ]
+    result = dc.validate_many(data)
+    assert result == [
+        {"aaa_float": ["Insert an odd number"]},
+        "Ok",
+        {"aaa_int": ["Ensure this value is greater than or equal to 1."]},
     ]

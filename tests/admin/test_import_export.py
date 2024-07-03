@@ -30,7 +30,6 @@ def test_export_all(db, app, data):
     url = reverse("admin:hope_flex_fields_fielddefinition_export_all")
     res = app.get(url)
     assert res.json
-    print(222222, res.json)
 
 
 def test_import_all(db, app, data):

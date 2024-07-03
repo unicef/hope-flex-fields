@@ -4,7 +4,13 @@ from django.contrib.auth.models import User
 import factory.fuzzy
 from factory.base import FactoryMetaClass
 
-from hope_flex_fields.models import FieldDefinition, Fieldset, FieldsetField
+from hope_flex_fields.models import (
+    DataChecker,
+    DataCheckerFieldset,
+    FieldDefinition,
+    Fieldset,
+    FieldsetField,
+)
 
 factories_registry = {}
 
@@ -96,3 +102,21 @@ class FieldsetFieldFactory(AutoRegisterModelFactory):
     class Meta:
         model = FieldsetField
         django_get_or_create = ("name",)
+
+
+class DataCheckerFactory(AutoRegisterModelFactory):
+    name = factory.Sequence(lambda d: "DataChecker-%s" % d)
+
+    class Meta:
+        model = DataChecker
+        django_get_or_create = ("name",)
+
+
+class DataCheckerFieldsetFactory(AutoRegisterModelFactory):
+    checker = factory.SubFactory(DataCheckerFactory)
+    fieldset = factory.SubFactory(FieldsetFactory)
+    prefix = "aaa"
+
+    class Meta:
+        model = DataCheckerFieldset
+        django_get_or_create = ("checker", "prefix")
