@@ -91,6 +91,7 @@ class FieldsetFieldFactory(AutoRegisterModelFactory):
     name = factory.Sequence(lambda d: "FieldsetField-%s" % d)
     fieldset = factory.SubFactory(FieldsetFactory)
     field = factory.SubFactory(FieldDefinitionFactory)
+    attrs = {}
 
     class Meta:
         model = FieldsetField

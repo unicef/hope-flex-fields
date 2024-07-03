@@ -3,7 +3,7 @@ from django.forms import ModelForm
 
 from jsoneditor.forms import JSONEditor
 
-from .models import Fieldset
+from .models import Fieldset, FieldsetField
 from .widgets import JavascriptEditor
 
 
@@ -19,4 +19,10 @@ class FieldsetForm(ModelForm):
 
     class Meta:
         model = Fieldset
+        exclude = ()
+
+
+class FieldsetFieldForm(ModelForm):
+    class Meta:
+        model = FieldsetField
         exclude = ()

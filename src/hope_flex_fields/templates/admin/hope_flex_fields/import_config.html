@@ -1,0 +1,26 @@
+{% extends "admin/app_index.html" %}{% load i18n %}
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a> &rsaquo;
+        <a href="{% url 'admin:app_list' 'hope_flex_fields' %}">Flex Fields</a> &rsaquo;
+        {{ title }}
+
+
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div id="content-main">
+        <form id="import-form" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <table>
+                {{ form }}
+            </table>
+            <input type="submit" value="{% trans "Load" %}">
+        </form>
+    </div>
+{% endblock %}
+
+{% block sidebar %}
+
+{% endblock %}

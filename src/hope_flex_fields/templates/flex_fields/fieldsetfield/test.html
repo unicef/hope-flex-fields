@@ -1,0 +1,26 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% block action-content %}
+    {{ original }}
+    <table>
+        <tr>
+            <td style="width: 80%">
+                <form method="post" id="test">
+                    <table>
+                        {% csrf_token %}
+                        {{ form }}
+                    </table>
+                    <input type="submit" value="Test">
+                </form>
+            </td>
+            <td style="width: 30%">
+                <h3>Final</h3>
+                <pre>{{ original.get_merged_attrs|pprint }}</pre>
+
+                <h3>Definition (<a href="{% url "admin:hope_flex_fields_fielddefinition_change" original.field.pk %}">{{ original.field}}</a> )</h3>
+                <pre>{{ original.field.attrs|pprint }}</pre>
+                <h3>Override</h3>
+                <pre>{{ original.attrs|pprint }}</pre>
+            </td>
+        </tr>
+    </table>
+{% endblock %}

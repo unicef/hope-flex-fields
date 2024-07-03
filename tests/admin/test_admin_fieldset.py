@@ -19,7 +19,9 @@ def record(db):
     fs = Fieldset.objects.create(name="Fieldset")
 
     FieldsetField.objects.create(name="int", field=fd1, fieldset=fs)
-    FieldsetField.objects.create(name="float", field=fd2, fieldset=fs)
+    FieldsetField.objects.create(
+        name="float", field=fd2, fieldset=fs, attrs={"required": True}
+    )
     return fs
 
 

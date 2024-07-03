@@ -1,0 +1,74 @@
+[
+  {
+    "model": "hope_flex_fields.fielddefinition",
+    "fields": {
+      "name": "imported-intfield",
+      "description": "",
+      "attrs": {
+        "min_value": 1
+      },
+      "regex": null,
+      "validation": "",
+      "field_type": "django.forms.fields.IntegerField"
+    }
+  },
+  {
+    "model": "hope_flex_fields.fielddefinition",
+    "fields": {
+      "name": "imported-floatfield",
+      "description": "",
+      "attrs": {
+        "min_value": 1
+      },
+      "regex": null,
+      "validation": "",
+      "field_type": "django.forms.fields.FloatField"
+    }
+  },
+  {
+    "model": "hope_flex_fields.fieldset",
+    "fields": {
+      "name": "imported-fieldset"
+    }
+  },
+  {
+    "model": "hope_flex_fields.fieldsetfield",
+    "fields": {
+      "name": "imported-int",
+      "description": "",
+      "attrs": {
+        "required": false,
+        "label": null,
+        "help_text": ""
+      },
+      "regex": null,
+      "validation": "",
+      "fieldset": [
+        "imported-fieldset"
+      ],
+      "field": [
+        "imported-intfield"
+      ]
+    }
+  },
+  {
+    "model": "hope_flex_fields.fieldsetfield",
+    "fields": {
+      "name": "imported-float",
+      "description": "",
+      "attrs": {
+        "required": false,
+        "label": null,
+        "help_text": ""
+      },
+      "regex": null,
+      "validation": "",
+      "fieldset": [
+        "imported-fieldset"
+      ],
+      "field": [
+        "imported-floatfield"
+      ]
+    }
+  }
+]
