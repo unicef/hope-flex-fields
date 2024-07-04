@@ -1,34 +1,51 @@
 import io
+import json
 import tempfile
 from io import StringIO
+from json import JSONDecodeError
 from pathlib import Path
 
 from django import forms
 from django.contrib import messages
-from django.contrib.admin import ModelAdmin, TabularInline, register
+from django.contrib.admin import ModelAdmin, register
+from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.core.serializers.base import DeserializationError
-from django.db.models import JSONField
+from django.core.validators import FileExtensionValidator
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+from django.utils.deconstruct import deconstructible
+from django.utils.translation import gettext as _
 
 from admin_extra_buttons.decorators import button, view
 from admin_extra_buttons.mixins import ExtraButtonsMixin
-from jsoneditor.forms import JSONEditor
 
-from .forms import FieldDefinitionForm
-from .models import (
-    DataChecker,
-    DataCheckerFieldset,
-    FieldDefinition,
-    Fieldset,
-    FieldsetField,
-    get_default_attrs,
-)
+from ..forms import FieldDefinitionForm
+from ..models import FieldDefinition, get_default_attrs
+
+
+@deconstructible
+class FixtureFileValidator(object):
+    error_messages = {
+        "invalid_json": _("Invalid fixture file"),
+    }
+
+    def __call__(self, data):
+        # This is a bit expensive but we do not expect big files
+        try:
+            json.load(data)
+            data.seek(0)
+        except JSONDecodeError:
+            raise ValidationError(self.error_messages["invalid_json"])
 
 
 class ImportConfigurationForm(forms.Form):
-    file = forms.FileField()
+    file = forms.FileField(
+        validators=[
+            FixtureFileValidator(),
+            FileExtensionValidator(allowed_extensions=["json"]),
+        ]
+    )
 
 
 @register(FieldDefinition)
@@ -47,7 +64,6 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
             },
         ),
     )
-    initial = {"attrs": get_default_attrs()}
 
     def field_type_(self, obj):
         return obj.field_type.__name__
@@ -90,11 +106,11 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
                 out = io.StringIO()
                 try:
                     call_command("loaddata", fixture, stdout=out, verbosity=3)
+                    self.message_user(request, "Data successfully imported.")
                 except DeserializationError as e:
                     self.message_user(request, str(e), messages.ERROR)
                 finally:
                     fixture.unlink()
-                self.message_user(request, "Data successfully imported.")
                 return HttpResponseRedirect("..")
         else:
             form = ImportConfigurationForm()
@@ -135,121 +151,3 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
         fd: FieldDefinition = ctx["original"]
         fd.set_default_arguments()
         fd.save()
-
-
-class FieldsetFieldTabularInline(TabularInline):
-    model = FieldsetField
-    fields = (
-        "name",
-        "field",
-    )
-
-
-@register(Fieldset)
-class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
-    list_display = ("name",)
-    inlines = [FieldsetFieldTabularInline]
-
-    @button()
-    def test(self, request, pk):
-        ctx = self.get_common_context(request, pk, title="Test")
-        fs: Fieldset = ctx["original"]
-        form_class = fs.get_form()
-        if request.method == "POST":
-            form = form_class(request.POST)
-            if form.is_valid():
-                self.message_user(request, "Valid", messages.SUCCESS)
-            else:
-                self.message_user(
-                    request, "Please correct the errors below", messages.ERROR
-                )
-        else:
-            form = form_class()
-
-        ctx["form"] = form
-        return render(request, "flex_fields/fieldset/test.html", ctx)
-
-
-@register(FieldsetField)
-class FieldsetFieldAdmin(ExtraButtonsMixin, ModelAdmin):
-    list_display = ("fieldset", "field", "name")
-    list_filter = ("fieldset", "field")
-    search_fields = ("name",)
-    # form = FieldsetFieldForm
-    initial = {"attrs": dict()}
-
-    fieldsets = (
-        ("", {"fields": ("name", "field", "fieldset")}),
-        (
-            "Overrides",
-            {
-                "classes": ("collapse", "open"),
-                "fields": ("regex", "attrs", "validation"),
-            },
-        ),
-    )
-
-    formfield_overrides = {
-        JSONField: {
-            "widget": JSONEditor(
-                init_options={"mode": "code", "modes": ["text", "code", "tree"]},
-                ace_options={"readOnly": False},
-            )
-        }
-    }
-
-    @button()
-    def test(self, request, pk):
-        ctx = self.get_common_context(request, pk, title="Test")
-        fd: FieldDefinition = ctx["original"]
-        field = fd.get_field()
-        form_class_attrs = {
-            fd.name: field,
-        }
-        form_class = type("TestFlexForm", (forms.Form,), form_class_attrs)
-        if request.method == "POST":
-            form = form_class(request.POST)
-            if form.is_valid():
-                self.message_user(request, "Valid", messages.SUCCESS)
-            else:
-                self.message_user(
-                    request, "Please correct the errors below", messages.ERROR
-                )
-        else:
-            form = form_class()
-
-        ctx["form"] = form
-        return render(request, "flex_fields/fieldsetfield/test.html", ctx)
-
-
-class DataCheckerFieldsetTabularInline(TabularInline):
-    model = DataCheckerFieldset
-    fields = ("fieldset", "prefix", "order")
-
-    def get_ordering(self, request):
-        return ["order"]
-
-
-@register(DataChecker)
-class DataCheckerAdmin(ExtraButtonsMixin, ModelAdmin):
-    list_display = ("name",)
-    inlines = [DataCheckerFieldsetTabularInline]
-
-    @button()
-    def test(self, request, pk):
-        ctx = self.get_common_context(request, pk, title="Test")
-        fs: Fieldset = ctx["original"]
-        form_class = fs.get_form()
-        if request.method == "POST":
-            form = form_class(request.POST)
-            if form.is_valid():
-                self.message_user(request, "Valid", messages.SUCCESS)
-            else:
-                self.message_user(
-                    request, "Please correct the errors below", messages.ERROR
-                )
-        else:
-            form = form_class()
-
-        ctx["form"] = form
-        return render(request, "flex_fields/fieldset/test.html", ctx)

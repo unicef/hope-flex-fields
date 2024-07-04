@@ -3,18 +3,18 @@ from django.forms import ModelForm
 
 from jsoneditor.forms import JSONEditor
 
-from .models import FieldDefinition, FieldsetField
+from .models import FieldDefinition, Fieldset, FlexField
 from .widgets import JavascriptEditor
 
 
 class FieldDefinitionForm(ModelForm):
     validation = forms.CharField(widget=JavascriptEditor(toolbar=False), required=False)
-    attrs = forms.CharField(
+    attrs = forms.JSONField(
         widget=JSONEditor(
             init_options={"mode": "code", "modes": ["text", "code", "tree"]},
             ace_options={"readOnly": False},
         ),
-        required=False,
+        required=True,
     )
 
     class Meta:
@@ -22,9 +22,9 @@ class FieldDefinitionForm(ModelForm):
         exclude = ()
 
 
-class FieldsetFieldForm(ModelForm):
+class FlexFieldForm(ModelForm):
     validation = forms.CharField(widget=JavascriptEditor(toolbar=False), required=False)
-    attrs = forms.CharField(
+    attrs = forms.JSONField(
         widget=JSONEditor(
             init_options={"mode": "code", "modes": ["text", "code", "tree"]},
             ace_options={"readOnly": False},
@@ -33,5 +33,11 @@ class FieldsetFieldForm(ModelForm):
     )
 
     class Meta:
-        model = FieldsetField
+        model = FlexField
+        exclude = ()
+
+
+class FieldsetForm(ModelForm):
+    class Meta:
+        model = Fieldset
         exclude = ()

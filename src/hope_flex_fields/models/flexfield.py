@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext as _
 
-from ..fields import FlexField
+from ..fields import FlexFormMixin
 from ..utils import namefy
 from ..validators import JsValidator, ReValidator
 from .base import AbstractField
@@ -19,7 +19,7 @@ class FieldsetFieldManager(models.Manager):
         return self.get(name=name, fieldset__name=fieldset_name)
 
 
-class FieldsetField(AbstractField):
+class FlexField(AbstractField):
     fieldset = models.ForeignKey(
         Fieldset, on_delete=models.CASCADE, related_name="fields"
     )
@@ -30,20 +30,22 @@ class FieldsetField(AbstractField):
     objects = FieldsetFieldManager()
 
     class Meta:
-        unique_together = [["fieldset", "name"]]
-        verbose_name = _("Fieldset Field")
-        verbose_name_plural = _("Fieldset Fields")
+        unique_together = ("fieldset", "name")
+        verbose_name = _("Flex Field")
+        verbose_name_plural = _("flex Fields")
 
-    def validate_attrs(self, attrs):
-        attrs = self.get_merged_attrs()
+    def __str__(self):
+        return self.name
+
+    def validate_attrs(self):
         try:
-            self.get_field(attrs)
+            self.get_field()
         except Exception as e:
             raise ValidationError(e)
 
     def clean(self):
         self.name = namefy(str(self.name))
-        self.validate_attrs(self.attrs)
+        self.validate_attrs()
 
     def natural_key(self):
         return self.name, self.fieldset.name
@@ -54,10 +56,10 @@ class FieldsetField(AbstractField):
             attrs.update(self.attrs)
         return attrs
 
-    def get_field(self, kwargs=None) -> "FlexField":
+    def get_field(self, **extra) -> "FlexFormMixin":
         try:
-            if not kwargs:
-                kwargs = self.get_merged_attrs()
+            kwargs = self.get_merged_attrs()
+            kwargs.update(extra)
             validators = []
             if self.validation:
                 validators.append(JsValidator(self.validation))
@@ -71,7 +73,7 @@ class FieldsetField(AbstractField):
 
             kwargs["validators"] = validators
             field_class = type(
-                f"{self.name}Field", (FlexField, self.field.field_type), {}
+                f"{self.name}Field", (FlexFormMixin, self.field.field_type), {}
             )
             fld = field_class(**kwargs)
         except Exception as e:  # pragma: no cover

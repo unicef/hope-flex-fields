@@ -35,3 +35,17 @@ def app(django_app_factory, mocked_responses):
     django_app.set_user(admin_user)
     django_app._user = admin_user
     return django_app
+
+
+@pytest.fixture()
+def fieldset1(django_app_factory, mocked_responses):
+    from testutils.factories import FieldsetFactory
+
+    FieldsetFactory()
+    from testutils.factories import SuperUserFactory
+
+    django_app = django_app_factory(csrf_checks=False)
+    admin_user = SuperUserFactory(username="superuser")
+    django_app.set_user(admin_user)
+    django_app._user = admin_user
+    return django_app

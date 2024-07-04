@@ -32,7 +32,7 @@
     }
   },
   {
-    "model": "hope_flex_fields.fieldsetfield",
+    "model": "hope_flex_fields.flexfield",
     "fields": {
       "name": "imported-int",
       "description": "",
@@ -52,7 +52,7 @@
     }
   },
   {
-    "model": "hope_flex_fields.fieldsetfield",
+    "model": "hope_flex_fields.flexfield",
     "fields": {
       "name": "imported-float",
       "description": "",

@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 here = Path(__file__).parent.resolve()
+sys.path.insert(0, str(here / "tests/extra"))
 sys.path.insert(0, str(here / "tests/extra/demoapp"))
 
 

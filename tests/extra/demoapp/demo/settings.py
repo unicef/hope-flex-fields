@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "jsoneditor",
     "csp",
     "hope_flex_fields.apps.Config",
+    "demo",
 ]
 
 MIDDLEWARE = [

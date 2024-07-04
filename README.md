@@ -20,6 +20,7 @@
 ## Demo Application
 
     python manage.py migrate
+    python manage.py demo
     python manage.py runserver
 
 Navigate to http://localhost:8000/admin/ and login using any username/password

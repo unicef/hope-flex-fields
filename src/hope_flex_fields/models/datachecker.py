@@ -10,7 +10,7 @@ from .fieldset import Fieldset
 
 if TYPE_CHECKING:
     from ..forms import FieldDefinitionForm
-    from .field import FieldsetField
+    from .field import FLexField
 
 
 class DataCheckerManager(models.Manager):
@@ -29,6 +29,7 @@ class DataCheckerFieldset(models.Model):
 
 class DataChecker(models.Model):
     name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(blank=True)
     fieldsets = models.ManyToManyField(Fieldset, through=DataCheckerFieldset)
     objects = DataCheckerManager()
 
@@ -44,7 +45,7 @@ class DataChecker(models.Model):
 
     def get_form(self) -> "type[FieldDefinitionForm]":
         fields: dict[str, forms.Field] = {}
-        field: "FieldsetField"
+        field: "FLexField"
         for fs in self.members.all():
             for field in fs.fieldset.fields.filter():
                 fld = field.get_field()

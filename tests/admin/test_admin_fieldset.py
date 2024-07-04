@@ -2,26 +2,22 @@ from django import forms
 from django.urls import reverse
 
 import pytest
+from testutils.factories import (
+    FieldDefinitionFactory,
+    FieldsetFactory,
+    FlexFieldFactory,
+)
 
 pytestmark = [pytest.mark.admin, pytest.mark.smoke, pytest.mark.django_db]
 
 
 @pytest.fixture
 def record(db):
-    from hope_flex_fields.models import FieldDefinition, Fieldset, FieldsetField
-
-    fd1 = FieldDefinition.objects.create(
-        name="IntField", field_type=forms.IntegerField, attrs={"min_value": 1}
-    )
-    fd2 = FieldDefinition.objects.create(
-        name="FloatField", field_type=forms.FloatField, attrs={"min_value": 1}
-    )
-    fs = Fieldset.objects.create(name="Fieldset")
-
-    FieldsetField.objects.create(name="int", field=fd1, fieldset=fs)
-    FieldsetField.objects.create(
-        name="float", field=fd2, fieldset=fs, attrs={"required": True}
-    )
+    fd1 = FieldDefinitionFactory(field_type=forms.IntegerField, attrs={"min_value": 1})
+    fd2 = FieldDefinitionFactory(field_type=forms.FloatField, attrs={"min_value": 1})
+    fs = FieldsetFactory()
+    FlexFieldFactory(name="int", field=fd1, fieldset=fs, attrs={})
+    FlexFieldFactory(name="float", field=fd2, fieldset=fs, attrs={"required": True})
     return fs
 
 

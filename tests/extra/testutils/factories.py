@@ -9,7 +9,7 @@ from hope_flex_fields.models import (
     DataCheckerFieldset,
     FieldDefinition,
     Fieldset,
-    FieldsetField,
+    FlexField,
 )
 
 factories_registry = {}
@@ -66,7 +66,9 @@ class SuperUserFactory(UserFactory):
 
 class FieldDefinitionFactory(AutoRegisterModelFactory):
     name = factory.Sequence(lambda d: "FieldDefinition-%s" % d)
-    field_type = factory.fuzzy.FuzzyChoice([forms.CharField, forms.IntegerField])
+    field_type = factory.fuzzy.FuzzyChoice(
+        [forms.CharField, forms.IntegerField, forms.FloatField, forms.BooleanField]
+    )
     attrs = {}
 
     class Meta:
@@ -76,32 +78,22 @@ class FieldDefinitionFactory(AutoRegisterModelFactory):
 
 class FieldsetFactory(AutoRegisterModelFactory):
     name = factory.Sequence(lambda d: "Fieldset-%s" % d)
+    extends = None
 
     class Meta:
         model = Fieldset
         django_get_or_create = ("name",)
 
-    @factory.post_generation
-    def fields(self, create, extracted, **kwargs):
-        if not create:
-            # Simple build, or nothing to add, do nothing.
-            return
-        if extracted:
-            # Add the iterable of groups using bulk addition
-            self.fields.add(*extracted)
-        else:
-            self.fields.add(FieldsetFieldFactory(fieldset=self))
 
-
-class FieldsetFieldFactory(AutoRegisterModelFactory):
+class FlexFieldFactory(AutoRegisterModelFactory):
     name = factory.Sequence(lambda d: "FieldsetField-%s" % d)
     fieldset = factory.SubFactory(FieldsetFactory)
     field = factory.SubFactory(FieldDefinitionFactory)
     attrs = {}
 
     class Meta:
-        model = FieldsetField
-        django_get_or_create = ("name",)
+        model = FlexField
+        django_get_or_create = ("name", "fieldset")
 
 
 class DataCheckerFactory(AutoRegisterModelFactory):

@@ -9,7 +9,7 @@ from .base import TestForm
 
 if TYPE_CHECKING:
     from ..forms import FieldDefinitionForm
-    from .field import FieldsetField
+    from .flexfield import FlexField
 
 
 class FieldsetManager(models.Manager):
@@ -19,6 +19,8 @@ class FieldsetManager(models.Manager):
 
 class Fieldset(models.Model):
     name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(blank=True)
+    extends = models.ForeignKey("self", null=True, blank=True, on_delete=models.CASCADE)
     objects = FieldsetManager()
 
     class Meta:
@@ -31,14 +33,33 @@ class Fieldset(models.Model):
     def natural_key(self):
         return (self.name,)
 
+    def get_field(self, name) -> "FlexField":
+        ff = [f for f in self.get_fields() if f.name == name]
+        return ff[0]
+
+    def get_fields(self):
+        local_names = [f.name for f in self.fields.all()]
+        if self.extends:
+            for f in self.extends.get_fields():
+                if f.name not in local_names:
+                    yield f
+        for f in self.fields.all():
+            yield f
+
     def get_form(self) -> "type[FieldDefinitionForm]":
         fields: dict[str, forms.Field] = {}
-        field: "FieldsetField"
-        for field in self.fields.filter():
-            fld = field.get_field()
+        field: "FlexField"
+
+        for field in self.get_fields():
+            fld = field.get_field(label=field.name)
             fields[field.name] = fld
         form_class_attrs = {"FieldsetForm": self, **fields}
         return type(f"{self.name}FieldsetForm", (TestForm,), form_class_attrs)
+
+    def clean(self):
+        super().clean()
+        if self.extends == self:
+            raise ValidationError({"extends": "Cannot extends itself"})
 
     def validate(self, data):
         form_class = self.get_form()

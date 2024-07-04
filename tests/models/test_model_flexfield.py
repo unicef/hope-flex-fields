@@ -8,32 +8,25 @@ from hope_flex_fields.models import Fieldset
 
 @pytest.fixture
 def config(db):
-    from hope_flex_fields.models import FieldDefinition, Fieldset, FieldsetField
+    from testutils.factories import (
+        FieldDefinitionFactory,
+        FieldsetFactory,
+        FlexFieldFactory,
+    )
 
-    fd1 = FieldDefinition.objects.create(
-        name="IntField",
-        field_type=forms.IntegerField,
-        attrs={"min_value": 1},
-        validation="",
+    fd1 = FieldDefinitionFactory(field_type=forms.IntegerField, attrs={"min_value": 1})
+    fd2 = FieldDefinitionFactory(field_type=forms.FloatField, attrs={"min_value": 1})
+    fd3 = FieldDefinitionFactory(field_type=forms.FloatField, attrs={"required": False})
+    fd4 = FieldDefinitionFactory(
+        field_type=forms.IntegerField, attrs={"required": False}, regex=r"\d\d\d"
     )
-    fd2 = FieldDefinition.objects.create(
-        name="FloatField", field_type=forms.FloatField, attrs={"min_value": 1}
-    )
-    fd3 = FieldDefinition.objects.create(
-        name="Int1", field_type=forms.FloatField, attrs={"required": False}
-    )
-    fd4 = FieldDefinition.objects.create(
-        name="Int2",
-        field_type=forms.IntegerField,
-        attrs={"required": False},
-        regex=r"\d\d\d",
-    )
-    fs = Fieldset.objects.create(name="Fieldset")
 
-    FieldsetField.objects.create(name="int", field=fd1, fieldset=fs)
-    FieldsetField.objects.create(name="float", field=fd2, fieldset=fs)
-    FieldsetField.objects.create(name="int1", field=fd3, fieldset=fs)
-    FieldsetField.objects.create(name="int2", field=fd4, fieldset=fs)
+    fs = FieldsetFactory()
+    FlexFieldFactory(name="int", field=fd1, fieldset=fs)
+    FlexFieldFactory(name="float", field=fd2, fieldset=fs)
+    FlexFieldFactory(name="int1", field=fd3, fieldset=fs)
+    FlexFieldFactory(name="int2", field=fd4, fieldset=fs)
+
     return {"fs": fs}
 
 

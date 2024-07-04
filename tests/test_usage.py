@@ -9,21 +9,22 @@ from hope_flex_fields.models import DataChecker, Fieldset
 
 @pytest.fixture
 def config(db):
-    from hope_flex_fields.models import FieldDefinition, Fieldset, FieldsetField
-
-    fd1 = FieldDefinition.objects.create(
-        name="IntField", field_type=forms.IntegerField, attrs={"min_value": 1}
+    from testutils.factories import (
+        FieldDefinitionFactory,
+        FieldsetFactory,
+        FlexFieldFactory,
     )
-    fd2 = FieldDefinition.objects.create(
-        name="FloatField",
+
+    fd1 = FieldDefinitionFactory(field_type=forms.IntegerField, attrs={"min_value": 1})
+    fd2 = FieldDefinitionFactory(
         field_type=forms.FloatField,
         attrs={"min_value": 1},
         validation="""if (value % 2 == 0) {result="Insert an odd number"}""",
     )
-    fs = Fieldset.objects.create(name="Fieldset")
+    fs = FieldsetFactory()
+    FlexFieldFactory(name="int", field=fd1, fieldset=fs, attrs={})
+    FlexFieldFactory(name="float", field=fd2, fieldset=fs, attrs={"required": True})
 
-    FieldsetField.objects.create(name="int", field=fd1, fieldset=fs)
-    FieldsetField.objects.create(name="float", field=fd2, fieldset=fs)
     data = [
         {"int": 1, "float": 2.0},
         {"int": 2, "float": 2.2},

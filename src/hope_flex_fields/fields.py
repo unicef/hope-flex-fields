@@ -1,5 +1,5 @@
 from django import forms
 
 
-class FlexField(forms.Field):
+class FlexFormMixin(forms.Field):
     pass
