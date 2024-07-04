@@ -1,11 +1,13 @@
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, TabularInline, register
+from django.http import HttpResponse
 from django.shortcuts import render
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 
 from ..models import DataChecker, DataCheckerFieldset, Fieldset
+from ..models.datachecker import create_xls_importer
 
 
 class DataCheckerFieldsetTabularInline(TabularInline):
@@ -20,6 +22,22 @@ class DataCheckerFieldsetTabularInline(TabularInline):
 class DataCheckerAdmin(ExtraButtonsMixin, ModelAdmin):
     list_display = ("name",)
     inlines = [DataCheckerFieldsetTabularInline]
+
+    @button()
+    def inspect(self, request, pk):
+        ctx = self.get_common_context(request, pk, title="Inspect")
+        return render(request, "flex_fields/datachecker/inspect.html", ctx)
+
+    @button()
+    def create_xls_importer(self, request, pk):
+        ctx = self.get_common_context(request, pk, title="Inspect")
+        dc: DataChecker = ctx["original"]
+        buffer, __ = create_xls_importer(dc)
+        return HttpResponse(
+            buffer.read(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        # return render(request, "flex_fields/datachecker/inspect.html", ctx)
 
     @button()
     def test(self, request, pk):
@@ -38,4 +56,4 @@ class DataCheckerAdmin(ExtraButtonsMixin, ModelAdmin):
             form = form_class()
 
         ctx["form"] = form
-        return render(request, "flex_fields/fieldset/test.html", ctx)
+        return render(request, "flex_fields/test.html", ctx)

@@ -143,7 +143,7 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
             form = form_class()
 
         ctx["form"] = form
-        return render(request, "flex_fields/fielddefinition/test.html", ctx)
+        return render(request, "flex_fields/test.html", ctx)
 
     @button()
     def inspect(self, request, pk):

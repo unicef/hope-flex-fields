@@ -35,4 +35,4 @@ class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
             form = form_class()
 
         ctx["form"] = form
-        return render(request, "flex_fields/fieldset/test.html", ctx)
+        return render(request, "flex_fields/test.html", ctx)

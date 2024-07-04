@@ -37,6 +37,9 @@ class FlexField(AbstractField):
     def __str__(self):
         return self.name
 
+    def base_type(self):
+        return self.field.field_type.__name__
+
     def validate_attrs(self):
         try:
             self.get_field()

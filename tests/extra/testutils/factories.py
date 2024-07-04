@@ -75,6 +75,16 @@ class FieldDefinitionFactory(AutoRegisterModelFactory):
         model = FieldDefinition
         django_get_or_create = ("name",)
 
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        if "attrs" in kwargs:
+            from hope_flex_fields.utils import get_kwargs_for_field
+
+            attrs = get_kwargs_for_field(kwargs["field_type"])
+            attrs.update(**kwargs["attrs"])
+            kwargs["attrs"] = attrs
+        return super()._create(model_class, *args, **kwargs)
+
 
 class FieldsetFactory(AutoRegisterModelFactory):
     name = factory.Sequence(lambda d: "Fieldset-%s" % d)

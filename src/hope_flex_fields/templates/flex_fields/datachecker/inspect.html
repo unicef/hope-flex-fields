@@ -1,0 +1,32 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% block action-content %}
+    {{ original }}
+    <table>
+    <tr>
+                <th>
+                    name
+                </th>
+                <th>
+                    type
+                </th>
+                <th>
+                    args
+                </th>
+            </tr>
+        {% for f in original.get_fields %}
+            <tr>
+                <td>
+                    {{ f }}
+                </td>
+                <td>
+                    {{ f.field.name }}({{ f.base_type }})
+                </td>
+                <td>
+                    {{ f.get_merged_attrs }}
+                </td>
+            </tr>
+
+        {% endfor %}
+    </table>
+
+{% endblock %}
