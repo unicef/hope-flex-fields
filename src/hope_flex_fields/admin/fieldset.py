@@ -14,7 +14,7 @@ from .flexfield import FieldsetFieldTabularInline
 class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
     list_select_related = True
     search_fields = ("name",)
-    list_display = ("name",)
+    list_display = ("name", "extends")
     inlines = [FieldsetFieldTabularInline]
     form = FieldsetForm
 
