@@ -1,0 +1,23 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% block action-content %}
+    {{ original }}
+        <form id="validate-form" method="post" enctype="multipart/form-data">
+
+        <table>
+            {% csrf_token %}
+            {{ form }}
+        </table>
+        <input type="submit" value="Import">
+    </form>
+    {% if results %}
+        <table>
+        {% for i, row in results.items %}
+            <tr>
+            <td>{{ i }}</td>
+            <td>{{ row }}</td>
+            </tr>
+        {% endfor %}
+        </table>
+    {% endif %}
+    
+{% endblock %}

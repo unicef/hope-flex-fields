@@ -3,7 +3,6 @@ from django import forms
 import pytest
 from testutils.factories import DataCheckerFactory, DataCheckerFieldsetFactory
 
-from hope_flex_fields.importers import validate_json
 from hope_flex_fields.models import DataChecker, Fieldset
 
 
@@ -25,36 +24,67 @@ def config(db):
     FlexFieldFactory(name="int", field=fd1, fieldset=fs, attrs={})
     FlexFieldFactory(name="float", field=fd2, fieldset=fs, attrs={"required": True})
 
+    dc = DataCheckerFactory()
+    DataCheckerFieldsetFactory(checker=dc, fieldset=fs, prefix="aaa_")
+    return {"fs": fs, "dc": dc}
+
+
+def test_validate_fs_json(config):
+    fs: Fieldset = config["fs"]
+
     data = [
         {"int": 1, "float": 2.0},
         {"int": 2, "float": 2.2},
         {"int": -3, "float": 2.1},
     ]
-    dc = DataCheckerFactory()
-    DataCheckerFieldsetFactory(checker=dc, fieldset=fs)
-    return {"fs": fs, "data": data, "dc": dc}
+    result = fs.validate(data, True)
+    assert result == {
+        1: {"float": ["Insert an odd number"]},
+        2: "Ok",
+        3: {"int": ["Ensure this value is greater than or equal to 1."]},
+    }
 
 
-def test_validate_json(config):
-    fs: Fieldset = config["fs"]
-    result = validate_json(config["data"], fs.name)
-    assert result == [
-        {"float": ["Insert an odd number"]},
-        "Ok",
-        {"int": ["Ensure this value is greater than or equal to 1."]},
-    ]
-
-
-def test_validate_json2(config):
+def test_validate_dc_json(config):
     dc: DataChecker = config["dc"]
     data = [
         {"aaa_int": 1, "aaa_float": 2.0},
         {"aaa_int": 2, "aaa_float": 2.2},
         {"aaa_int": -3, "aaa_float": 2.1},
     ]
-    result = dc.validate_many(data)
-    assert result == [
-        {"aaa_float": ["Insert an odd number"]},
-        "Ok",
-        {"aaa_int": ["Ensure this value is greater than or equal to 1."]},
+    result = dc.validate(data, True)
+    assert result == {
+        1: {"aaa_float": ["Insert an odd number"]},
+        2: "Ok",
+        3: {"aaa_int": ["Ensure this value is greater than or equal to 1."]},
+    }
+
+
+def test_validate_dc_exclude_success(config):
+    dc: DataChecker = config["dc"]
+    data = [
+        {"aaa_int": 1, "aaa_float": 2.0},
+        {"aaa_int": 2, "aaa_float": 2.2},
+        {"aaa_int": -3, "aaa_float": 2.1},
     ]
+    result = dc.validate(data)
+    assert result == {
+        1: {"aaa_float": ["Insert an odd number"]},
+        3: {"aaa_int": ["Ensure this value is greater than or equal to 1."]},
+    }
+
+
+def test_validate_dc_fail_if_alien(config):
+    dc: DataChecker = config["dc"]
+    data = [
+        {"aaa_alien": -3, "aaa_float": 2.1, "aaa_int": 0},
+        {"aaa_int": -3, "aaa_float": 2.1},
+    ]
+    result = dc.validate(data, fail_if_alien=True)
+    assert result == {
+        1: {
+            "-": ["Alien values found {'aaa_alien'}"],
+            "aaa_int": ["Ensure this value is greater than or equal to 1."],
+        },
+        2: {"aaa_int": ["Ensure this value is greater than or equal to 1."]},
+    }

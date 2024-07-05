@@ -2,16 +2,15 @@ from io import BytesIO
 from typing import TYPE_CHECKING
 
 from django import forms
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext as _
 
+from ..fields import FlexFormMixin
 from ..xlsx import get_format_for_field, get_validation_for_field
-from .base import TestForm
+from .base import FlexForm, ValidatorMixin
 from .fieldset import Fieldset
 
 if TYPE_CHECKING:
-    from ..forms import FieldDefinitionForm
     from .flexfield import FLexField
 
 
@@ -74,11 +73,11 @@ class DataCheckerFieldset(models.Model):
         "DataChecker", on_delete=models.CASCADE, related_name="members"
     )
     fieldset = models.ForeignKey(Fieldset, on_delete=models.CASCADE)
-    prefix = models.CharField(max_length=30)
+    prefix = models.CharField(max_length=30, blank=True, default="")
     order = models.PositiveSmallIntegerField(default=0)
 
 
-class DataChecker(models.Model):
+class DataChecker(ValidatorMixin, models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
     fieldsets = models.ManyToManyField(Fieldset, through=DataCheckerFieldset)
@@ -99,31 +98,13 @@ class DataChecker(models.Model):
             for field in fs.fieldset.fields.filter():
                 yield field
 
-    def get_form(self) -> "type[FieldDefinitionForm]":
+    def get_form(self) -> "type[FlexForm]":
         fields: dict[str, forms.Field] = {}
         field: "FLexField"
         for fs in self.members.all():
             for field in fs.fieldset.fields.filter():
-                fld = field.get_field()
-                fields[f"{fs.prefix}_{field.name}"] = fld
+                fld: FlexFormMixin = field.get_field()
+                fld.label = f"{fs.prefix}_{field.name}"
+                fields[f"{fs.prefix}{field.name}"] = fld
         form_class_attrs = {"DataChecker": self, **fields}
-        return type(f"{self.name}DataChecker", (TestForm,), form_class_attrs)
-
-    def validate(self, data):
-        form_class = self.get_form()
-        form: "FieldDefinitionForm" = form_class(data=data)
-        if form.is_valid():
-            return True
-        else:
-            self.errors = form.errors
-            raise ValidationError(form.errors)
-
-    def validate_many(self, data):
-        ret = []
-        for r in data:
-            try:
-                self.validate(r)
-                ret.append("Ok")
-            except ValidationError as e:
-                ret.append(e.message_dict)
-        return ret
+        return type(f"{self.name}DataChecker", (FlexForm,), form_class_attrs)

@@ -19,6 +19,11 @@ class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
     form = FieldsetForm
 
     @button()
+    def inspect(self, request, pk):
+        ctx = self.get_common_context(request, pk, title="Inspect")
+        return render(request, "flex_fields/inspect.html", ctx)
+
+    @button()
     def test(self, request, pk):
         ctx = self.get_common_context(request, pk, title="Test")
         fs: Fieldset = ctx["original"]

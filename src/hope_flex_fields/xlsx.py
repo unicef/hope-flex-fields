@@ -35,15 +35,13 @@ def get_validation_for_field(fld: "FlexField"):
         base = {"validate": "integer"}
         if attrs["min_value"]:
             base["minimum"] = attrs["min_value"]
+            base["criteria"] = ">="
         if attrs["max_value"]:
-            base["maximum"] = attrs["max_value"]
+            base["max_value"] = attrs["max_value"]
+            base["criteria"] = "<="
 
         if attrs["min_value"] and attrs["max_value"]:
             base["criteria"] = "between"
-        elif attrs["min_value"]:
-            base["criteria"] = ">="
-        elif attrs["max_value"]:
-            base["criteria"] = "<="
         return base
     elif base_type == "BooleanField":
         return {"validate": "list", "source": [True, False]}
@@ -51,8 +49,3 @@ def get_validation_for_field(fld: "FlexField"):
         return {}
     elif base_type == "ChoiceField":
         return {"validate": "list", "source": [m[0] for m in attrs["choices"]]}
-
-        # {'validate': 'integer',
-        #                                  'criteria': 'between',
-        #                                  'minimum': 1,
-        #                                  'maximum': 10}

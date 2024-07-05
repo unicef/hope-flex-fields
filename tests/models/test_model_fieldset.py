@@ -38,33 +38,29 @@ def test_validate_row(config):
     data = {"int": 1, "float": 1.1, "str": "string"}
     fs: Fieldset = config["fs"]
 
-    assert fs.validate(data)
+    ret = fs.validate(data, include_success=False)
+    assert ret == {}
 
 
 def test_validate_fail(config):
     #  try to validate json formatted data against a FieldSet
     data = {"int": 0, "float": 1.1, "str": "string"}
     fs: Fieldset = config["fs"]
-    with pytest.raises(ValidationError) as e:
-        fs.validate(data)
+    # with pytest.raises(ValidationError) as e:
+    ret = fs.validate(data)
 
-    assert e.value.message_dict == {
-        "int": ["Ensure this value is greater than or equal to 1."]
-    }
+    assert ret == {1: {"int": ["Ensure this value is greater than or equal to 1."]}}
 
 
 def test_validate_regex(config):
     #  try to validate json formatted data against a FieldSet
     data = {"int": 10, "float": 1.1, "str": "string", "int2": "1"}
     fs: Fieldset = config["fs"]
-    with pytest.raises(ValidationError) as e:
-        fs.validate(data)
-    assert fs.errors == {"int2": ["Invalid format. Allowed Regex is '\\d\\d\\d'"]}
-    assert e.value.message_dict == {
-        "int2": ["Invalid format. Allowed Regex is '\\d\\d\\d'"]
-    }
+    ret = fs.validate(data)
+    assert ret == {1: {"int2": ["Invalid format. Allowed Regex is '\\d\\d\\d'"]}}
     data = {"int": 10, "float": 1.1, "str": "string", "int2": "111"}
-    assert fs.validate(data)
+    ret = fs.validate(data)
+    assert ret == {}
 
 
 def test_extends(config):
