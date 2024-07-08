@@ -1,5 +1,6 @@
 .*
 ~*
+__pycache__
 dist/
 build/
 coverage.xml
@@ -11,5 +12,4 @@ coverage.xml
 !.pylintrc
 !.gitignore
 !.coveragerc
-!.pdm-python
 !.pre-commit-config.yaml
