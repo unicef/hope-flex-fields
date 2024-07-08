@@ -1,0 +1,44 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% block action-content %}
+    {{ original }}
+    {% if fields %}
+        <form method="post" id="create-form">
+            {% csrf_token %}
+            {{ form }}
+            <input type="submit" name="create" value="Create">
+        </form>
+        {% if errors %}
+            <h3>Errors</h3>
+            <table>
+                {% for err in errors %}
+                    <tr>
+                        <td>{{ err.name }}</td>
+                        <td>{{ err.error }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+        <div>
+        <h3>Fields</h3>
+        <table>
+            {% for fld in fields %}
+                <tr>
+                    <td>{{ fld }}</td>
+                    <td>{{ fld.field }}</td>
+                    <td>{{ fld.attrs }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <form method="post" id="analyse-form">
+            <table>
+                {% csrf_token %}
+                {{ form }}
+            </table>
+            <input type="submit" value="Analyse">
+        </form>
+        <div>
+    {% endif %}
+</div>
+
+{% endblock %}

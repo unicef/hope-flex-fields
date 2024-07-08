@@ -1,12 +1,15 @@
 import logging
+from inspect import isclass
 
+from django import forms
 from django.db import models
 from django.db.models import UniqueConstraint
 from django.utils.translation import gettext as _
 
 from strategy_field.fields import StrategyClassField
+from strategy_field.utils import fqn
 
-from hope_flex_fields.utils import get_kwargs_for_field
+from hope_flex_fields.utils import get_kwargs_from_field_class
 
 from ..fields import FlexFormMixin
 from ..registry import field_registry
@@ -19,6 +22,20 @@ logger = logging.getLogger(__name__)
 class FieldDefinitionManager(models.Manager):
     def get_by_natural_key(self, name):
         return self.get(name=name)
+
+    def get_from_django_field(self, django_field: "forms.Field|type[forms.Field]"):
+        if isinstance(django_field, forms.Field):
+            fld = type(django_field)
+        elif isclass(django_field) and issubclass(django_field, forms.Field):
+            fld = django_field
+        else:
+            raise ValueError(django_field)
+        name = fld.__name__
+        return FieldDefinition.objects.get_or_create(
+            name=name,
+            field_type=fqn(fld),
+            defaults={"attrs": get_kwargs_from_field_class(fld, get_default_attrs())},
+        )[0]
 
 
 class FieldDefinition(AbstractField):
@@ -49,7 +66,7 @@ class FieldDefinition(AbstractField):
         if not isinstance(self.attrs, dict) or not self.attrs:
             self.attrs = get_default_attrs()
         if self.field_type:
-            attrs = get_kwargs_for_field(self.field_type)
+            attrs = get_kwargs_from_field_class(self.field_type)
             attrs.update(**self.attrs)
             self.attrs = attrs
 

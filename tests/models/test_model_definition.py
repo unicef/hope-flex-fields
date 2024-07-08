@@ -48,3 +48,10 @@ def test_override(db):
     with pytest.raises(ValidationError) as e:
         field.clean(11)
     assert e.value.messages == [r"Invalid format. Allowed Regex is '\d$'"]
+
+
+@pytest.mark.parametrize("form_field", [forms.CharField(), forms.CharField])
+def test_get_from_django_field(db, form_field):
+    from hope_flex_fields.models import FieldDefinition
+
+    assert FieldDefinition.objects.get_from_django_field(form_field)
