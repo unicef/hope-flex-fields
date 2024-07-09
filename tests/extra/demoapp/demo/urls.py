@@ -20,10 +20,20 @@ from django.urls.conf import include
 
 from rest_framework import routers
 
-from hope_flex_fields.api.views import FieldDefinitionViewSet
+from hope_flex_fields.api.views import (
+    DataCheckerViewSet,
+    FieldDefinitionViewSet,
+    FieldsetViewSet,
+    FlexFieldViewSet,
+    SyncViewSet,
+)
 
 router = routers.DefaultRouter()
-router.register(r"fields", FieldDefinitionViewSet)
+router.register(r"field", FieldDefinitionViewSet)
+router.register(r"fieldset", FieldsetViewSet)
+router.register(r"datachecker", DataCheckerViewSet)
+router.register(r"flexfield", FlexFieldViewSet)
+router.register(r"sync", SyncViewSet, basename="sync")
 
 
 urlpatterns = [

@@ -2,6 +2,7 @@
   {
     "model": "hope_flex_fields.fielddefinition",
     "fields": {
+      "last_modified": "2024-07-08T13:16:07.112Z",
       "name": "imported-intfield",
       "description": "",
       "attrs": {
@@ -15,6 +16,7 @@
   {
     "model": "hope_flex_fields.fielddefinition",
     "fields": {
+      "last_modified": "2024-07-08T13:16:07.112Z",
       "name": "imported-floatfield",
       "description": "",
       "attrs": {
@@ -28,12 +30,14 @@
   {
     "model": "hope_flex_fields.fieldset",
     "fields": {
-      "name": "imported-fieldset"
+      "name": "imported-fieldset",
+      "last_modified": "2024-07-08T13:16:07.112Z"
     }
   },
   {
     "model": "hope_flex_fields.flexfield",
     "fields": {
+      "last_modified": "2024-07-08T13:16:07.112Z",
       "name": "imported-int",
       "description": "",
       "attrs": {
@@ -54,6 +58,7 @@
   {
     "model": "hope_flex_fields.flexfield",
     "fields": {
+      "last_modified": "2024-07-08T13:16:07.112Z",
       "name": "imported-float",
       "description": "",
       "attrs": {

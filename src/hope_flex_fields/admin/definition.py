@@ -1,15 +1,10 @@
-import io
 import json
-import tempfile
-from io import StringIO
 from json import JSONDecodeError
-from pathlib import Path
 
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, register
 from django.core.exceptions import ValidationError
-from django.core.management import call_command
 from django.core.serializers.base import DeserializationError
 from django.core.validators import FileExtensionValidator
 from django.http import HttpResponse, HttpResponseRedirect
@@ -22,6 +17,7 @@ from admin_extra_buttons.mixins import ExtraButtonsMixin
 
 from ..forms import FieldDefinitionForm
 from ..models import FieldDefinition, get_default_attrs
+from ..utils import dumpdata_to_buffer, loaddata_from_buffer
 
 
 @deconstructible
@@ -76,16 +72,8 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
 
     @view()
     def export_all(self, request):
-        buf = StringIO()
-        call_command(
-            "dumpdata",
-            "hope_flex_fields",
-            use_natural_primary_keys=True,
-            use_natural_foreign_keys=True,
-            stdout=buf,
-        )
-        buf.seek(0)
-        return HttpResponse(buf.getvalue(), content_type="application/json")
+        data = dumpdata_to_buffer()
+        return HttpResponse(data, content_type="application/json")
 
     @view()
     def import_all(self, request):
@@ -93,24 +81,11 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
         if request.method == "POST":
             form = ImportConfigurationForm(request.POST, request.FILES)
             if form.is_valid():
-                workdir = Path(".").absolute()
-                kwargs = {
-                    "dir": workdir,
-                    "prefix": "~LOADDATA",
-                    "suffix": ".json",
-                    "delete": False,
-                }
-                with tempfile.NamedTemporaryFile(**kwargs) as fdst:
-                    fdst.write(form.files["file"].file.read())
-                    fixture = (workdir / fdst.name).absolute()
-                out = io.StringIO()
                 try:
-                    call_command("loaddata", fixture, stdout=out, verbosity=3)
+                    loaddata_from_buffer(form.files["file"].file)
                     self.message_user(request, "Data successfully imported.")
                 except DeserializationError as e:
                     self.message_user(request, str(e), messages.ERROR)
-                finally:
-                    fixture.unlink()
                 return HttpResponseRedirect("..")
         else:
             form = ImportConfigurationForm()

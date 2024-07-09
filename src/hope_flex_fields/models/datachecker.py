@@ -69,6 +69,7 @@ class DataCheckerManager(models.Manager):
 
 
 class DataCheckerFieldset(models.Model):
+    last_modified = models.DateTimeField(auto_now=True)
     checker = models.ForeignKey(
         "DataChecker", on_delete=models.CASCADE, related_name="members"
     )
@@ -78,6 +79,7 @@ class DataCheckerFieldset(models.Model):
 
 
 class DataChecker(ValidatorMixin, models.Model):
+    last_modified = models.DateTimeField(auto_now=True)
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
     fieldsets = models.ManyToManyField(Fieldset, through=DataCheckerFieldset)

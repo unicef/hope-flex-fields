@@ -18,6 +18,8 @@ dependencies = [
     "django-adminactions>=2.3.0",
     "duckdb>=1.0.0",
     "python-calamine>=0.2.0",
+    "requests>=2.32.3",
+    "responses>=0.25.3",
 ]
 requires-python = ">=3.11"
 readme = "README.md"
@@ -79,6 +81,7 @@ dev = [
     "responses>=0.25.3",
     "django-csp>=3.8",
     "bandit>=1.7.9",
+    "pdm-bump>=0.9.0",
 ]
 
 [tool.pdm.scripts]

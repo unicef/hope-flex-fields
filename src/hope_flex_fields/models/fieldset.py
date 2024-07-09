@@ -18,6 +18,7 @@ class FieldsetManager(models.Manager):
 
 
 class Fieldset(ValidatorMixin, models.Model):
+    last_modified = models.DateTimeField(auto_now=True)
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
     extends = models.ForeignKey("self", null=True, blank=True, on_delete=models.CASCADE)

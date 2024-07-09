@@ -1,6 +1,11 @@
 import inspect
+import io
+import tempfile
+from io import StringIO
+from pathlib import Path
 
 from django import forms
+from django.core.management import call_command
 from django.forms.fields import DateTimeFormatsIterator
 from django.utils.text import slugify
 
@@ -43,3 +48,37 @@ def get_kwargs_from_formfield(field: forms.Field):
             value = [str(v) for v in value]
         ret[attr_name] = value
     return ret
+
+
+def dumpdata_to_buffer():
+    buf = StringIO()
+    call_command(
+        "dumpdata",
+        "hope_flex_fields",
+        use_natural_primary_keys=True,
+        use_natural_foreign_keys=True,
+        stdout=buf,
+    )
+    buf.seek(0)
+    return buf.getvalue()
+
+
+def loaddata_from_buffer(buf):
+    workdir = Path(".").absolute()
+    kwargs = {
+        "dir": workdir,
+        "prefix": "~LOADDATA",
+        "suffix": ".json",
+        "delete": False,
+    }
+    with tempfile.NamedTemporaryFile(**kwargs) as fdst:
+        fdst.write(buf.getvalue())
+        fixture = (workdir / fdst.name).absolute()
+    out = io.StringIO()
+    try:
+        call_command("loaddata", fixture, stdout=out, verbosity=3)
+    except Exception:
+        raise
+    finally:
+        fixture.unlink()
+    return out.getvalue()

@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class FieldDefinitionManager(models.Manager):
+
     def get_by_natural_key(self, name):
         return self.get(name=name)
 

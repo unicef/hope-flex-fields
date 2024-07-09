@@ -20,6 +20,7 @@ class FlexForm(forms.Form):
 
 
 class AbstractField(models.Model):
+    last_modified = models.DateTimeField(auto_now=True)
     name = models.CharField(max_length=255)
     description = models.TextField(max_length=500, blank=True, null=True, default="")
     attrs = models.JSONField(default=dict, blank=True, null=False)
