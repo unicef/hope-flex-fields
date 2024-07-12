@@ -35,9 +35,9 @@ class FieldSetForm(forms.Form):
                     name=name, field=fd, attrs=get_kwargs_from_formfield(field)
                 )
                 fld.attrs = fld.get_merged_attrs()
-                fields.append(fld)
-                config["name"] = {"definition": fd.name, "attrs": fld.attrs}
                 fld.get_field()
+                config[name] = {"definition": fd.name, "attrs": fld.attrs}
+                fields.append(fld)
             except Exception:
                 errors.append(
                     {
