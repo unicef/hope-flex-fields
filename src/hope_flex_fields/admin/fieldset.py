@@ -4,6 +4,7 @@ from django.contrib.admin import ModelAdmin, register
 from django.contrib.contenttypes.models import ContentType
 from django.db.transaction import atomic
 from django.forms import modelform_factory
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
 from admin_extra_buttons.decorators import button
@@ -37,7 +38,7 @@ class FieldSetForm(forms.Form):
                 fields.append(fld)
                 config["name"] = {"definition": fd.name, "attrs": fld.attrs}
                 fld.get_field()
-            except FieldDefinition.DoesNotExist:
+            except Exception:
                 errors.append(
                     {
                         "name": name,
@@ -90,6 +91,7 @@ class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
                 form = FieldSetForm2(request.POST, request.FILES)
                 form.is_valid()
                 form.save()
+                return HttpResponseRedirect("..")
             else:
                 form = FieldSetForm(request.POST, request.FILES)
                 if form.is_valid():

@@ -19,7 +19,14 @@ From the design point of view a high level comparison with Django components cou
 - `Fieldset` = `forms.Form`
 - `FlexField` = `forms.Field()`
 - `DataChecker` = `[forms.Form(),...]`
- 
+
+... and some utilities
+
+- Automatic creation of FieldSets inspecting [exiting models](http://localhost:8000/hope_flex_fields/fieldset/create_from_content_type/?)
+- Automatic creation of XLS file matching an existing [Datachecker](http://localhost:8000/hope_flex_fields/datachecker/)
+- Validate XLS against an existing [Datachecker](http://localhost:8000/hope_flex_fields/datachecker/)
+
+
 ```mermaid 
 
 classDiagram
