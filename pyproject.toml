@@ -67,11 +67,12 @@ distribution = true
 
 [tool.pdm.dev-dependencies]
 dev = [
-    "django>=3,<4",
+    "django>=3",
     "pytest>=8.2.2",
     "django-factory-boy>=1.0.0",
     "black>=24.4.2",
     "flake8>=7.1.0",
+    "flake8-html>=0.4.3",
     "isort>=5.13.2",
     "pre-commit>=3.7.1",
     "freezegun>=1.5.1",
@@ -83,6 +84,7 @@ dev = [
     "responses>=0.25.3",
     "django-csp>=3.8",
     "bandit>=1.7.9",
+    "tox>=4.16.0",
     "pdm-bump>=0.9.0",
 ]
 

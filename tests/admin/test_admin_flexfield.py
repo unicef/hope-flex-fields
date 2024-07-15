@@ -46,10 +46,11 @@ def test_fields_create(app):
     fs = FieldsetFactory()
     url = reverse("admin:hope_flex_fields_flexfield_add")
     res = app.get(url)
-    res.form["name"] = "int"
-    res.form["field"] = fd.pk
-    res.form["fieldset"] = fs.pk
-    res = res.form.submit()
+    form = res.forms[1]
+    form["name"] = "int"
+    form["field"] = fd.pk
+    form["fieldset"] = fs.pk
+    res = form.submit()
     assert res.status_code == 302
     obj: FlexField = FlexField.objects.get(name="int")
     assert obj.attrs == "{}"
@@ -61,19 +62,21 @@ def test_fields_create_and_update(app, record):
 
     url = reverse("admin:hope_flex_fields_flexfield_add")
     res = app.get(url)
-    res.form["name"] = "int2"
-    res.form["field"] = fd.pk
-    res.form["fieldset"] = fs.pk
+    form = res.forms[1]
+    form["name"] = "int2"
+    form["field"] = fd.pk
+    form["fieldset"] = fs.pk
 
-    res = res.form.submit("_continue")
+    res = form.submit("_continue")
     assert res.status_code == 302, res.context["adminform"].form.errors
     res = res.follow()
-    assert res.form["attrs"].value == '"{}"'
+    form = res.forms[1]
+    assert form["attrs"].value == '"{}"'
 
-    res.form["attrs"] = (
+    form["attrs"] = (
         '{"max_value": 1, "min_value": 10, "required": false, "help_text": ""}'
     )
-    res = res.form.submit("_continue")
+    res = form.submit("_continue")
     assert res.status_code == 302, res.context["adminform"].form.errors
 
     obj: FlexField = FlexField.objects.get(name="int2")
