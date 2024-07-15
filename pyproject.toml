@@ -20,6 +20,8 @@ dependencies = [
     "python-calamine>=0.2.0",
     "requests>=2.32.3",
     "responses>=0.25.3",
+    "jmespath>=1.0.1",
+    "deepdiff>=7.0.1",
 ]
 requires-python = ">=3.11"
 readme = "README.md"

@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 
 import factory.fuzzy
 from factory.base import FactoryMetaClass
@@ -84,6 +85,15 @@ class FieldDefinitionFactory(AutoRegisterModelFactory):
             attrs.update(**kwargs["attrs"])
             kwargs["attrs"] = attrs
         return super()._create(model_class, *args, **kwargs)
+
+
+class ContentTypeFactory(AutoRegisterModelFactory):
+    app_label = "auth"
+    model = "user"
+
+    class Meta:
+        model = ContentType
+        django_get_or_create = ("app_label", "model")
 
 
 class FieldsetFactory(AutoRegisterModelFactory):

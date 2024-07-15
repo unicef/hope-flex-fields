@@ -1,0 +1,12 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% block action-content %}
+    <table>
+        {% for field_name, diff in diff %}
+            <tr>
+                <td>{{ field_name }}</td>
+                <td>{{ diff }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}

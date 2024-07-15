@@ -1,6 +1,5 @@
 {% extends "admin_extra_buttons/action_page.html" %}
 {% block action-content %}
-    {{ original }}
     {% if fields %}
         <form method="post" id="create-form">
             {% csrf_token %}
@@ -35,7 +34,7 @@
                 {% csrf_token %}
                 {{ form }}
             </table>
-            <input type="submit" value="Analyse">
+            <input type="submit" name="analyse" value="Analyse">
         </form>
         <div>
     {% endif %}

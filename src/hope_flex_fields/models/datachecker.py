@@ -106,7 +106,12 @@ class DataChecker(ValidatorMixin, models.Model):
         for fs in self.members.all():
             for field in fs.fieldset.fields.filter():
                 fld: FlexFormMixin = field.get_field()
-                fld.label = f"{fs.prefix}_{field.name}"
-                fields[f"{fs.prefix}{field.name}"] = fld
+                fld.label = f"{fs.prefix}{field.name}"
+                if "%s" in fs.prefix:
+                    full_name = fs.prefix % field.name
+                else:
+                    full_name = f"{fs.prefix}{field.name}"
+
+                fields[full_name] = fld
         form_class_attrs = {"DataChecker": self, **fields}
         return type(f"{self.name}DataChecker", (FlexForm,), form_class_attrs)

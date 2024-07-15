@@ -40,8 +40,26 @@ class FileForm(forms.Form):
     )
 
 
+class DataCheckerFieldsetFormset(forms.models.BaseInlineFormSet):
+    def clean(self):
+        all_fields = set()
+        fs: Fieldset
+        for form in self.forms:
+            if fs := form.cleaned_data.get("fieldset"):
+                prefix: str = form.cleaned_data["prefix"]
+                # fs_fields = {f"{prefix}{f}" for f in fs.get_fieldnames()}
+                if "%s" in prefix:
+                    fs_fields = {prefix % f for f in fs.get_fieldnames()}
+                else:
+                    fs_fields = {f"{prefix}{f}" for f in fs.get_fieldnames()}
+                if all_fields.intersection(fs_fields):
+                    raise forms.ValidationError("Field names are not unique")
+                all_fields.update(fs_fields)
+
+
 class DataCheckerFieldsetTabularInline(TabularInline):
     model = DataCheckerFieldset
+    formset = DataCheckerFieldsetFormset
     fields = ("fieldset", "prefix", "order")
 
     def get_ordering(self, request):

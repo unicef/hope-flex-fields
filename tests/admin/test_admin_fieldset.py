@@ -25,6 +25,18 @@ def record(db):
     return fs
 
 
+@pytest.fixture
+def record2(db):
+    ct = ContentType.objects.get_for_model(User)
+    fs = Fieldset.objects.create_from_content_type("Test", ct)
+    return fs
+
+
+def test_detect_changes(app, record2):
+    url = reverse("admin:hope_flex_fields_fieldset_detect_changes", args=[record2.pk])
+    app.get(url)
+
+
 def test_fieldset_test(app, record):
     url = reverse("admin:hope_flex_fields_fieldset_test", args=[record.pk])
     res = app.get(url)
@@ -39,24 +51,34 @@ def test_fieldset_test(app, record):
     assert messages == ["Valid"]
 
 
+def test_fieldset_unique_name(app, record):
+    url = reverse("admin:hope_flex_fields_fieldset_add")
+    res = app.get(url)
+    res.forms["fieldset_form"]["name"] = record.name
+    res = res.forms["fieldset_form"].submit()
+    assert res.status_code == 200
+    assert b"Fieldset with this Name already exists." in res.content
+
+
 @pytest.mark.parametrize(
     "model_class",
     [
         User,
     ],
 )
-def test_fieldset_create_from_content_type(app, model_class):
+def test_fieldset_create_from_content_type(app, record, model_class):
     url = reverse("admin:hope_flex_fields_fieldset_create_from_content_type")
     res = app.get(url)
-    res = res.forms["analyse-form"].submit()
+    res.forms["analyse-form"]["name"] = record.name
+    res = res.forms["analyse-form"].submit("analyse")
     assert res.status_code == 200
+    res.forms["analyse-form"]["name"] = "FS #1"
     res.forms["analyse-form"]["content_type"] = ContentType.objects.get_for_model(
         model_class
     ).pk
-    res = res.forms["analyse-form"].submit()
-    res.forms["create-form"].submit()
-    fs = Fieldset.objects.filter(
-        name=f"{model_class._meta.app_label}_{model_class._meta.model_name}"
-    ).first()
+    res = res.forms["analyse-form"].submit("analyse")
+
+    res.forms["create-form"].submit("create")
+    fs = Fieldset.objects.filter(name="FS #1").first()
     assert fs
     assert fs.fields.exists()
