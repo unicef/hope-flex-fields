@@ -16,6 +16,7 @@ def test_validate_attributes(db):
         "max_value": None,
         "min_value": None,
         "required": False,
+        "step_size": None,
     }
 
 
