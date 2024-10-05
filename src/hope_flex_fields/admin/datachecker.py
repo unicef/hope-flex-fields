@@ -85,7 +85,7 @@ class DataCheckerAdmin(ExtraButtonsMixin, ModelAdmin):
                 dc: DataChecker = ctx["original"]
                 f = form.cleaned_data["file"]
                 parser = HANDLERS[Path(f.name).suffix]
-                ret = dc.validate(parser(f), True)
+                ret = dc.validate(parser(f), include_success=True)
                 ctx["results"] = ret
                 self.message_user(request, "Data looks valid", messages.SUCCESS)
             else:
