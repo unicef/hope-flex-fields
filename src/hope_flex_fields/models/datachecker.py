@@ -79,6 +79,8 @@ class DataCheckerFieldset(models.Model):
 
 
 class DataChecker(ValidatorMixin, models.Model):
+    """Used for complex validations to combine different fieldsets"""
+
     last_modified = models.DateTimeField(auto_now=True)
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)

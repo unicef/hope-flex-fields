@@ -2,6 +2,7 @@ import logging
 from inspect import isclass
 
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import UniqueConstraint
 from django.utils.translation import gettext as _
@@ -40,8 +41,14 @@ class FieldDefinitionManager(models.Manager):
 
 
 class FieldDefinition(AbstractField):
+    """This class is the equivalent django.forms.Field class, used to create reusable field types"""
+
     field_type = StrategyClassField(registry=field_registry)
     objects = FieldDefinitionManager()
+    content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, null=True, blank=True
+    )
+    system_data = models.JSONField(default=dict, blank=True, editable=False, null=True)
 
     class Meta:
         verbose_name = _("Field Definition")
