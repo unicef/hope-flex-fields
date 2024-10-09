@@ -3,6 +3,7 @@ from typing import Generator, Iterable
 
 from django import forms
 from django.db import models
+from django.utils.text import slugify
 
 from django_regex.fields import RegexField
 from django_regex.validators import RegexValidator
@@ -25,9 +26,28 @@ class AbstractField(models.Model):
     attrs = models.JSONField(default=dict, blank=True, null=False)
     regex = RegexField(blank=True, null=True, validators=[RegexValidator()])
     validation = models.TextField(blank=True, null=True, default="")
+    slug = models.SlugField(blank=True, null=True, editable=False)
 
     class Meta:
         abstract = True
+
+    def save(
+        self,
+        *args,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None,
+    ):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(
+            *args,
+            force_insert=force_insert,
+            force_update=force_update,
+            using=using,
+            update_fields=update_fields,
+        )
 
 
 class ValidatorMixin:

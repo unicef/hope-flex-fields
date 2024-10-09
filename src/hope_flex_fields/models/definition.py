@@ -49,11 +49,15 @@ class FieldDefinition(AbstractField):
         ContentType, on_delete=models.CASCADE, null=True, blank=True
     )
     system_data = models.JSONField(default=dict, blank=True, editable=False, null=True)
+    # protected = models.BooleanField(default=False, help_text="If true the field can be deleted only by superusers")
 
     class Meta:
         verbose_name = _("Field Definition")
         verbose_name_plural = _("Field Definitions")
-        constraints = (UniqueConstraint(fields=("name",), name="unique_name"),)
+        constraints = (
+            UniqueConstraint(fields=("name",), name="fielddefinition_unique_name"),
+            UniqueConstraint(fields=("slug",), name="fielddefinition_unique_slug"),
+        )
 
     def __str__(self):
         return self.name

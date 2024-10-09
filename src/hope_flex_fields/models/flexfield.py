@@ -2,6 +2,7 @@ import logging
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import UniqueConstraint
 from django.utils.translation import gettext as _
 
 from ..fields import FlexFormMixin
@@ -30,9 +31,12 @@ class FlexField(AbstractField):
     objects = FieldsetFieldManager()
 
     class Meta:
-        unique_together = ("fieldset", "name")
         verbose_name = _("Flex Field")
         verbose_name_plural = _("flex Fields")
+        constraints = (
+            UniqueConstraint(fields=("name", "fieldset"), name="flexfield_unique_name"),
+            UniqueConstraint(fields=("slug", "fieldset"), name="flexfield_unique_slug"),
+        )
 
     def __str__(self):
         return self.name

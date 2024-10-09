@@ -110,8 +110,8 @@ class DataCheckerAdmin(ExtraButtonsMixin, ModelAdmin):
     @button()
     def test(self, request, pk):
         ctx = self.get_common_context(request, pk, title="Test")
-        fs: Fieldset = ctx["original"]
-        form_class = fs.get_form()
+        dc: DataChecker = ctx["original"]
+        form_class = dc.get_form()
         if request.method == "POST":
             form = form_class(request.POST)
             if form.is_valid():

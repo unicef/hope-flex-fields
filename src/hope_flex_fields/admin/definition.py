@@ -50,6 +50,7 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
     list_filter = ("field_type",)
     search_fields = ("name", "description")
     form = FieldDefinitionForm
+    readonly_fields = ("system_data", "content_type")
     fieldsets = (
         ("", {"fields": (("name", "field_type"), "description")}),
         (
@@ -57,6 +58,13 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
             {
                 "classes": ("collapse", "open"),
                 "fields": ("regex", "attrs", "validation"),
+            },
+        ),
+        (
+            "Advanced",
+            {
+                "classes": ("collapse", "open"),
+                "fields": ("content_type", "system_data"),
             },
         ),
     )
