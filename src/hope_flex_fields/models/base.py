@@ -8,11 +8,8 @@ from django.utils.text import slugify
 from django_regex.fields import RegexField
 from django_regex.validators import RegexValidator
 
+#
 logger = logging.getLogger(__name__)
-
-
-def get_default_attrs():
-    return {"required": False, "help_text": ""}
 
 
 class FlexForm(forms.Form):

@@ -14,6 +14,10 @@ def namefy(value):
     return slugify(value).replace("-", "_")
 
 
+def get_default_attrs():
+    return {"required": False, "help_text": ""}
+
+
 def get_kwargs_from_field_class(field, extra: dict | None = None):
     sig: inspect.Signature = inspect.signature(field)
     arguments = extra or {}

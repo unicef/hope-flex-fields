@@ -14,8 +14,9 @@ from hope_flex_fields.utils import get_kwargs_from_field_class
 
 from ..fields import FlexFormMixin
 from ..registry import field_registry
+from ..utils import get_default_attrs
 from ..validators import JsValidator, ReValidator
-from .base import AbstractField, get_default_attrs
+from .base import AbstractField
 
 logger = logging.getLogger(__name__)
 
@@ -44,12 +45,13 @@ class FieldDefinition(AbstractField):
     """This class is the equivalent django.forms.Field class, used to create reusable field types"""
 
     field_type = StrategyClassField(registry=field_registry)
-    objects = FieldDefinitionManager()
     content_type = models.ForeignKey(
         ContentType, on_delete=models.CASCADE, null=True, blank=True
     )
     system_data = models.JSONField(default=dict, blank=True, editable=False, null=True)
     # protected = models.BooleanField(default=False, help_text="If true the field can be deleted only by superusers")
+
+    objects = FieldDefinitionManager()
 
     class Meta:
         verbose_name = _("Field Definition")

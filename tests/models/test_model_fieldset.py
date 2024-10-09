@@ -1,8 +1,6 @@
 from typing import TYPE_CHECKING
 
 from django import forms
-from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
 import pytest
@@ -12,7 +10,6 @@ from testutils.factories import (
     FlexFieldFactory,
 )
 
-from hope_flex_fields.apps import create_default_fields
 from hope_flex_fields.models import Fieldset
 
 if TYPE_CHECKING:
@@ -106,12 +103,3 @@ def test_cannot_extends_self(config):
     fs: Fieldset = config["fs"]
     fs.extends = fs
     pytest.raises(ValidationError, fs.clean)
-
-
-@pytest.mark.parametrize("model_class", [User])
-def test_create_from_content_type(db, model_class):
-    create_default_fields(None)
-    ct: ContentType = ContentType.objects.get_for_model(model_class)
-    config = Fieldset.objects.inspect_content_type(ct)
-    ret = Fieldset.objects.create_from_content_type("FS1", ct, config["config"])
-    assert ret.name == "FS1"

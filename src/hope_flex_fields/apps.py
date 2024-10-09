@@ -2,14 +2,6 @@ from django.apps import AppConfig
 from django.db.models.signals import post_migrate
 
 
-def create_default_fields(sender, **kwargs):
-    from hope_flex_fields.models import FieldDefinition
-    from hope_flex_fields.registry import field_registry
-
-    for fld in field_registry:
-        FieldDefinition.objects.get_from_django_field(fld)
-
-
 def sync_content_types(sender, **kwargs):
     from hope_flex_fields.models import Fieldset
 
@@ -30,5 +22,4 @@ class Config(AppConfig):
     verbose_name = "Flex Fields"
 
     def ready(self):
-        post_migrate.connect(create_default_fields, sender=self)
         post_migrate.connect(sync_content_types, sender=self)

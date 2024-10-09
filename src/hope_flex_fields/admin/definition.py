@@ -16,8 +16,8 @@ from admin_extra_buttons.decorators import button, view
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 
 from ..forms import FieldDefinitionForm
-from ..models import FieldDefinition, get_default_attrs
-from ..utils import dumpdata_to_buffer, loaddata_from_buffer
+from ..models import FieldDefinition
+from ..utils import dumpdata_to_buffer, get_default_attrs, loaddata_from_buffer
 
 
 @deconstructible
