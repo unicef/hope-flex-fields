@@ -55,6 +55,9 @@ jobs:
           python-version: 3.12
           architecture: 'x64'
       - uses: yezz123/setup-uv@v4
+        with:
+          uv-version: "0.4.15"
+        
       - name: lint
         if: needs.changes.outputs.lint
         run: |
