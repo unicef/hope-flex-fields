@@ -1,6 +1,6 @@
 [project]
 name = "hope-flex-fields"
-version = "0.1.0rc"
+version = "0.1.0"
 description = ""
 authors = [
     {name = "sax", email = "s.apostolico@gmail.com"},
@@ -39,6 +39,7 @@ docs = [
 dev-dependencies = [
     "bandit>=1.7.9",
     "black>=24.4.2",
+    "bump2version>=1.0.1",
     "django-csp>=3.8",
     "django-factory-boy>=1.0.0",
     "django-webtest>=1.9.11",
