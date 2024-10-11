@@ -71,21 +71,20 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: |
-            .cache-uv/
             .venv/
           key: ${{ matrix.python-version }}-${{matrix.django-version}}-${{ hashFiles('pyproject.toml') }}-venv
 
       - uses: yezz123/setup-uv@v4
-        with:
-          python:  ${{ matrix.python-version }}
+
 
       - name: Test
-        continue-on-error: true
+        continue-on-error: false
         run: |
-          uv export -q --no-hashes  -o {work_dir}/requirements.txt
-          pip install -r {work_dir}/requirements.txt
-          pip install '{env:DJANGO}'
-          pytest tests --create-db --cov --junit-xml junit-${{ matrix.python-version }}-${{matrix.django-version}}.xml
+          python3 -m venv .venv
+          uv export -q --no-hashes  -o requirements.txt
+          .venv/bin/pip install -r requirements.txt
+          .venv/bin/pip install "django>=${{matrix.django-version}}"
+          .venv/bin/pytest tests --create-db --cov --junit-xml junit-${{ matrix.python-version }}-${{matrix.django-version}}.xml
 
       - name: Cache venv
         if: steps.cache-venv-restore.outputs.cache-hit != 'true'
@@ -93,7 +92,6 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: |
-            .cache-uv/
             .venv/
           key: ${{ matrix.python-version }}-${{matrix.django-version}}-${{ hashFiles('pyproject.toml') }}-venv
 

@@ -57,6 +57,8 @@ def dc(db):
         field_type=forms.ChoiceField,
         attrs={"choices": [["a", "a"], ["b", "b"], ["c", "c"]]},
     )
+    fd8 = FieldDefinitionFactory(field_type=forms.ChoiceField, attrs={})
+
     fs = FieldsetFactory()
     FlexFieldFactory(name="int1", field=fd1, fieldset=fs, attrs={"required": False})
     FlexFieldFactory(name="int2", field=fd2, fieldset=fs, attrs={"required": False})
@@ -65,6 +67,7 @@ def dc(db):
     FlexFieldFactory(name="date", field=fd5, fieldset=fs, attrs={"required": False})
     FlexFieldFactory(name="bool", field=fd6, fieldset=fs, attrs={"required": False})
     FlexFieldFactory(name="choice", field=fd7, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="choice1", field=fd8, fieldset=fs, attrs={"required": False})
 
     dc = DataCheckerFactory()
     DataCheckerFieldsetFactory(checker=dc, fieldset=fs, prefix="fs")

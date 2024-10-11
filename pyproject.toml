@@ -1,6 +1,6 @@
 [project]
 name = "hope-flex-fields"
-version = "0.2.0"
+version = "0.3.0"
 description = ""
 authors = [
     {name = "sax", email = "s.apostolico@gmail.com"},
@@ -21,7 +21,7 @@ dependencies = [
     "jsonpickle>=3.2.2",
     "xlsxwriter>=3.2.0",
     "django-adminactions>=2.3.0",
-    "python-calamine>=0.2.0",
+    "python-calamine>=0.3.0",
     "requests>=2.32.3",
     "responses>=0.25.3",
     "jmespath>=1.0.1",
