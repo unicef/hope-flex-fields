@@ -109,7 +109,12 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
     def test(self, request, pk):
         ctx = self.get_common_context(request, pk, title="Test")
         fd: FieldDefinition = ctx["original"]
-        field = fd.get_field()
+        try:
+            field = fd.get_field()
+        except Exception as e:
+            self.message_user(request, str(e))
+            field = fd.get_field({})
+
         form_class_attrs = {
             fd.name: field,
         }

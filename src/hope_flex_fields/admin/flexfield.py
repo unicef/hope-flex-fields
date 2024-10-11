@@ -13,10 +13,7 @@ from ..models import FieldDefinition, FlexField
 class FieldsetFieldTabularInline(TabularInline):
     model = FlexField
     show_change_link = True
-    fields = (
-        "name",
-        "field",
-    )
+    fields = ("name", "field", "attrs")
 
 
 @register(FlexField)
@@ -37,15 +34,6 @@ class FieldsetFieldAdmin(ExtraButtonsMixin, ModelAdmin):
         ),
     )
 
-    #
-    # formfield_overrides = {
-    #     JSONField: {
-    #         "widget": JSONEditor(
-    #             init_options={"mode": "code", "modes": ["text", "code", "tree"]},
-    #             ace_options={"readOnly": False},
-    #         )
-    #     }
-    # }
     def get_changeform_initial_data(self, request):
         initial = super().get_changeform_initial_data(request)
         initial["attrs"] = "{}"
@@ -55,7 +43,12 @@ class FieldsetFieldAdmin(ExtraButtonsMixin, ModelAdmin):
     def test(self, request, pk):
         ctx = self.get_common_context(request, pk, title="Test")
         fd: FieldDefinition = ctx["original"]
-        field = fd.get_field()
+        try:
+            field = fd.get_field()
+        except Exception as e:
+            self.message_user(request, str(e))
+            field = fd.get_field({})
+
         form_class_attrs = {
             fd.name: field,
         }

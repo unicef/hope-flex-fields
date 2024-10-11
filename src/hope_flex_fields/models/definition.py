@@ -88,9 +88,12 @@ class FieldDefinition(AbstractField):
     def required(self):
         return self.attrs.get("required", False)
 
-    def get_field(self):
+    def get_field(self, override_attrs=None):
         try:
-            kwargs = dict(self.attrs)
+            if override_attrs is not None:
+                kwargs = dict(override_attrs)
+            else:
+                kwargs = dict(self.attrs)
             validators = []
             if self.validation:
                 validators.append(JsValidator(self.validation))
@@ -104,5 +107,7 @@ class FieldDefinition(AbstractField):
             fld = field_class(**kwargs)
         except Exception as e:  # pragma: no cover
             logger.exception(e)
-            raise
+            raise TypeError(
+                f"Error creating field for FieldDefinition {self.name}: {e}"
+            )
         return fld
