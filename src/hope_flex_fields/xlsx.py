@@ -33,14 +33,14 @@ def get_validation_for_field(fld: "FlexField"):
     attrs = fld.get_merged_attrs()
     if base_type == "IntegerField":
         base = {"validate": "integer"}
-        if attrs["min_value"]:
+        if attrs.get("min_value"):
             base["minimum"] = attrs["min_value"]
             base["criteria"] = ">="
-        if attrs["max_value"]:
+        if attrs.get("max_value"):
             base["max_value"] = attrs["max_value"]
             base["criteria"] = "<="
 
-        if attrs["min_value"] and attrs["max_value"]:
+        if attrs.get("min_value") and attrs.get("max_value"):
             base["criteria"] = "between"
         return base
     elif base_type == "BooleanField":
@@ -48,4 +48,5 @@ def get_validation_for_field(fld: "FlexField"):
     elif base_type == "DateField":
         return {}
     elif base_type == "ChoiceField":
-        return {"validate": "list", "source": [m[0] for m in attrs["choices"]]}
+        return {"validate": "list", "source": [m[0] for m in attrs.get("choices", [])]}
+    return {}
