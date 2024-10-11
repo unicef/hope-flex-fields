@@ -30,7 +30,6 @@ jobs:
         shell: bash
     outputs:
       run_tests: ${{steps.changes.outputs.run_tests }}
-      lint: ${{steps.changes.outputs.lint }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.7
@@ -55,7 +54,7 @@ jobs:
         django-version: [ "4.2", "5.1" ]
       fail-fast: true
     needs: [ changes ]
-    if: needs.changes.outputs.run_tests || needs.changes.outputs.lint
+    if: needs.changes.outputs.run_tests
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.7

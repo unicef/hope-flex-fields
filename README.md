@@ -1,7 +1,12 @@
 # HOPE FlexFields
 
 [![Test](https://github.com/unicef/hope-flex-fields/actions/workflows/test.yml/badge.svg)](https://github.com/unicef/hope-flex-fields/actions/workflows/test.yml)
+[![Lint](https://github.com/unicef/hope-flex-fields/actions/workflows/lint.yml/badge.svg)](https://github.com/unicef/hope-flex-fields/actions/workflows/lint.yml)
 [![codecov](https://codecov.io/gh/unicef/hope-flex-fields/graph/badge.svg?token=GSYAH4IEUK)](https://codecov.io/gh/unicef/hope-flex-fields)
+[![Documentation](https://github.com/unicef/hope-flex-fields/actions/workflows/docs.yml/badge.svg)](https://unicef.github.io/hope-flex-fields/)
+[![PyPI](https://img.shields.io/pypi/v/hope-flex-fields)](https://pypi.org/project/hope-flex-fields/)
+
+
 
 This library provides the ability to define a set of fields and related validation rules dynamically. It has been designed as part of the [HOPE](https://github.com/unicef/hct-mis) project to manage user-customizable fields (FlexField). The idea is to have a central business logic repository for data import validation.
 
