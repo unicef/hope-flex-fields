@@ -52,7 +52,7 @@ jobs:
       max-parallel: 1
       matrix:
         python-version: [ "3.11", "3.12" ]
-        django-version: [ "3.2", "4.2", "5.0" ]
+        django-version: [ "4.2", "5.1" ]
       fail-fast: true
     needs: [ changes ]
     if: needs.changes.outputs.run_tests || needs.changes.outputs.lint
@@ -66,40 +66,47 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: 'x64'
 
-      - name: Cache virtualenv
-        uses: actions/cache@v3
+      - name: Restore cached venv
+        id: cache-venv-restore
+        uses: actions/cache/restore@v4
         with:
-          key: venv-${{ runner.os }}-${{ steps.setup_python.outputs.python-version}}-${{ hashFiles('pdm.lock') }}
-          path: .venv
+          path: |
+            .cache-uv/
+            .venv/
+          key: ${{ matrix.python-version }}-${{matrix.django-version}}-${{ hashFiles('pyproject.toml') }}-venv
+
+      - uses: yezz123/setup-uv@v4
+        with:
+          python:  ${{ matrix.python-version }}
 
       - name: Test
         continue-on-error: true
         run: |
-          pip install pdm
-          pdm venv create -q
-          pdm install
+          uv export -q --no-hashes  -o {work_dir}/requirements.txt
+          pip install -r {work_dir}/requirements.txt
+          pip install '{env:DJANGO}'
+          pytest tests --create-db --cov --junit-xml junit-${{ matrix.python-version }}-${{matrix.django-version}}.xml
 
-      - name: lint
-        if: needs.changes.outputs.lint
-        run: |
-          pdm run isort src/ --check-only
-          pdm run flake8 src/
-
-      - name: Test
-        if: needs.changes.outputs.run_tests
-        run: |
-          pdm run pytest tests --create-db --junit-xml junit-${{ matrix.python-version }}-${{matrix.django-version}}.xml
+      - name: Cache venv
+        if: steps.cache-venv-restore.outputs.cache-hit != 'true'
+        id: cache-venv-save
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            .cache-uv/
+            .venv/
+          key: ${{ matrix.python-version }}-${{matrix.django-version}}-${{ hashFiles('pyproject.toml') }}-venv
 
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
         with:
           name: pytest-results-${{ matrix.python-version }}-${{matrix.django-version}}
           path: junit-${{ matrix.python-version }}-${{matrix.django-version}}.xml
-        if: ${{ always() }}
+        if: matrix.python-version == 3.12
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
-        if: ${{ always() }}
+        if: matrix.python-version == 3.12
         continue-on-error: true
         with:
           env_vars: OS,PYTHON

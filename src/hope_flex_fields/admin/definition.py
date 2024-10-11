@@ -16,8 +16,8 @@ from admin_extra_buttons.decorators import button, view
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 
 from ..forms import FieldDefinitionForm
-from ..models import FieldDefinition, get_default_attrs
-from ..utils import dumpdata_to_buffer, loaddata_from_buffer
+from ..models import FieldDefinition
+from ..utils import dumpdata_to_buffer, get_default_attrs, loaddata_from_buffer
 
 
 @deconstructible
@@ -50,6 +50,7 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
     list_filter = ("field_type",)
     search_fields = ("name", "description")
     form = FieldDefinitionForm
+    readonly_fields = ("system_data", "content_type")
     fieldsets = (
         ("", {"fields": (("name", "field_type"), "description")}),
         (
@@ -57,6 +58,13 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
             {
                 "classes": ("collapse", "open"),
                 "fields": ("regex", "attrs", "validation"),
+            },
+        ),
+        (
+            "Advanced",
+            {
+                "classes": ("collapse", "open"),
+                "fields": ("content_type", "system_data"),
             },
         ),
     )
@@ -101,7 +109,12 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
     def test(self, request, pk):
         ctx = self.get_common_context(request, pk, title="Test")
         fd: FieldDefinition = ctx["original"]
-        field = fd.get_field()
+        try:
+            field = fd.get_field()
+        except Exception as e:
+            self.message_user(request, str(e))
+            field = fd.get_field({})
+
         form_class_attrs = {
             fd.name: field,
         }

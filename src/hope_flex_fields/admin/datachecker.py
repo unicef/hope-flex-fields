@@ -40,8 +40,26 @@ class FileForm(forms.Form):
     )
 
 
+class DataCheckerFieldsetFormset(forms.models.BaseInlineFormSet):
+    def clean(self):
+        all_fields = set()
+        fs: Fieldset
+        for form in self.forms:
+            if fs := form.cleaned_data.get("fieldset"):
+                prefix: str = form.cleaned_data["prefix"]
+                # fs_fields = {f"{prefix}{f}" for f in fs.get_fieldnames()}
+                if "%s" in prefix:
+                    fs_fields = {prefix % f for f in fs.get_fieldnames()}
+                else:
+                    fs_fields = {f"{prefix}{f}" for f in fs.get_fieldnames()}
+                if all_fields.intersection(fs_fields):
+                    raise forms.ValidationError("Field names are not unique")
+                all_fields.update(fs_fields)
+
+
 class DataCheckerFieldsetTabularInline(TabularInline):
     model = DataCheckerFieldset
+    formset = DataCheckerFieldsetFormset
     fields = ("fieldset", "prefix", "order")
 
     def get_ordering(self, request):
@@ -67,7 +85,7 @@ class DataCheckerAdmin(ExtraButtonsMixin, ModelAdmin):
                 dc: DataChecker = ctx["original"]
                 f = form.cleaned_data["file"]
                 parser = HANDLERS[Path(f.name).suffix]
-                ret = dc.validate(parser(f), True)
+                ret = dc.validate(parser(f), include_success=True)
                 ctx["results"] = ret
                 self.message_user(request, "Data looks valid", messages.SUCCESS)
             else:
@@ -92,8 +110,8 @@ class DataCheckerAdmin(ExtraButtonsMixin, ModelAdmin):
     @button()
     def test(self, request, pk):
         ctx = self.get_common_context(request, pk, title="Test")
-        fs: Fieldset = ctx["original"]
-        form_class = fs.get_form()
+        dc: DataChecker = ctx["original"]
+        form_class = dc.get_form()
         if request.method == "POST":
             form = form_class(request.POST)
             if form.is_valid():

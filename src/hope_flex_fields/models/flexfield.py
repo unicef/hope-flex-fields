@@ -2,6 +2,7 @@ import logging
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import UniqueConstraint
 from django.utils.translation import gettext as _
 
 from ..fields import FlexFormMixin
@@ -30,9 +31,12 @@ class FlexField(AbstractField):
     objects = FieldsetFieldManager()
 
     class Meta:
-        unique_together = ("fieldset", "name")
         verbose_name = _("Flex Field")
         verbose_name_plural = _("flex Fields")
+        constraints = (
+            UniqueConstraint(fields=("name", "fieldset"), name="flexfield_unique_name"),
+            UniqueConstraint(fields=("slug", "fieldset"), name="flexfield_unique_slug"),
+        )
 
     def __str__(self):
         return self.name
@@ -59,10 +63,13 @@ class FlexField(AbstractField):
             attrs.update(self.attrs)
         return attrs
 
-    def get_field(self, **extra) -> "FlexFormMixin":
+    def get_field(self, override_attrs=None, **extra) -> "FlexFormMixin":
         try:
-            kwargs = self.get_merged_attrs()
-            kwargs.update(extra)
+            if override_attrs is not None:
+                kwargs = dict(override_attrs)
+            else:
+                kwargs = self.get_merged_attrs()
+                kwargs.update(extra)
             validators = []
             if self.validation:
                 validators.append(JsValidator(self.validation))
@@ -76,10 +83,12 @@ class FlexField(AbstractField):
 
             kwargs["validators"] = validators
             field_class = type(
-                f"{self.name}Field", (FlexFormMixin, self.field.field_type), {}
+                f"{self.name}Field",
+                (FlexFormMixin, self.field.field_type),
+                {"flex_field": self},
             )
             fld = field_class(**kwargs)
         except Exception as e:  # pragma: no cover
             logger.exception(e)
-            raise
+            raise TypeError(f"Error creating field for FlexField {self.name}: {e}")
         return fld

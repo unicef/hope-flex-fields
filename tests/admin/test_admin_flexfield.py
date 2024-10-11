@@ -46,7 +46,7 @@ def test_fields_create(app):
     fs = FieldsetFactory()
     url = reverse("admin:hope_flex_fields_flexfield_add")
     res = app.get(url)
-    form = res.forms[1]
+    form = res.forms["flexfield_form"]
     form["name"] = "int"
     form["field"] = fd.pk
     form["fieldset"] = fs.pk
@@ -62,7 +62,7 @@ def test_fields_create_and_update(app, record):
 
     url = reverse("admin:hope_flex_fields_flexfield_add")
     res = app.get(url)
-    form = res.forms[1]
+    form = res.forms["flexfield_form"]
     form["name"] = "int2"
     form["field"] = fd.pk
     form["fieldset"] = fs.pk
@@ -70,7 +70,7 @@ def test_fields_create_and_update(app, record):
     res = form.submit("_continue")
     assert res.status_code == 302, res.context["adminform"].form.errors
     res = res.follow()
-    form = res.forms[1]
+    form = res.forms["flexfield_form"]
     assert form["attrs"].value == '"{}"'
 
     form["attrs"] = (

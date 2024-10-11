@@ -3,6 +3,8 @@ from django import forms
 from strategy_field.registry import Registry
 from strategy_field.utils import fqn
 
+# from .fields import OptionField
+
 
 class FieldRegistry(Registry):
     def get_name(self, entry):
@@ -35,3 +37,4 @@ field_registry.register(forms.TimeField)
 field_registry.register(forms.URLField)
 field_registry.register(forms.UUIDField)
 field_registry.register(forms.JSONField)
+# field_registry.register(OptionField)

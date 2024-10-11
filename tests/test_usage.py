@@ -37,7 +37,7 @@ def test_validate_fs_json(config):
         {"int": 2, "float": 2.2},
         {"int": -3, "float": 2.1},
     ]
-    result = fs.validate(data, True)
+    result = fs.validate(data, include_success=True)
     assert result == {
         1: {"float": ["Insert an odd number"]},
         2: "Ok",
@@ -52,7 +52,7 @@ def test_validate_dc_json(config):
         {"aaa_int": 2, "aaa_float": 2.2},
         {"aaa_int": -3, "aaa_float": 2.1},
     ]
-    result = dc.validate(data, True)
+    result = dc.validate(data, include_success=True)
     assert result == {
         1: {"aaa_float": ["Insert an odd number"]},
         2: "Ok",
