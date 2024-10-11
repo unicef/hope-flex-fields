@@ -84,7 +84,7 @@ jobs:
         run: |
           uv export -q --no-hashes  -o requirements.txt
           pip install -r requirements.txt
-          pip install '{env:DJANGO}'
+          pip install django==${{matrix.django-version}}
           pytest tests --create-db --cov --junit-xml junit-${{ matrix.python-version }}-${{matrix.django-version}}.xml
 
       - name: Cache venv
