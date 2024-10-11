@@ -2,6 +2,7 @@ import logging
 from inspect import isclass
 
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import UniqueConstraint
 from django.utils.translation import gettext as _
@@ -13,8 +14,9 @@ from hope_flex_fields.utils import get_kwargs_from_field_class
 
 from ..fields import FlexFormMixin
 from ..registry import field_registry
+from ..utils import get_default_attrs
 from ..validators import JsValidator, ReValidator
-from .base import AbstractField, get_default_attrs
+from .base import AbstractField
 
 logger = logging.getLogger(__name__)
 
@@ -40,13 +42,24 @@ class FieldDefinitionManager(models.Manager):
 
 
 class FieldDefinition(AbstractField):
+    """This class is the equivalent django.forms.Field class, used to create reusable field types"""
+
     field_type = StrategyClassField(registry=field_registry)
+    content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, null=True, blank=True
+    )
+    system_data = models.JSONField(default=dict, blank=True, editable=False, null=True)
+    # protected = models.BooleanField(default=False, help_text="If true the field can be deleted only by superusers")
+
     objects = FieldDefinitionManager()
 
     class Meta:
         verbose_name = _("Field Definition")
         verbose_name_plural = _("Field Definitions")
-        constraints = (UniqueConstraint(fields=("name",), name="unique_name"),)
+        constraints = (
+            UniqueConstraint(fields=("name",), name="fielddefinition_unique_name"),
+            UniqueConstraint(fields=("slug",), name="fielddefinition_unique_slug"),
+        )
 
     def __str__(self):
         return self.name
@@ -75,9 +88,12 @@ class FieldDefinition(AbstractField):
     def required(self):
         return self.attrs.get("required", False)
 
-    def get_field(self):
+    def get_field(self, override_attrs=None):
         try:
-            kwargs = dict(self.attrs)
+            if override_attrs is not None:
+                kwargs = dict(override_attrs)
+            else:
+                kwargs = dict(self.attrs)
             validators = []
             if self.validation:
                 validators.append(JsValidator(self.validation))
@@ -91,5 +107,7 @@ class FieldDefinition(AbstractField):
             fld = field_class(**kwargs)
         except Exception as e:  # pragma: no cover
             logger.exception(e)
-            raise
+            raise TypeError(
+                f"Error creating field for FieldDefinition {self.name}: {e}"
+            )
         return fld

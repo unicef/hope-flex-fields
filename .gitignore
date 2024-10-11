@@ -5,6 +5,8 @@ dist/
 build/
 coverage.xml
 *.sqlite3
+Makefile
+uv.lock
 !.git
 !.github
 !.flake8

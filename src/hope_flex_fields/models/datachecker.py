@@ -11,7 +11,7 @@ from .base import FlexForm, ValidatorMixin
 from .fieldset import Fieldset
 
 if TYPE_CHECKING:
-    from .flexfield import FLexField
+    from .flexfield import FlexField
 
 
 def create_xls_importer(dc: "DataChecker"):
@@ -79,6 +79,8 @@ class DataCheckerFieldset(models.Model):
 
 
 class DataChecker(ValidatorMixin, models.Model):
+    """Used for complex validations to combine different fieldsets"""
+
     last_modified = models.DateTimeField(auto_now=True)
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
@@ -102,11 +104,16 @@ class DataChecker(ValidatorMixin, models.Model):
 
     def get_form(self) -> "type[FlexForm]":
         fields: dict[str, forms.Field] = {}
-        field: "FLexField"
+        field: "FlexField"
         for fs in self.members.all():
             for field in fs.fieldset.fields.filter():
                 fld: FlexFormMixin = field.get_field()
-                fld.label = f"{fs.prefix}_{field.name}"
-                fields[f"{fs.prefix}{field.name}"] = fld
+                fld.label = f"{fs.prefix}{field.name}"
+                if "%s" in fs.prefix:
+                    full_name = fs.prefix % field.name
+                else:
+                    full_name = f"{fs.prefix}{field.name}"
+
+                fields[full_name] = fld
         form_class_attrs = {"DataChecker": self, **fields}
         return type(f"{self.name}DataChecker", (FlexForm,), form_class_attrs)

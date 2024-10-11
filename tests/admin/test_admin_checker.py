@@ -7,6 +7,8 @@ import pytest
 from testutils.factories import DataCheckerFactory
 from webtest import Upload
 
+from hope_flex_fields.models import Fieldset
+
 pytestmark = [pytest.mark.admin, pytest.mark.smoke, pytest.mark.django_db]
 
 
@@ -27,7 +29,7 @@ def record(db):
     FlexFieldFactory(name="int2", field=fd2, fieldset=fs2, attrs={"required": True})
 
     dc = DataCheckerFactory()
-    DataCheckerFieldsetFactory(checker=dc, fieldset=fs1, prefix="fs1_")
+    DataCheckerFieldsetFactory(checker=dc, fieldset=fs1, prefix="fs1_%s")
     DataCheckerFieldsetFactory(checker=dc, fieldset=fs2, prefix="fs2_")
     return dc
 
@@ -311,6 +313,19 @@ def test_datachecker_inspect(app, record):
     url = reverse("admin:hope_flex_fields_datachecker_inspect", args=[record.pk])
     res = app.get(url)
     assert res
+
+
+def test_datachecker_unique_field(app, record):
+    url = reverse("admin:hope_flex_fields_datachecker_add")
+    res = app.get(url)
+    res.forms["datachecker_form"]["name"] = "DC #1"
+    res.forms["datachecker_form"]["members-0-fieldset"] = Fieldset.objects.first().pk
+    res.forms["datachecker_form"]["members-0-prefix"] = "pr_"
+    res.forms["datachecker_form"]["members-1-fieldset"] = Fieldset.objects.first().pk
+    res.forms["datachecker_form"]["members-1-prefix"] = "pr_%s"
+    res = res.forms["datachecker_form"].submit()
+    assert res.status_code == 200
+    assert b"Field names are not unique" in res.content
 
 
 def test_datachecker_xls_importer(app, dc):
