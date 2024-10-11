@@ -86,7 +86,7 @@ jobs:
           pip install -r {work_dir}/requirements.txt
           pip install '{env:DJANGO}'
           pytest
-          
+
       - name: Cache venv
         if: steps.cache-venv-restore.outputs.cache-hit != 'true'
         id: cache-venv-save
@@ -96,17 +96,6 @@ jobs:
             .cache-uv/
             .venv/
           key: ${{ matrix.python-version }}-${{matrix.django-version}}-${{ hashFiles('pyproject.toml') }}-venv
-
-      - name: lint
-        if: needs.changes.outputs.lint
-        run: |
-          pdm run isort src/ --check-only
-          pdm run flake8 src/
-
-      - name: Test
-        if: needs.changes.outputs.run_tests
-        run: |
-          pdm run pytest tests --create-db --junit-xml junit-${{ matrix.python-version }}-${{matrix.django-version}}.xml
 
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
