@@ -82,8 +82,8 @@ jobs:
       - name: Test
         continue-on-error: true
         run: |
-          uv export -q --no-hashes  -o {work_dir}/requirements.txt
-          pip install -r {work_dir}/requirements.txt
+          uv export -q --no-hashes  -o requirements.txt
+          pip install -r requirements.txt
           pip install '{env:DJANGO}'
           pytest tests --create-db --cov --junit-xml junit-${{ matrix.python-version }}-${{matrix.django-version}}.xml
 
