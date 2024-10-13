@@ -150,7 +150,7 @@ class Fieldset(ValidatorMixin, models.Model):
         for field in self.get_fields():
             fld = field.get_field(label=field.name)
             fields[field.name] = fld
-        form_class_attrs = {"FieldsetForm": self, **fields}
+        form_class_attrs = {"FieldsetForm": self, **dict(sorted(fields.items()))}
         return type(f"{self.name}FieldsetForm", (FlexForm,), form_class_attrs)
 
     def clean(self):
