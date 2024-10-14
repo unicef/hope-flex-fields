@@ -16,12 +16,12 @@ from ..fields import FlexFormMixin
 from ..registry import field_registry
 from ..utils import get_default_attrs
 from ..validators import JsValidator, ReValidator
-from .base import AbstractField
+from .base import AbstractField, BaseManager
 
 logger = logging.getLogger(__name__)
 
 
-class FieldDefinitionManager(models.Manager):
+class FieldDefinitionManager(BaseManager):
 
     def get_by_natural_key(self, name):
         return self.get(name=name)

@@ -3,11 +3,17 @@ import io
 import tempfile
 from io import StringIO
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from django import forms
 from django.core.management import call_command
 from django.forms.fields import DateTimeFormatsIterator
 from django.utils.text import slugify
+
+from strategy_field.utils import fqn
+
+if TYPE_CHECKING:
+    from hope_flex_fields.models import FieldDefinition
 
 
 def namefy(value):
@@ -86,3 +92,17 @@ def loaddata_from_buffer(buf):
     finally:
         fixture.unlink()
     return out.getvalue()
+
+
+def create_default_fields(apps, schema_editor):
+    from hope_flex_fields.registry import field_registry
+
+    fd: "FieldDefinition" = apps.get_model("hope_flex_fields", "FieldDefinition")
+
+    for fld in field_registry:
+        name = fld.__name__
+        fd.objects.get_or_create(
+            name=name,
+            field_type=fqn(fld),
+            defaults={"attrs": get_kwargs_from_field_class(fld, get_default_attrs())},
+        )
