@@ -1,8 +1,9 @@
 import logging
-from typing import Generator, Iterable
+from typing import Any, Generator, Iterable
 
 from django import forms
 from django.db import models
+from django.db.models import Model
 from django.utils.text import slugify
 
 from django_regex.fields import RegexField
@@ -14,6 +15,22 @@ logger = logging.getLogger(__name__)
 
 class FlexForm(forms.Form):
     fieldset = None
+
+
+class BaseQuerySet(models.QuerySet["Model"]):
+
+    def get(self, *args: Any, **kwargs: Any) -> "Model":
+        try:
+            return super().get(*args, **kwargs)
+        except self.model.DoesNotExist:
+            raise self.model.DoesNotExist(
+                "%s matching query does not exist. Using %s %s"
+                % (self.model._meta.object_name, args, kwargs)
+            )
+
+
+class BaseManager(models.Manager["Model"]):
+    _queryset_class = BaseQuerySet
 
 
 class AbstractField(models.Model):

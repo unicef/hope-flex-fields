@@ -115,5 +115,5 @@ class DataChecker(ValidatorMixin, models.Model):
                     full_name = f"{fs.prefix}{field.name}"
 
                 fields[full_name] = fld
-        form_class_attrs = {"DataChecker": self, **fields}
+        form_class_attrs = {"DataChecker": self, **dict(sorted(fields.items()))}
         return type(f"{self.name}DataChecker", (FlexForm,), form_class_attrs)
