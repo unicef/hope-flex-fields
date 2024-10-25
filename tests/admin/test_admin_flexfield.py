@@ -53,7 +53,7 @@ def test_fields_create(app):
     res = form.submit()
     assert res.status_code == 302
     obj: FlexField = FlexField.objects.get(name="int")
-    assert obj.attrs == "{}"
+    assert obj.attributes == "{}"
 
 
 def test_fields_create_and_update(app, record):
@@ -80,7 +80,7 @@ def test_fields_create_and_update(app, record):
     assert res.status_code == 302, res.context["adminform"].form.errors
 
     obj: FlexField = FlexField.objects.get(name="int2")
-    assert obj.attrs == {
+    assert obj.attributes == {
         "max_value": 1,
         "min_value": 10,
         "required": False,

@@ -10,6 +10,7 @@ from django.utils.translation import gettext as _
 
 from deepdiff import DeepDiff
 
+from ..exceptions import FlexFieldCreationError
 from ..utils import get_kwargs_from_formfield
 from .base import FlexForm, ValidatorMixin
 
@@ -55,10 +56,12 @@ class FieldsetManager(models.Manager):
                 fld = FlexField(
                     name=name, field=fd, attrs=get_kwargs_from_formfield(field)
                 )
-                fld.attrs = fld.get_merged_attrs()
+                fld.attributes = fld.get_merged_attrs()
                 fld.get_field()
-                config[name] = {"definition": fd.name, "attrs": fld.attrs}
+                config[name] = {"definition": fd.name, "attrs": fld.attributes}
                 fields.append(fld)
+            except FlexFieldCreationError:
+                raise
             except FieldDefinition.DoesNotExist:
                 errors.append(
                     {
@@ -119,7 +122,7 @@ class Fieldset(ValidatorMixin, models.Model):
         result = {}
         for field_name, w in attrs["config"].items():
             if ff := self.get_field(field_name):
-                dd = DeepDiff(ff.attrs, w["attrs"])
+                dd = DeepDiff(ff.attributes, w["attrs"])
                 if dd:
                     result[field_name] = dd
         return result

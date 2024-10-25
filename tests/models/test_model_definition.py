@@ -11,7 +11,7 @@ def test_validate_attributes(db):
         name="IntField", field_type=forms.IntegerField, attrs={"cccc": "abc"}
     )
     fd.clean()
-    assert fd.attrs == {
+    assert fd.attributes == {
         "help_text": "",
         "max_value": None,
         "min_value": None,

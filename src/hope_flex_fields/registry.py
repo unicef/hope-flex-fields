@@ -1,14 +1,26 @@
 from django import forms
 
 from strategy_field.registry import Registry
-from strategy_field.utils import fqn
-
-# from .fields import OptionField
+from strategy_field.utils import fqn, import_by_name
 
 
 class FieldRegistry(Registry):
     def get_name(self, entry):
         return entry.__name__
+
+    def cast(self, item: str) -> type:
+        if item in self:
+            if isinstance(item, str):
+                try:
+                    clazz = import_by_name(item)
+                except (ImportError, ValueError):
+                    raise KeyError(item)
+            else:
+                clazz = item
+        return clazz
+
+    def __getitem__(self, item):
+        return super().__getitem__(item)
 
     def as_choices(self):
         if not self._choices:
@@ -37,4 +49,3 @@ field_registry.register(forms.TimeField)
 field_registry.register(forms.URLField)
 field_registry.register(forms.UUIDField)
 field_registry.register(forms.JSONField)
-# field_registry.register(OptionField)

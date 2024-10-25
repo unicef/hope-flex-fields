@@ -1,5 +1,5 @@
 from io import BytesIO
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generator
 
 from django import forms
 from django.db import models
@@ -16,11 +16,6 @@ if TYPE_CHECKING:
 
 def create_xls_importer(dc: "DataChecker"):
     import xlsxwriter
-
-    # pattern = xlsxwriter_options.get(
-    #     fld.name, xlsxwriter_options.get(fld.base_type(), "general")
-    # )
-    # fmt = workbook.add_format({"num_format": pattern})
 
     out = BytesIO()
     workbook = xlsxwriter.Workbook(
@@ -97,10 +92,16 @@ class DataChecker(ValidatorMixin, models.Model):
     def natural_key(self):
         return (self.name,)
 
-    def get_fields(self):
+    def get_fields(self) -> Generator["FlexField", None, None]:
         for fs in self.members.all():
             for field in fs.fieldset.fields.filter():
                 yield field
+
+    def get_field(self, name) -> "FlexField":
+        for fs in self.members.all():
+            for field in fs.fieldset.fields.filter():
+                if field.name == name:
+                    return field
 
     def get_form(self) -> "type[FlexForm]":
         fields: dict[str, forms.Field] = {}

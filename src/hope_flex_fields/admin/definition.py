@@ -137,5 +137,5 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
     def inspect(self, request, pk):
         ctx = self.get_common_context(request, pk)
         fd: FieldDefinition = ctx["original"]
-        fd.set_default_arguments()
+        fd.set_default_attributes()
         fd.save()

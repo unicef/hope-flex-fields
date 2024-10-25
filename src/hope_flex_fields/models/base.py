@@ -45,6 +45,14 @@ class AbstractField(models.Model):
     class Meta:
         abstract = True
 
+    @property
+    def attributes(self):
+        raise NotImplementedError
+
+    @attributes.setter
+    def attributes(self, value):
+        raise NotImplementedError
+
     def save(
         self,
         *args,

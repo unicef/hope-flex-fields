@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models import UniqueConstraint
 from django.utils.translation import gettext as _
 
+from ..exceptions import FlexFieldCreationError
 from ..fields import FlexFormMixin
 from ..utils import namefy
 from ..validators import JsValidator, ReValidator
@@ -41,6 +42,14 @@ class FlexField(AbstractField):
     def __str__(self):
         return self.name
 
+    @property
+    def attributes(self):
+        return self.attrs
+
+    @attributes.setter
+    def attributes(self, value):
+        self.attrs = value
+
     def base_type(self):
         return self.field.field_type.__name__
 
@@ -58,8 +67,8 @@ class FlexField(AbstractField):
         return self.name, self.fieldset.name
 
     def get_merged_attrs(self):
-        attrs = dict(**self.field.attrs)
-        if isinstance(self.attrs, dict):
+        attrs = dict(**self.field.attributes)
+        if isinstance(self.attributes, dict):
             attrs.update(self.attrs)
         return attrs
 
@@ -89,6 +98,7 @@ class FlexField(AbstractField):
             )
             fld = field_class(**kwargs)
         except Exception as e:  # pragma: no cover
-            logger.exception(e)
-            raise TypeError(f"Error creating field for FlexField {self.name}: {e}")
+            raise FlexFieldCreationError(
+                f"Error creating field for FlexField {self.name}: {e}"
+            )
         return fld

@@ -46,11 +46,7 @@ def test_fields_create(app, record):
     res = form.submit()
     assert res.status_code == 302
     obj: FieldDefinition = FieldDefinition.objects.get(name="int")
-    assert obj.attrs == {
-        "choices": [],
-        "required": False,
-        "help_text": "",
-    }
+    assert obj.attributes == {"choices": [], "required": False, "help_text": ""}
 
 
 def test_fields_create_and_update(app, record):
@@ -71,7 +67,7 @@ def test_fields_create_and_update(app, record):
     form.submit("_continue").follow()
 
     obj: FieldDefinition = FieldDefinition.objects.get(name="Int")
-    assert obj.attrs == {
+    assert obj.attributes == {
         "max_value": 1,
         "min_value": 10,
         "required": False,
@@ -87,9 +83,9 @@ def test_fields_change_type(app, record):
     form["name"] = "Char"
     form["field_type"] = fqn(forms.CharField)
     res = form.submit("_continue")
-    assert res.status_code == 302, res.showbrowser()
+    assert res.status_code == 302
     obj: FieldDefinition = FieldDefinition.objects.get(name="Char")
-    assert obj.attrs == {
+    assert obj.attributes == {
         "empty_value": "",
         "strip": True,
         "max_length": None,

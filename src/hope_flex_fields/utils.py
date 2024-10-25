@@ -12,6 +12,8 @@ from django.utils.text import slugify
 
 from strategy_field.utils import fqn
 
+from hope_flex_fields.registry import field_registry
+
 if TYPE_CHECKING:
     from hope_flex_fields.models import FieldDefinition
 
@@ -24,7 +26,9 @@ def get_default_attrs():
     return {"required": False, "help_text": ""}
 
 
-def get_kwargs_from_field_class(field, extra: dict | None = None):
+def get_kwargs_from_field_class(field: "str|forms.Field", extra: dict | None = None):
+    field = field_registry.cast(field)
+
     sig: inspect.Signature = inspect.signature(field)
     arguments = extra or {}
     field_arguments = {
@@ -41,7 +45,7 @@ def get_kwargs_from_formfield(field: forms.Field):
 
     fd = FieldDefinition.objects.get(name=type(field).__name__)
     ret = {}
-    for attr_name in fd.attrs.keys():
+    for attr_name in fd.attributes.keys():
         if attr_name in (
             "widget",
             "validators",
