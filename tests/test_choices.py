@@ -11,9 +11,7 @@ from hope_flex_fields.models import Fieldset
 def data(db):
     ct = ContentType.objects.get(app_label="auth", model="user")
     data = Fieldset.objects.inspect_content_type(ct)
-    Fieldset.objects.create_from_content_type(
-        name="FS #2", content_type=ct, config=data["config"]
-    )
+    Fieldset.objects.create_from_content_type(name="FS #2", content_type=ct, config=data["config"])
 
 
 def test_sync_content_types(data):

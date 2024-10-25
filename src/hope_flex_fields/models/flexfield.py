@@ -22,12 +22,8 @@ class FieldsetFieldManager(models.Manager):
 
 
 class FlexField(AbstractField):
-    fieldset = models.ForeignKey(
-        Fieldset, on_delete=models.CASCADE, related_name="fields"
-    )
-    field = models.ForeignKey(
-        FieldDefinition, on_delete=models.CASCADE, related_name="instances"
-    )
+    fieldset = models.ForeignKey(Fieldset, on_delete=models.CASCADE, related_name="fields")
+    field = models.ForeignKey(FieldDefinition, on_delete=models.CASCADE, related_name="instances")
 
     objects = FieldsetFieldManager()
 
@@ -98,7 +94,5 @@ class FlexField(AbstractField):
             )
             fld = field_class(**kwargs)
         except Exception as e:  # pragma: no cover
-            raise FlexFieldCreationError(
-                f"Error creating field for FlexField {self.name}: {e}"
-            )
+            raise FlexFieldCreationError(f"Error creating field for FlexField {self.name}: {e}")
         return fld

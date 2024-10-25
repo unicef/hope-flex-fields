@@ -94,16 +94,12 @@ def record(db, request):
     modeladmin = request.getfixturevalue("modeladmin")
     instance = modeladmin.model.objects.first()
     if not instance:
-        full_name = (
-            f"{modeladmin.model._meta.app_label}.{modeladmin.model._meta.object_name}"
-        )
+        full_name = f"{modeladmin.model._meta.app_label}.{modeladmin.model._meta.object_name}"
         factory = get_factory_for_model(modeladmin.model)
         try:
             instance = factory(**KWARGS.get(full_name, {}))
         except Exception as e:
-            raise Exception(
-                f"Error creating fixture for {factory} using {KWARGS}"
-            ) from e
+            raise Exception(f"Error creating fixture for {factory} using {KWARGS}") from e
     return instance
 
 
@@ -181,9 +177,7 @@ def test_admin_delete(app, modeladmin, record, monkeypatch):
         pytest.skip("No 'delete' permission")
 
 
-@pytest.mark.skip_buttons(
-    "security.UserAdmin:link_user_data", "hope_flex_fields.FieldsetAdmin:detect_changes"
-)
+@pytest.mark.skip_buttons("security.UserAdmin:link_user_data", "hope_flex_fields.FieldsetAdmin:detect_changes")
 def test_admin_buttons(app, modeladmin, button_handler, record, monkeypatch):
     from admin_extra_buttons.handlers import LinkHandler
 

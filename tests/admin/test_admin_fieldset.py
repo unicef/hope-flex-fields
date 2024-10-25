@@ -4,11 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 
 import pytest
-from testutils.factories import (
-    FieldDefinitionFactory,
-    FieldsetFactory,
-    FlexFieldFactory,
-)
+from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory
 
 from hope_flex_fields.models import Fieldset
 
@@ -73,9 +69,7 @@ def test_fieldset_create_from_content_type(app, record, model_class):
     res = res.forms["analyse-form"].submit("analyse")
     assert res.status_code == 200
     res.forms["analyse-form"]["name"] = "FS #1"
-    res.forms["analyse-form"]["content_type"] = ContentType.objects.get_for_model(
-        model_class
-    ).pk
+    res.forms["analyse-form"]["content_type"] = ContentType.objects.get_for_model(model_class).pk
     res = res.forms["analyse-form"].submit("analyse")
 
     res.forms["create-form"].submit("create")

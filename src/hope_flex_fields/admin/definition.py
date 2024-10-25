@@ -9,15 +9,17 @@ from django.core.serializers.base import DeserializationError
 from django.core.validators import FileExtensionValidator
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext as _
 
 from admin_extra_buttons.decorators import button, view
 from admin_extra_buttons.mixins import ExtraButtonsMixin
+from jsoneditor.forms import JSONEditor
 
 from ..forms import FieldDefinitionForm
 from ..models import FieldDefinition
-from ..utils import dumpdata_to_buffer, get_default_attrs, loaddata_from_buffer
+from ..utils import dumpdata_to_buffer, get_default_attrs, get_kwargs_from_field_class, loaddata_from_buffer
 
 
 @deconstructible
@@ -44,6 +46,30 @@ class ImportConfigurationForm(forms.Form):
     )
 
 
+class ConfigurationForm(forms.Form):
+    attrs = forms.JSONField(
+        widget=JSONEditor(
+            init_options={"mode": "code", "modes": ["text", "code", "tree"]},
+            ace_options={"readOnly": False},
+        ),
+        required=True,
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.instance: FieldDefinition = kwargs.pop("instance")
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        value = self.cleaned_data["attrs"]
+        value = self.instance.get_default_attributes() | value
+        self.cleaned_data["attrs"] = value
+        return self.cleaned_data
+
+    def save(self):
+        self.instance.attrs = self.cleaned_data["attrs"]
+        self.instance.save(update_fields=["attrs"])
+
+
 @register(FieldDefinition)
 class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
     list_display = ("name", "field_type_", "required", "js_validation")
@@ -52,14 +78,17 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
     form = FieldDefinitionForm
     readonly_fields = ("system_data", "content_type")
     fieldsets = (
-        ("", {"fields": (("name", "field_type"), "description")}),
         (
-            "Configuration",
-            {
-                "classes": ("collapse", "open"),
-                "fields": ("regex", "attrs", "validation"),
-            },
+            "",
+            {"fields": (("name", "field_type"), "attributes_strategy", "description")},
         ),
+        # (
+        #     "Configuration",
+        #     {
+        #         "classes": ("collapse", "open"),
+        #         "fields": ("regex", "attrs", "validation"),
+        #     },
+        # ),
         (
             "Advanced",
             {
@@ -77,6 +106,13 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
 
     js_validation.short_description = "js"
     js_validation.boolean = True
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            form.cleaned_data["attrs"] = get_default_attrs() | get_kwargs_from_field_class(
+                form.cleaned_data["field_type"]
+            )
+        super().save_model(request, obj, form, change)
 
     @view()
     def export_all(self, request):
@@ -100,10 +136,43 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
         ctx["form"] = form
         return render(request, "admin/hope_flex_fields/import_config.html", ctx)
 
-    def get_changeform_initial_data(self, request):
-        initial = super().get_changeform_initial_data(request)
-        initial["attrs"] = get_default_attrs()
-        return initial
+    # def get_changeform_initial_data(self, request):
+    #     initial = super().get_changeform_initial_data(request)
+    #     # initial["attrs"] = get_default_attrs()
+    #     return initial
+
+    @button()
+    def configure(self, request, pk):
+        ctx = self.get_common_context(request, pk, title="Configure")
+        if request.method == "POST":
+            form1 = ConfigurationForm(request.POST, instance=self.object, prefix="fld")
+            form2 = self.object.attributes_strategy.config_class(
+                request.POST,
+                initial=self.object.strategy_config,
+                instance=self.object,
+                prefix="stg",
+            )
+            if form1.is_valid() and form2.is_valid():
+                form1.save()
+                # form2.save()
+                self.object.refresh_from_db()
+
+                self.message_user(request, "Configuration successfully saved.")
+                return HttpResponseRedirect(
+                    reverse(
+                        "admin:hope_flex_fields_fielddefinition_change",
+                        args=[self.object.id],
+                    )
+                )
+        else:
+            form1 = ConfigurationForm(instance=self.object, initial={"attrs": self.object.attrs}, prefix="fld")
+            form2 = self.object.attributes_strategy.config_class(
+                instance=self.object, initial=self.object.strategy_config, prefix="stg"
+            )
+
+        ctx["form1"] = form1
+        ctx["form2"] = form2
+        return render(request, "flex_fields/fielddefinition/configure.html", ctx)
 
     @button()
     def test(self, request, pk):
@@ -124,9 +193,7 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
             if form.is_valid():
                 self.message_user(request, "Valid", messages.SUCCESS)
             else:
-                self.message_user(
-                    request, "Please correct the errors below", messages.ERROR
-                )
+                self.message_user(request, "Please correct the errors below", messages.ERROR)
         else:
             form = form_class()
 

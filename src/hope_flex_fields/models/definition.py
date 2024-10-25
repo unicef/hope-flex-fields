@@ -48,18 +48,14 @@ class FieldDefinition(AbstractField):
     """This class is the equivalent django.forms.Field class, used to create reusable field types"""
 
     field_type = StrategyClassField(registry=field_registry)
-    content_type = models.ForeignKey(
-        ContentType, on_delete=models.CASCADE, null=True, blank=True
-    )
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
     system_data = models.JSONField(default=dict, blank=True, editable=False, null=True)
     attributes_strategy = StrategyField(
         registry=attributes_registry,
         default=fqn(DefaultAttributeHandler),
         help_text="Strategy to use for attributes retrieval",
     )
-    strategy_config = models.JSONField(
-        default=dict, blank=True, editable=False, null=True
-    )
+    strategy_config = models.JSONField(default=dict, blank=True, editable=False, null=True)
 
     objects = FieldDefinitionManager()
 
@@ -76,7 +72,12 @@ class FieldDefinition(AbstractField):
 
     @property
     def attributes(self):
-        return self.attributes_strategy.get()
+        base = self.attrs
+        try:
+            return base | self.attributes_strategy.get()
+        except Exception as e:
+            logger.exception(e)
+        return base
 
     @attributes.setter
     def attributes(self, value):
@@ -87,13 +88,11 @@ class FieldDefinition(AbstractField):
 
     def clean(self):
         self.name = str(self.name)
-        if self.pk:
-            try:
-                self.get_field()
-            except TypeError:
-                raise ValidationError("Field definition cannot be validated")
-        else:
-            self.set_default_attributes()
+        self.attrs = self.get_default_attributes() | self.attrs
+        try:
+            self.get_field()
+        except TypeError:
+            raise ValidationError("Field definition cannot be validated")
 
     def save(
         self,
@@ -103,12 +102,7 @@ class FieldDefinition(AbstractField):
         using=None,
         update_fields=None,
     ):
-        if not self.pk:
-            self.attrs = (
-                get_kwargs_from_field_class(self.field_type)
-                | get_default_attrs()
-                | self.attrs
-            )
+        self.attrs = self.get_default_attributes() | self.attrs
         super().save(
             *args,
             force_insert=force_insert,
@@ -117,9 +111,12 @@ class FieldDefinition(AbstractField):
             update_fields=update_fields,
         )
 
+    def get_default_attributes(self):
+        return get_default_attrs() | get_kwargs_from_field_class(self.field_type)
+
     def set_default_attributes(self):
         if self.field_type:
-            attrs = get_default_attrs() | get_kwargs_from_field_class(self.field_type)
+            attrs = self.get_default_attributes()
             self.attributes = attrs
         elif not isinstance(self.attrs, dict) or not self.attrs:
             self.attributes = get_default_attrs()
@@ -141,13 +138,9 @@ class FieldDefinition(AbstractField):
                 validators.append(ReValidator(self.regex))
 
             kwargs["validators"] = validators
-            field_class = type(
-                f"{self.name}Field", (FlexFormMixin, self.field_type), {}
-            )
+            field_class = type(f"{self.name}Field", (FlexFormMixin, self.field_type), {})
             fld = field_class(**kwargs)
         except Exception as e:  # pragma: no cover
             logger.exception(e)
-            raise TypeError(
-                f"Error creating field for FieldDefinition {self.name}: {e}"
-            )
+            raise TypeError(f"Error creating field for FieldDefinition {self.name}: {e}")
         return fld

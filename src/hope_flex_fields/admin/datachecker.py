@@ -25,9 +25,7 @@ class ValidatableFileValidator(object):
 
     def __call__(self, f):
         if Path(f.name).suffix not in HANDLERS.keys():
-            raise ValidationError(
-                self.error_messages["invalid_file"] % Path(f.name).suffix
-            )
+            raise ValidationError(self.error_messages["invalid_file"] % Path(f.name).suffix)
 
 
 class FileForm(forms.Form):
@@ -117,9 +115,7 @@ class DataCheckerAdmin(ExtraButtonsMixin, ModelAdmin):
             if form.is_valid():
                 self.message_user(request, "Valid", messages.SUCCESS)
             else:
-                self.message_user(
-                    request, "Please correct the errors below", messages.ERROR
-                )
+                self.message_user(request, "Please correct the errors below", messages.ERROR)
         else:
             form = form_class()
 

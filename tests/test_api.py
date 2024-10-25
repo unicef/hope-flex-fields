@@ -18,13 +18,9 @@ def data(db):
         FlexFieldFactory,
     )
 
-    fd1 = FieldDefinitionFactory(
-        field_type=forms.IntegerField, attrs={"min_value": 1, "max_value": 100}
-    )
+    fd1 = FieldDefinitionFactory(field_type=forms.IntegerField, attrs={"min_value": 1, "max_value": 100})
     fd2 = FieldDefinitionFactory(field_type=forms.IntegerField, attrs={"min_value": 1})
-    fd3 = FieldDefinitionFactory(
-        field_type=forms.IntegerField, attrs={"max_value": 100}
-    )
+    fd3 = FieldDefinitionFactory(field_type=forms.IntegerField, attrs={"max_value": 100})
     fd4 = FieldDefinitionFactory(field_type=forms.FloatField, attrs={})
     fd5 = FieldDefinitionFactory(field_type=forms.DateField, attrs={})
     fd6 = FieldDefinitionFactory(field_type=forms.BooleanField)

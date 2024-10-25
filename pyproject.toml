@@ -57,11 +57,12 @@ dev-dependencies = [
     "responses>=0.25.3",
     "pytest-xdist>=3.6.1",
     "tox>=4.16.0",
+    "requests>=2.32.3",
 ]
 
 
 [tool.black]
-line-length = 88
+line-length = 120
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -78,7 +79,7 @@ exclude = '''
 
 [tool.isort]
 profile = "black"
-line_length = 88
+line_length = 120
 default_section = "THIRDPARTY"
 known_first_party = []
 known_django = "django"

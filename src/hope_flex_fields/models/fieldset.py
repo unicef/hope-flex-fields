@@ -44,18 +44,14 @@ class FieldsetManager(models.Manager):
         from hope_flex_fields.models import FieldDefinition, FlexField
 
         model_class = ct.model_class()
-        model_form = modelform_factory(
-            model_class, exclude=(model_class._meta.pk.name,)
-        )
+        model_form = modelform_factory(model_class, exclude=(model_class._meta.pk.name,))
         errors = []
         fields = []
         config = {}
         for name, field in model_form().fields.items():
             try:
                 fd = FieldDefinition.objects.get(name=type(field).__name__)
-                fld = FlexField(
-                    name=name, field=fd, attrs=get_kwargs_from_formfield(field)
-                )
+                fld = FlexField(name=name, field=fd, attrs=get_kwargs_from_formfield(field))
                 fld.attributes = fld.get_merged_attrs()
                 fld.get_field()
                 config[name] = {"definition": fd.name, "attrs": fld.attributes}
@@ -104,9 +100,7 @@ class Fieldset(ValidatorMixin, models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
     extends = models.ForeignKey("self", null=True, blank=True, on_delete=models.CASCADE)
-    content_type = models.ForeignKey(
-        ContentType, on_delete=models.CASCADE, blank=True, null=True
-    )
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
 
     objects = FieldsetManager()
 

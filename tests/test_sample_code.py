@@ -29,14 +29,10 @@ def test_sample_code(db):
     )
 
     errors = fs.validate(data)
-    assert errors == {
-        4: {"gender": ["Select a valid choice. 1 is not one of the available choices."]}
-    }
+    assert errors == {4: {"gender": ["Select a valid choice. 1 is not one of the available choices."]}}
 
     errors = fs.validate(data, fail_if_alien=True)
     assert errors == {
         1: {"-": ["Alien values found {'unknown'}"]},
-        4: {
-            "gender": ["Select a valid choice. 1 is not one of the available choices."]
-        },
+        4: {"gender": ["Select a valid choice. 1 is not one of the available choices."]},
     }

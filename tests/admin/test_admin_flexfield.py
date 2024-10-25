@@ -2,11 +2,7 @@ from django import forms
 from django.urls import reverse
 
 import pytest
-from testutils.factories import (
-    FieldDefinitionFactory,
-    FieldsetFactory,
-    FlexFieldFactory,
-)
+from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory
 
 from hope_flex_fields.models import FieldDefinition, FlexField
 
@@ -73,9 +69,7 @@ def test_fields_create_and_update(app, record):
     form = res.forms["flexfield_form"]
     assert form["attrs"].value == '"{}"'
 
-    form["attrs"] = (
-        '{"max_value": 1, "min_value": 10, "required": false, "help_text": ""}'
-    )
+    form["attrs"] = '{"max_value": 1, "min_value": 10, "required": false, "help_text": ""}'
     res = form.submit("_continue")
     assert res.status_code == 302, res.context["adminform"].form.errors
 

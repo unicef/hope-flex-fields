@@ -5,18 +5,12 @@ import pytest
 
 @pytest.fixture
 def config(db):
-    from testutils.factories import (
-        FieldDefinitionFactory,
-        FieldsetFactory,
-        FlexFieldFactory,
-    )
+    from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory
 
     fd1 = FieldDefinitionFactory(field_type=forms.IntegerField, attrs={"min_value": 1})
     fd2 = FieldDefinitionFactory(field_type=forms.FloatField, attrs={"min_value": 1})
     fd3 = FieldDefinitionFactory(field_type=forms.FloatField, attrs={"required": False})
-    fd4 = FieldDefinitionFactory(
-        field_type=forms.IntegerField, attrs={"required": False}, regex=r"\d\d\d"
-    )
+    fd4 = FieldDefinitionFactory(field_type=forms.IntegerField, attrs={"required": False}, regex=r"\d\d\d")
 
     fs = FieldsetFactory()
     FlexFieldFactory(name="int", field=fd1, fieldset=fs)

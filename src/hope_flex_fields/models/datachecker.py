@@ -18,9 +18,7 @@ def create_xls_importer(dc: "DataChecker"):
     import xlsxwriter
 
     out = BytesIO()
-    workbook = xlsxwriter.Workbook(
-        out, {"in_memory": True, "default_date_format": "yyyy/mm/dd"}
-    )
+    workbook = xlsxwriter.Workbook(out, {"in_memory": True, "default_date_format": "yyyy/mm/dd"})
     # locked = workbook.add_format({"locked": True})
 
     header_format = workbook.add_format(
@@ -65,9 +63,7 @@ class DataCheckerManager(models.Manager):
 
 class DataCheckerFieldset(models.Model):
     last_modified = models.DateTimeField(auto_now=True)
-    checker = models.ForeignKey(
-        "DataChecker", on_delete=models.CASCADE, related_name="members"
-    )
+    checker = models.ForeignKey("DataChecker", on_delete=models.CASCADE, related_name="members")
     fieldset = models.ForeignKey(Fieldset, on_delete=models.CASCADE)
     prefix = models.CharField(max_length=30, blank=True, default="")
     order = models.PositiveSmallIntegerField(default=0)

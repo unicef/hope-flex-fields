@@ -1,3 +1,5 @@
+import json
+
 from django import forms
 from django.urls import reverse
 
@@ -56,18 +58,21 @@ def test_fields_create_and_update(app, record):
     form["name"] = "Int"
     form["field_type"] = fqn(forms.IntegerField)
     res = form.submit("_continue").follow()
-    form = res.forms["fielddefinition_form"]
-    assert form["attrs"].value == (
-        '{"max_value": null, "min_value": null, "step_size": null, '
-        '"required": false, "help_text": ""}'
-    )
-    form["attrs"] = (
-        '{"max_value": 1, "min_value": 10, ' '"required": false, "help_text": ""}'
-    )
-    form.submit("_continue").follow()
+    res = res.click("Configure")
+    form = res.forms["config-form"]
+    assert json.loads(form["fld-attrs"].value) == {
+        "max_value": None,
+        "min_value": None,
+        "step_size": None,
+        "required": False,
+        "help_text": "",
+    }
+
+    form["fld-attrs"] = json.dumps({"max_value": 1, "min_value": 10, "required": False, "help_text": ""})
+    res = form.submit().follow()
 
     obj: FieldDefinition = FieldDefinition.objects.get(name="Int")
-    assert obj.attributes == {
+    assert obj.attrs == {
         "max_value": 1,
         "min_value": 10,
         "required": False,
@@ -84,8 +89,10 @@ def test_fields_change_type(app, record):
     form["field_type"] = fqn(forms.CharField)
     res = form.submit("_continue")
     assert res.status_code == 302
-    obj: FieldDefinition = FieldDefinition.objects.get(name="Char")
-    assert obj.attributes == {
+    print(33333, record.get_default_attributes())
+    # obj: FieldDefinition = FieldDefinition.objects.get(name="Char")
+    record.refresh_from_db()
+    assert record.attributes == {
         "empty_value": "",
         "strip": True,
         "max_length": None,

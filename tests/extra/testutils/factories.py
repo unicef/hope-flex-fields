@@ -5,13 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 import factory.fuzzy
 from factory.base import FactoryMetaClass
 
-from hope_flex_fields.models import (
-    DataChecker,
-    DataCheckerFieldset,
-    FieldDefinition,
-    Fieldset,
-    FlexField,
-)
+from hope_flex_fields.models import DataChecker, DataCheckerFieldset, FieldDefinition, Fieldset, FlexField
 
 factories_registry = {}
 
@@ -23,9 +17,7 @@ class AutoRegisterFactoryMetaClass(FactoryMetaClass):
         return new_class
 
 
-class AutoRegisterModelFactory(
-    factory.django.DjangoModelFactory, metaclass=AutoRegisterFactoryMetaClass
-):
+class AutoRegisterModelFactory(factory.django.DjangoModelFactory, metaclass=AutoRegisterFactoryMetaClass):
     pass
 
 
@@ -35,9 +27,7 @@ def get_factory_for_model(_model):
 
     if _model in factories_registry:
         return factories_registry[_model]
-    return type(
-        f"{_model._meta.model_name}Factory", (AutoRegisterModelFactory,), {"Meta": Meta}
-    )
+    return type(f"{_model._meta.model_name}Factory", (AutoRegisterModelFactory,), {"Meta": Meta})
 
 
 class UserFactory(AutoRegisterModelFactory):
@@ -67,9 +57,7 @@ class SuperUserFactory(UserFactory):
 
 class FieldDefinitionFactory(AutoRegisterModelFactory):
     name = factory.Sequence(lambda d: "FieldDefinition-%s" % d)
-    field_type = factory.fuzzy.FuzzyChoice(
-        [forms.CharField, forms.IntegerField, forms.FloatField, forms.BooleanField]
-    )
+    field_type = factory.fuzzy.FuzzyChoice([forms.CharField, forms.IntegerField, forms.FloatField, forms.BooleanField])
     attrs = {}
 
     class Meta:

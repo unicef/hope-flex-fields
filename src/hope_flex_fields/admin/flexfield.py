@@ -58,9 +58,7 @@ class FieldsetFieldAdmin(ExtraButtonsMixin, ModelAdmin):
             if form.is_valid():
                 self.message_user(request, "Valid", messages.SUCCESS)
             else:
-                self.message_user(
-                    request, "Please correct the errors below", messages.ERROR
-                )
+                self.message_user(request, "Please correct the errors below", messages.ERROR)
         else:
             form = form_class()
 

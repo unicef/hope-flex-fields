@@ -1,0 +1,23 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% block action-content %}
+    {{ form1.media }}
+    {{ form2.media }}
+    <form method="post" id="config-form">
+        <table>
+            {% csrf_token %}
+            <fieldset>
+                <h3>Field Configuration</h3>
+                {{ form1 }}
+            </fieldset>
+            <fieldset>
+                <h3>Strategy Configuration</h3>
+                {{ form2 }}
+            </fieldset>
+        </table>
+        <input type="submit" value="Save">
+    </form>
+    <pre>
+    {{ form.cleaned_data }}
+    </pre>
+
+{% endblock %}

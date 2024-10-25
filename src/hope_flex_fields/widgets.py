@@ -43,7 +43,7 @@ class JavascriptEditor(forms.Textarea):
             "https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/selection/active-line.min.js",
             "https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/display/fullscreen.min.js",
             "https://cdnjs.cloudflare.com/ajax/libs/jshint/2.13.6/jshint.min.js",
-            "cm.js",
+            # "cm.js",
             # "codemirror/codemirror.js",
             # "codemirror/javascript.js",
             # "codemirror/fullscreen.js",

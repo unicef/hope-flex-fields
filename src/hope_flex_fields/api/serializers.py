@@ -56,9 +56,7 @@ class FieldsetSerializer(BaseSerializer):
 
 
 class DataCheckerSerializer(BaseSerializer):
-    fieldsets = serializers.SlugRelatedField(
-        many=True, read_only=True, slug_field="name"
-    )
+    fieldsets = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
 
     class Meta:
         model = DataChecker

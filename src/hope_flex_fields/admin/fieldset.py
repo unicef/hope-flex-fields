@@ -17,9 +17,7 @@ from .flexfield import FieldsetFieldTabularInline
 
 class FieldSetForm(forms.Form):
     name = forms.CharField()
-    content_type = forms.ModelChoiceField(
-        queryset=ContentType.objects.all(), required=True
-    )
+    content_type = forms.ModelChoiceField(queryset=ContentType.objects.all(), required=True)
 
     def clean_name(self):
         if Fieldset.objects.filter(name__iexact=self.cleaned_data["name"]).exists():
@@ -34,9 +32,7 @@ class FieldSetForm(forms.Form):
 class FieldSetForm2(forms.Form):
     name = forms.CharField(widget=forms.HiddenInput)
     config = forms.JSONField(widget=forms.HiddenInput)
-    content_type = forms.ModelChoiceField(
-        queryset=ContentType.objects.all(), widget=forms.HiddenInput
-    )
+    content_type = forms.ModelChoiceField(queryset=ContentType.objects.all(), widget=forms.HiddenInput)
 
     def save(self):
         with atomic():
@@ -105,9 +101,7 @@ class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
             if form.is_valid():
                 self.message_user(request, "Valid", messages.SUCCESS)
             else:
-                self.message_user(
-                    request, "Please correct the errors below", messages.ERROR
-                )
+                self.message_user(request, "Please correct the errors below", messages.ERROR)
         else:
             form = form_class()
 

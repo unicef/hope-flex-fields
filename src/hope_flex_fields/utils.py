@@ -32,9 +32,7 @@ def get_kwargs_from_field_class(field: "str|forms.Field", extra: dict | None = N
     sig: inspect.Signature = inspect.signature(field)
     arguments = extra or {}
     field_arguments = {
-        k.name: k.default
-        for __, k in sig.parameters.items()
-        if k.default not in [inspect.Signature.empty]
+        k.name: k.default for __, k in sig.parameters.items() if k.default not in [inspect.Signature.empty]
     }
     arguments.update(field_arguments)
     return arguments

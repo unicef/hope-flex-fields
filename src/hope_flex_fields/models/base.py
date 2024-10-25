@@ -24,8 +24,7 @@ class BaseQuerySet(models.QuerySet["Model"]):
             return super().get(*args, **kwargs)
         except self.model.DoesNotExist:
             raise self.model.DoesNotExist(
-                "%s matching query does not exist. Using %s %s"
-                % (self.model._meta.object_name, args, kwargs)
+                "%s matching query does not exist. Using %s %s" % (self.model._meta.object_name, args, kwargs)
             )
 
 
