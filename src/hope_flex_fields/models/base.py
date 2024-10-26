@@ -99,7 +99,8 @@ class ValidatorMixin:
             if pk := form.cleaned_data[self._primary_key_field_name]:
                 if pk in self.primary_keys:
                     return f"{pk} duplicated"
-            self.primary_keys.add(str(pk).strip())
+            self.primary_keys.add(form.cleaned_data[self._primary_key_field_name])
+            # self.primary_keys.add(str(pk).strip())
 
     def is_valid_foreignkey(self, form):
         if self._master_fieldset:

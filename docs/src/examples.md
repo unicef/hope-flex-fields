@@ -49,3 +49,37 @@ With the example above just uses
     4: {'gender': ['Select a valid choice. 1 is not one of the available choices.']}
 }
 ```
+
+
+## Handle Master detail data
+
+How do connect two Validators with master/details relationship
+      
+    COUNTRIES = [{"id": 1, "name": "Italy"}, {"id": 2, "name": "France"}]
+    CITIES = [{"country": 1, "name": "Rome"}, {"country": 2, "name": "Paris"}, {"country": 3, "name": "Berlin"}]
+
+    num = FieldDefinition.objects.create(name="Int", field_type=forms.IntegerField)
+    char = FieldDefinition.objects.create(name="Char", field_type=forms.CharField)
+
+    country = Fieldset.objects.create(name="Country")
+    country.fields.create(name="id", field=num)
+    country.fields.create(name="name", field=char)
+
+    city = Fieldset.objects.create(name="City")
+    city.fields.create(name="country", field=num)
+    city.fields.create(name="name", field=char)
+
+    country.set_primary_key_col("id")
+    city.set_master(country, "country")
+
+    if not (errors := country.validate(COUNTRIES)):
+        errors = city.validate(CITIES)
+
+    print(errors)
+    
+
+```python
+{3: 
+     {'-': ["'3' not found in master"]}
+}
+```
