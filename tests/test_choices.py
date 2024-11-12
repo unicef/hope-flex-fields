@@ -17,16 +17,16 @@ def data(db):
 def test_sync_content_types(data):
     fs = FieldsetFactory(content_type=ContentTypeFactory())
     attrs = Fieldset.objects.inspect_content_type(fs.content_type)
-    FlexFieldFactory(fieldset=fs, field__name="CharField", name="username")
+    FlexFieldFactory(fieldset=fs, definition__name="CharField", name="username")
     FlexFieldFactory(
         fieldset=fs,
-        field__name="CharField",
+        definition__name="CharField",
         name="password",
         attrs=attrs["config"]["password"],
     )
     FlexFieldFactory(
         fieldset=fs,
-        field__name="CharField",
+        definition__name="CharField",
         name="password",
         attrs=attrs["config"]["password"],
     )

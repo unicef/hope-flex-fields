@@ -29,19 +29,19 @@ class Command(BaseCommand):
             attrs={"choices": list(zip(RESIDENCE_STATUSES, RESIDENCE_STATUSES))},
         )
 
-        FlexFieldFactory(fieldset=hh, name="residence_status_h_c", field=residence_status)
-        FlexFieldFactory(fieldset=hh, name="consent_h_c", field=boolean)
+        FlexFieldFactory(fieldset=hh, name="residence_status_h_c", definition=residence_status)
+        FlexFieldFactory(fieldset=hh, name="consent_h_c", definition=boolean)
         FlexFieldFactory(
             fieldset=hh,
             name="country_origin_h_c",
-            field=string,
+            definition=string,
             attrs={"max_length": 3},
         )
-        FlexFieldFactory(fieldset=hh, name="address_h_c", field=string, attrs={"max_length": 200})
+        FlexFieldFactory(fieldset=hh, name="address_h_c", definition=string, attrs={"max_length": 200})
 
         FlexFieldFactory(
             fieldset=hh2,
             name="size_h_c",
-            field=integer,
+            definition=integer,
             attrs={"min_value": 1, "required": True},
         )

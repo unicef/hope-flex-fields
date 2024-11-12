@@ -20,10 +20,10 @@ def config(db):
     fd4 = FieldDefinitionFactory(field_type=forms.IntegerField, attrs={"required": False}, regex=r"\d\d\d")
 
     fs = FieldsetFactory()
-    FlexFieldFactory(name="int", field=fd1, fieldset=fs)
-    FlexFieldFactory(name="float", field=fd2, fieldset=fs)
-    FlexFieldFactory(name="int1", field=fd3, fieldset=fs)
-    FlexFieldFactory(name="int2", field=fd4, fieldset=fs)
+    FlexFieldFactory(name="int", definition=fd1, fieldset=fs)
+    FlexFieldFactory(name="float", definition=fd2, fieldset=fs)
+    FlexFieldFactory(name="int1", definition=fd3, fieldset=fs)
+    FlexFieldFactory(name="int2", definition=fd4, fieldset=fs)
 
     return {"fs": fs}
 
@@ -59,7 +59,7 @@ def test_validate_regex(config):
 
 def test_extends(config):
     fs: Fieldset = config["fs"]
-    fs2 = FieldsetFactory(extends=fs)
+    fs2: Fieldset = FieldsetFactory(extends=fs)
 
     ii: FlexField = fs2.get_field("int")  # NOTE: we get 'int' from fs2
     assert ii.get_field().min_value == 1
@@ -78,7 +78,7 @@ def test_extends(config):
     # override existing field
     FlexFieldFactory(
         name=ii.name,
-        field__field_type=ii.field.field_type,
+        definition__field_type=ii.definition.field_type,
         fieldset=fs2,
         attrs={"min_value": 100},
     )

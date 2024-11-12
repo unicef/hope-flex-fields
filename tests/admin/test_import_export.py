@@ -16,8 +16,8 @@ def data(db):
     fd1 = FieldDefinitionFactory(field_type=forms.IntegerField, attrs={"min_value": 1})
     fd2 = FieldDefinitionFactory(field_type=forms.FloatField, attrs={"min_value": 1})
     fs = FieldsetFactory()
-    FlexFieldFactory(name="int", field=fd1, fieldset=fs, attrs={})
-    FlexFieldFactory(name="float", field=fd2, fieldset=fs, attrs={"required": True})
+    FlexFieldFactory(name="int", definition=fd1, fieldset=fs, attrs={})
+    FlexFieldFactory(name="float", definition=fd2, fieldset=fs, attrs={"required": True})
     return fs
 
 

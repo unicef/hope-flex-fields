@@ -29,7 +29,7 @@ from hope_flex_fields.api.views import (
 )
 
 router = routers.DefaultRouter()
-router.register(r"field", FieldDefinitionViewSet)
+router.register(r"definition", FieldDefinitionViewSet)
 router.register(r"fieldset", FieldsetViewSet)
 router.register(r"datachecker", DataCheckerViewSet)
 router.register(r"flexfield", FlexFieldViewSet)

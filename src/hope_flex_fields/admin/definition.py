@@ -19,7 +19,7 @@ from jsoneditor.forms import JSONEditor
 
 from ..forms import FieldDefinitionForm
 from ..models import FieldDefinition
-from ..utils import dumpdata_to_buffer, get_default_attrs, get_kwargs_from_field_class, loaddata_from_buffer
+from ..utils import dumpdata_to_buffer, get_common_attrs, get_kwargs_from_field_class, loaddata_from_buffer
 
 
 @deconstructible
@@ -72,15 +72,15 @@ class ConfigurationForm(forms.Form):
 
 @register(FieldDefinition)
 class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
-    list_display = ("name", "field_type_", "required", "js_validation")
+    list_display = ("name", "field_type_", "required", "js_validation", "validated")
     list_filter = ("field_type",)
     search_fields = ("name", "description")
     form = FieldDefinitionForm
-    readonly_fields = ("system_data", "content_type")
+    readonly_fields = ("system_data", "content_type", "validated")
     fieldsets = (
         (
             "",
-            {"fields": (("name", "field_type"), "attributes_strategy", "description")},
+            {"fields": (("name", "field_type", "validated"), ("attributes_strategy",), "description")},
         ),
         # (
         #     "Configuration",
@@ -99,7 +99,10 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
     )
 
     def field_type_(self, obj):
-        return obj.field_type.__name__
+        try:
+            return obj.field_type.__name__
+        except AttributeError:
+            return "--"
 
     def js_validation(self, obj):
         return bool(obj.validation)
@@ -109,7 +112,7 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if not change:
-            form.cleaned_data["attrs"] = get_default_attrs() | get_kwargs_from_field_class(
+            form.cleaned_data["attrs"] = get_common_attrs() | get_kwargs_from_field_class(
                 form.cleaned_data["field_type"]
             )
         super().save_model(request, obj, form, change)
@@ -154,8 +157,15 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
             )
             if form1.is_valid() and form2.is_valid():
                 form1.save()
-                # form2.save()
+                form2.save()
                 self.object.refresh_from_db()
+                try:
+                    self.object.get_field()
+                    self.object.validated = True
+                except ValidationError as e:
+                    self.message_user(request, str(e), messages.ERROR)
+                    self.object.validated = False
+                self.object.save()
 
                 self.message_user(request, "Configuration successfully saved.")
                 return HttpResponseRedirect(
@@ -199,10 +209,3 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
 
         ctx["form"] = form
         return render(request, "flex_fields/test.html", ctx)
-
-    @button()
-    def inspect(self, request, pk):
-        ctx = self.get_common_context(request, pk)
-        fd: FieldDefinition = ctx["original"]
-        fd.set_default_attributes()
-        fd.save()

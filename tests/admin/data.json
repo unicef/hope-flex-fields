@@ -50,7 +50,7 @@
       "fieldset": [
         "imported-fieldset"
       ],
-      "field": [
+      "definition": [
         "imported-intfield"
       ]
     }
@@ -71,7 +71,7 @@
       "fieldset": [
         "imported-fieldset"
       ],
-      "field": [
+      "definition": [
         "imported-floatfield"
       ]
     }

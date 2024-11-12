@@ -29,13 +29,13 @@ def data(db):
         attrs={"choices": [["a", "a"], ["b", "b"], ["c", "c"]]},
     )
     fs = FieldsetFactory()
-    FlexFieldFactory(name="int1", field=fd1, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="int2", field=fd2, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="int3", field=fd3, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="float", field=fd4, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="date", field=fd5, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="bool", field=fd6, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="choice", field=fd7, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="int1", definition=fd1, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="int2", definition=fd2, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="int3", definition=fd3, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="float", definition=fd4, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="date", definition=fd5, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="bool", definition=fd6, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="choice", definition=fd7, fieldset=fs, attrs={"required": False})
 
     dc = DataCheckerFactory()
     DataCheckerFieldsetFactory(checker=dc, fieldset=fs, prefix="fs")
@@ -45,7 +45,7 @@ def data(db):
 def test_fields(admin_user, data):
     client = APIClient()
     client.force_authenticate(user=admin_user)
-    response = client.get("http://testserver/api/field/")
+    response = client.get("http://testserver/api/definition/")
     assert response.json()
 
 

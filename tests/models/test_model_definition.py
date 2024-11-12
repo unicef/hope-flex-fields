@@ -33,13 +33,13 @@ def test_override(db):
     from hope_flex_fields.models import FieldDefinition, FlexField
 
     fd = FieldDefinition(name="IntField", field_type=forms.IntegerField, validation="true", regex=".*")
-    fld = FlexField(field=fd, validation="false", regex=r"\d")
+    fld = FlexField(definition=fd, validation="false", regex=r"\d")
     field = fld.get_field()
     with pytest.raises(ValidationError) as e:
         field.clean(1)
     assert e.value.messages == ["Please insert a valid value"]
 
-    fld = FlexField(field=fd, regex=r"\d$")
+    fld = FlexField(definition=fd, regex=r"\d$")
     field = fld.get_field()
     with pytest.raises(ValidationError) as e:
         field.clean(11)

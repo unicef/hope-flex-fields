@@ -18,7 +18,7 @@ def record(db):
         regex=".*",
         validation="true",
     )
-    fs1 = FlexFieldFactory(field=fd, name="int")
+    fs1 = FlexFieldFactory(definition=fd, name="int")
 
     return fs1
 
@@ -44,7 +44,7 @@ def test_fields_create(app):
     res = app.get(url)
     form = res.forms["flexfield_form"]
     form["name"] = "int"
-    form["field"] = fd.pk
+    form["definition"] = fd.pk
     form["fieldset"] = fs.pk
     res = form.submit()
     assert res.status_code == 302
@@ -60,7 +60,7 @@ def test_fields_create_and_update(app, record):
     res = app.get(url)
     form = res.forms["flexfield_form"]
     form["name"] = "int2"
-    form["field"] = fd.pk
+    form["definition"] = fd.pk
     form["fieldset"] = fs.pk
 
     res = form.submit("_continue")

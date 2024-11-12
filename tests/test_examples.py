@@ -14,12 +14,12 @@ def test_example_master_detail_data(db):
     char = FieldDefinition.objects.create(name="Char", field_type=forms.CharField)
 
     country = Fieldset.objects.create(name="Country")
-    country.fields.create(name="id", field=num)
-    country.fields.create(name="name", field=char)
+    country.fields.create(name="id", definition=num)
+    country.fields.create(name="name", definition=char)
 
     city = Fieldset.objects.create(name="City")
-    city.fields.create(name="country", field=num)
-    city.fields.create(name="name", field=char)
+    city.fields.create(name="country", definition=num)
+    city.fields.create(name="name", definition=char)
 
     country.set_primary_key_col("id")
     city.set_master(country, "country")

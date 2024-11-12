@@ -15,16 +15,16 @@ DETAILS = [{"country_id": 1, "name": "Rome"}, {"country_id": 2, "name": "Paris"}
 @pytest.fixture()
 def country_validator(db: Any) -> Fieldset:
     fs = FieldsetFactory(name="Country")
-    FlexFieldFactory(name="id", fieldset=fs, field__field_type=forms.IntegerField)
-    FlexFieldFactory(name="name", fieldset=fs, field__field_type=forms.CharField)
+    FlexFieldFactory(name="id", fieldset=fs, definition__field_type=forms.IntegerField)
+    FlexFieldFactory(name="name", fieldset=fs, definition__field_type=forms.CharField)
     return fs
 
 
 @pytest.fixture()
 def city_validator(db: Any) -> Fieldset:
     fs = FieldsetFactory()
-    FlexFieldFactory(name="country_id", fieldset=fs, field__field_type=forms.IntegerField)
-    FlexFieldFactory(name="name", fieldset=fs, field__field_type=forms.CharField)
+    FlexFieldFactory(name="country_id", fieldset=fs, definition__field_type=forms.IntegerField)
+    FlexFieldFactory(name="name", fieldset=fs, definition__field_type=forms.CharField)
     return fs
 
 

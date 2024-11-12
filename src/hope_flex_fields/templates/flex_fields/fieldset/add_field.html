@@ -1,0 +1,10 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        <table>
+            {{ form.as_table }}
+        </table>
+        <input type="submit">
+    </form>
+{% endblock %}

@@ -12,10 +12,11 @@ from deepdiff import DeepDiff
 
 from ..exceptions import FlexFieldCreationError
 from ..utils import get_kwargs_from_formfield
-from .base import FlexForm, ValidatorMixin
+from .base import ValidatorMixin
 
 if TYPE_CHECKING:
     from ..models import FlexField
+
 
 ContentTypeConfig = TypedDict(
     "ContentTypeConfig",
@@ -26,12 +27,6 @@ ContentTypeConfig = TypedDict(
         "content_type": type[ContentType],
     },
 )
-# {
-#             "fields": fields,
-#             "errors": errors,
-#             "config": config,
-#             "content_type": ct,
-#         }
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +46,7 @@ class FieldsetManager(models.Manager):
         for name, field in model_form().fields.items():
             try:
                 fd = FieldDefinition.objects.get(name=type(field).__name__)
-                fld = FlexField(name=name, field=fd, attrs=get_kwargs_from_formfield(field))
+                fld = FlexField(name=name, definition=fd, attrs=get_kwargs_from_formfield(field))
                 fld.attributes = fld.get_merged_attrs()
                 fld.get_field()
                 config[name] = {"definition": fd.name, "attrs": fld.attributes}
@@ -91,7 +86,7 @@ class FieldsetManager(models.Manager):
         fs, __ = Fieldset.objects.get_or_create(name=name, content_type=content_type)
         for name, info in config.items():
             fd = FieldDefinition.objects.get(name=info["definition"])
-            fs.fields.get_or_create(name=name, field=fd, attrs=info["attrs"])
+            fs.fields.get_or_create(name=name, definition=fd, attrs=info["attrs"])
         return fs
 
 
@@ -124,6 +119,7 @@ class Fieldset(ValidatorMixin, models.Model):
     def natural_key(self):
         return (self.name,)
 
+    # @memoized_method()
     def get_field(self, name) -> "FlexField":
         ff = [f for f in self.get_fields() if f.name == name]
         return ff[0] if ff else None
@@ -131,23 +127,26 @@ class Fieldset(ValidatorMixin, models.Model):
     def get_fieldnames(self):
         return [f.name for f in self.get_fields()]
 
+    # @memoized_method()
     def get_fields(self):
         local_names = [f.name for f in self.fields.all()]
         if self.extends:
             for f in self.extends.get_fields():
                 if f.name not in local_names:
                     yield f
-        for f in self.fields.all():
+        for f in self.fields.select_related("definition", "master").all():
             yield f
 
     def get_form(self) -> "type":
+        from ..forms import FlexForm
+
         fields: dict[str, forms.Field] = {}
         field: "FlexField"
 
         for field in self.get_fields():
             fld = field.get_field(label=field.name)
             fields[field.name] = fld
-        form_class_attrs = {"FieldsetForm": self, **dict(sorted(fields.items()))}
+        form_class_attrs = {"fieldset": self, "validator": self, **dict(sorted(fields.items()))}
         return type(f"{self.name}FieldsetForm", (FlexForm,), form_class_attrs)
 
     def clean(self):

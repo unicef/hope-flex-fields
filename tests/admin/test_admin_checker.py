@@ -25,8 +25,8 @@ def record(db):
     fd2 = FieldDefinitionFactory(field_type=forms.IntegerField, attrs={"min_value": 1})
     fs1 = FieldsetFactory()
     fs2 = FieldsetFactory()
-    FlexFieldFactory(name="int1", field=fd1, fieldset=fs1, attrs={"required": False})
-    FlexFieldFactory(name="int2", field=fd2, fieldset=fs2, attrs={"required": True})
+    FlexFieldFactory(name="int1", definition=fd1, fieldset=fs1, attrs={"required": False})
+    FlexFieldFactory(name="int2", definition=fd2, fieldset=fs2, attrs={"required": True})
 
     dc = DataCheckerFactory()
     DataCheckerFieldsetFactory(checker=dc, fieldset=fs1, prefix="fs1_%s")
@@ -56,14 +56,14 @@ def dc(db):
     fd8 = FieldDefinitionFactory(field_type=forms.ChoiceField, attrs={})
 
     fs = FieldsetFactory()
-    FlexFieldFactory(name="int1", field=fd1, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="int2", field=fd2, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="int3", field=fd3, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="float", field=fd4, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="date", field=fd5, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="bool", field=fd6, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="choice", field=fd7, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="choice1", field=fd8, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="int1", definition=fd1, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="int2", definition=fd2, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="int3", definition=fd3, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="float", definition=fd4, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="date", definition=fd5, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="bool", definition=fd6, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="choice", definition=fd7, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="choice1", definition=fd8, fieldset=fs, attrs={"required": False})
 
     dc = DataCheckerFactory()
     DataCheckerFieldsetFactory(checker=dc, fieldset=fs, prefix="fs")
@@ -81,115 +81,115 @@ def rdi(db):
 
     cher = FieldDefinitionFactory(field_type=forms.CharField)
     fs = FieldsetFactory()
-    FlexFieldFactory(name="household_id", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="residence_status_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="consent_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="country_origin_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="country_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="address_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="admin1_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="admin2_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="hh_geopoint_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="unhcr_hh_id_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="returnee_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="size_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="pregnant_member_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="f_0_5_age_group_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="f_6_11_age_group_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="f_12_17_age_group_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="f_adults_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="f_pregnant_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="m_0_5_age_group_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="m_6_11_age_group_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="m_12_17_age_group_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="m_adults_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="f_0_5_disability_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="f_6_11_disability_h_c", field=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="household_id", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="residence_status_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="consent_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="country_origin_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="country_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="address_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="admin1_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="admin2_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="hh_geopoint_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="unhcr_hh_id_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="returnee_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="size_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="pregnant_member_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="f_0_5_age_group_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="f_6_11_age_group_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="f_12_17_age_group_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="f_adults_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="f_pregnant_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="m_0_5_age_group_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="m_6_11_age_group_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="m_12_17_age_group_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="m_adults_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="f_0_5_disability_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="f_6_11_disability_h_c", definition=cher, fieldset=fs, attrs={"required": False})
     FlexFieldFactory(
         name="f_12_17_disability_h_c",
-        field=cher,
+        definition=cher,
         fieldset=fs,
         attrs={"required": False},
     )
     FlexFieldFactory(
         name="f_12_17_disability_h_c",
-        field=cher,
+        definition=cher,
         fieldset=fs,
         attrs={"required": False},
     )
     FlexFieldFactory(
         name="f_adults_disability_h_c",
-        field=cher,
+        definition=cher,
         fieldset=fs,
         attrs={"required": False},
     )
-    FlexFieldFactory(name="m_0_5_disability_h_c", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="m_6_11_disability_h_c", field=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="m_0_5_disability_h_c", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="m_6_11_disability_h_c", definition=cher, fieldset=fs, attrs={"required": False})
     FlexFieldFactory(
         name="m_12_17_disability_h_c",
-        field=cher,
+        definition=cher,
         fieldset=fs,
         attrs={"required": False},
     )
     FlexFieldFactory(
         name="m_adults_disability_h_c",
-        field=cher,
+        definition=cher,
         fieldset=fs,
         attrs={"required": False},
     )
     FlexFieldFactory(
         name="unaccompanied_child_h_f",
-        field=cher,
+        definition=cher,
         fieldset=fs,
         attrs={"required": False},
     )
     FlexFieldFactory(
         name="recent_illness_child_h_f",
-        field=cher,
+        definition=cher,
         fieldset=fs,
         attrs={"required": False},
     )
     FlexFieldFactory(
         name="difficulty_breathing_h_f",
-        field=cher,
+        definition=cher,
         fieldset=fs,
         attrs={"required": False},
     )
-    FlexFieldFactory(name="treatment_h_f", field=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="treatment_h_f", definition=cher, fieldset=fs, attrs={"required": False})
     FlexFieldFactory(
         name="treatment_facility_h_f",
-        field=cher,
+        definition=cher,
         fieldset=fs,
         attrs={"required": False},
     )
     FlexFieldFactory(
         name="other_treatment_facility_h_f",
-        field=cher,
+        definition=cher,
         fieldset=fs,
         attrs={"required": False},
     )
-    FlexFieldFactory(name="living_situation_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="number_of_rooms_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="total_dwellers_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="one_room_dwellers_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="total_households_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="water_source_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="sufficient_water_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="latrine_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="meals_yesterday_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="food_consumption_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="cereals_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="tubers_roots_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="vegetables_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="fruits_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="meat_fish_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="pulses_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="dairy_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="oilfat_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="sugarsweet_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="condiments_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="assistance_type_h_f", field=cher, fieldset=fs, attrs={"required": False})
-    FlexFieldFactory(name="assistance_source_h_f", field=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="living_situation_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="number_of_rooms_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="total_dwellers_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="one_room_dwellers_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="total_households_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="water_source_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="sufficient_water_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="latrine_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="meals_yesterday_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="food_consumption_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="cereals_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="tubers_roots_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="vegetables_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="fruits_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="meat_fish_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="pulses_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="dairy_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="oilfat_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="sugarsweet_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="condiments_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="assistance_type_h_f", definition=cher, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="assistance_source_h_f", definition=cher, fieldset=fs, attrs={"required": False})
 
     dc = DataCheckerFactory()
     DataCheckerFieldsetFactory(checker=dc, fieldset=fs, prefix="")

@@ -19,12 +19,12 @@ def test_sample_code(db):
     charfield = FieldDefinition.objects.get(field_type=forms.CharField)
     choicefield = FieldDefinition.objects.get(field_type=forms.ChoiceField)
 
-    FlexField.objects.get_or_create(name="name", fieldset=fs, field=charfield)
-    FlexField.objects.get_or_create(name="last_name", fieldset=fs, field=charfield)
+    FlexField.objects.get_or_create(name="name", fieldset=fs, definition=charfield)
+    FlexField.objects.get_or_create(name="last_name", fieldset=fs, definition=charfield)
     FlexField.objects.get_or_create(
         name="gender",
         fieldset=fs,
-        field=choicefield,
+        definition=choicefield,
         attrs={"choices": [["M", "M"], ["F", "F"], ["X", "X"]]},
     )
 

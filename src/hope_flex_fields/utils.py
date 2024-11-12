@@ -1,6 +1,8 @@
+import functools
 import inspect
 import io
 import tempfile
+import weakref
 from io import StringIO
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -22,12 +24,12 @@ def namefy(value):
     return slugify(value).replace("-", "_")
 
 
-def get_default_attrs():
+def get_common_attrs():
     return {"required": False, "help_text": ""}
 
 
 def get_kwargs_from_field_class(field: "str|forms.Field", extra: dict | None = None):
-    field = field_registry.cast(field)
+    field = field_registry.get_class(field)
 
     sig: inspect.Signature = inspect.signature(field)
     arguments = extra or {}
@@ -106,5 +108,26 @@ def create_default_fields(apps, schema_editor):
         fd.objects.get_or_create(
             name=name,
             field_type=fqn(fld),
-            defaults={"attrs": get_kwargs_from_field_class(fld, get_default_attrs())},
+            defaults={"attrs": get_kwargs_from_field_class(fld, get_common_attrs())},
         )
+
+
+def memoized_method(*lru_args, **lru_kwargs):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapped_func(self, *args, **kwargs):
+            # We're storing the wrapped method inside the instance. If we had
+            # a strong reference to self the instance would never die.
+            self_weak = weakref.ref(self)
+
+            @functools.wraps(func)
+            @functools.lru_cache(*lru_args, **lru_kwargs)
+            def cached_method(*args, **kwargs):
+                return func(self_weak(), *args, **kwargs)
+
+            setattr(self, func.__name__, cached_method)
+            return cached_method(*args, **kwargs)
+
+        return wrapped_func
+
+    return decorator

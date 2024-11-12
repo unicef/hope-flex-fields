@@ -23,7 +23,8 @@ class FieldsetFieldManager(models.Manager):
 
 class FlexField(AbstractField):
     fieldset = models.ForeignKey(Fieldset, on_delete=models.CASCADE, related_name="fields")
-    field = models.ForeignKey(FieldDefinition, on_delete=models.CASCADE, related_name="instances")
+    definition = models.ForeignKey(FieldDefinition, on_delete=models.CASCADE, related_name="instances")
+    master = models.ForeignKey("self", blank=True, null=True, on_delete=models.CASCADE, related_name="+")
 
     objects = FieldsetFieldManager()
 
@@ -46,8 +47,12 @@ class FlexField(AbstractField):
     def attributes(self, value):
         self.attrs = value
 
+    @property
+    def dependants(self):
+        return FlexField.objects.filter(master=self)
+
     def base_type(self):
-        return self.field.field_type.__name__
+        return self.definition.field_type.__name__
 
     def validate_attrs(self):
         try:
@@ -63,7 +68,7 @@ class FlexField(AbstractField):
         return self.name, self.fieldset.name
 
     def get_merged_attrs(self):
-        attrs = dict(**self.field.attributes)
+        attrs = dict(**self.definition.get_attributes(self))
         if isinstance(self.attributes, dict):
             attrs.update(self.attrs)
         return attrs
@@ -78,21 +83,23 @@ class FlexField(AbstractField):
             validators = []
             if self.validation:
                 validators.append(JsValidator(self.validation))
-            elif self.field.validation:
-                validators.append(JsValidator(self.field.validation))
+            elif self.definition.validation:
+                validators.append(JsValidator(self.definition.validation))
 
             if self.regex:
                 validators.append(ReValidator(self.regex))
-            elif self.field.regex:
-                validators.append(ReValidator(self.field.regex))
+            elif self.definition.regex:
+                validators.append(ReValidator(self.definition.regex))
 
             kwargs["validators"] = validators
             field_class = type(
                 f"{self.name}Field",
-                (FlexFormMixin, self.field.field_type),
+                (FlexFormMixin, self.definition.field_type),
                 {"flex_field": self},
             )
             fld = field_class(**kwargs)
+            if self.definition.attributes_strategy.validators:
+                fld.validators.extend([v(fld) for v in self.definition.attributes_strategy.validators])
         except Exception as e:  # pragma: no cover
             raise FlexFieldCreationError(f"Error creating field for FlexField {self.name}: {e}")
         return fld

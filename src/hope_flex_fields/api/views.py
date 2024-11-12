@@ -5,12 +5,7 @@ from rest_framework import viewsets
 from ..config import CONFIG
 from ..models import DataChecker, FieldDefinition, Fieldset, FlexField
 from ..utils import dumpdata_to_buffer
-from .serializers import (
-    DataCheckerSerializer,
-    FieldDefinitionSerializer,
-    FieldsetSerializer,
-    FlexFieldSerializer,
-)
+from .serializers import DataCheckerSerializer, FieldDefinitionSerializer, FieldsetSerializer, FlexFieldSerializer
 
 
 class Base:

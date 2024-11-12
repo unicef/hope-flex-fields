@@ -1,0 +1,32 @@
+{% extends "admin_extra_buttons/action_page.html" %}
+{% block content %}
+    {{ media }}
+    {{ original }}
+    <form method="post">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        <table>
+            {% for e in formset %}
+                <tr>
+                    {{ e.id }}
+                    <td>{{ e.name.errors }}{{ e.name }}</td>
+                    <td>{{ e.definition.errors }}{{ e.definition }}</td>
+                    <td>{{ e.DELETE }}</td>
+                    <td>
+                        <a class="inlinechangelink related-widget-wrapper-link change-related"
+{#                           data-href-template="/admin/hope_flex_fields/fielddefinition/__fk__/change/?_to_field=id&amp;_popup=1"#}
+{#                           data-popup="yes"#}
+                           href="{% url "admin:hope_flex_fields_flexfield_change" e.instance.id %}?_popup=1"
+                           target="popup">
+                            edit
+                        </a>
+                    </td>
+                <td>
+                    {{ e.master }}
+                </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <input type="submit" value="Save">
+    </form>
+{% endblock %}

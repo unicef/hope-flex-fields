@@ -89,8 +89,6 @@ def test_fields_change_type(app, record):
     form["field_type"] = fqn(forms.CharField)
     res = form.submit("_continue")
     assert res.status_code == 302
-    print(33333, record.get_default_attributes())
-    # obj: FieldDefinition = FieldDefinition.objects.get(name="Char")
     record.refresh_from_db()
     assert record.attributes == {
         "empty_value": "",

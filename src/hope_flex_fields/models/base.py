@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Generator, Iterable
 
-from django import forms
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Model
 from django.utils.text import slugify
@@ -11,10 +11,6 @@ from django_regex.validators import RegexValidator
 
 #
 logger = logging.getLogger(__name__)
-
-
-class FlexForm(forms.Form):
-    fieldset = None
 
 
 class BaseQuerySet(models.QuerySet["Model"]):
@@ -75,7 +71,9 @@ class ValidatorMixin:
     def __init__(self, *args, **kwargs):
         self._primary_key_field_name = None
         self._master_fieldset = None
+        self.form = None
         self.primary_keys = set()
+        self.globals = {}
         # self._collect_values = []
         self._collected_values = {}
         super().__init__(*args, **kwargs)
@@ -108,6 +106,24 @@ class ValidatorMixin:
             if fk not in self._master_fieldset.primary_keys:
                 return f"'{fk}' not found in master"
 
+    def validate_parent_child(self, errors, data):
+        for field_name, field in self.form.fields.items():
+            if field.flex_field.master and hasattr(field, "validate_with_parent"):
+                parent_value = data.get(field.flex_field.master.name)
+                value = data.get(field_name)
+                try:
+                    field.validate_with_parent(parent_value, value)
+                except ValidationError as e:
+                    if field_name not in errors:
+                        errors[field_name] = str(e)
+                    else:
+                        errors[field_name].append(str(e))
+
+        return errors
+
+    def get_form(self):
+        raise NotImplementedError
+
     def validate(
         self,
         data: Iterable,
@@ -115,6 +131,8 @@ class ValidatorMixin:
         include_success: bool = False,
         fail_if_alien: bool = False,
     ):
+        from hope_flex_fields.forms import FlexForm
+
         if not isinstance(data, (list, tuple, Generator)):
             data = [data]
         self.primary_keys = set()
@@ -122,24 +140,26 @@ class ValidatorMixin:
         known_fields = set(sorted(form_class.declared_fields.keys()))
         ret = {}
         for i, row in enumerate(data, 1):
-            form: "FlexForm" = form_class(data=row)
+            self.form: "FlexForm" = form_class(data=row)
             posted_fields = set(sorted(row.keys()))
             fields_errors = {}
             row_errors = []
             if fail_if_alien and (diff := posted_fields.difference(known_fields)):
                 row_errors.append(f"Alien values found {diff}")
-            if not form.is_valid():
-                fields_errors.update(**form.errors)
+            if not self.form.is_valid():
+                fields_errors.update(**self.form.errors)
 
-            if err := self.is_duplicate(form):
+            if err := self.is_duplicate(self.form):
                 row_errors.append(err)
-            if err := self.is_valid_foreignkey(form):
+            if err := self.is_valid_foreignkey(self.form):
                 row_errors.append(err)
 
             for field_name in self._collected_values.keys():
-                self._collected_values[field_name].append(form.cleaned_data[field_name])
+                self._collected_values[field_name].append(self.form.cleaned_data[field_name])
             if row_errors:
                 fields_errors["-"] = row_errors
+            self.validate_parent_child(fields_errors, row)
+
             if fields_errors:
                 ret[i] = fields_errors
             elif include_success:
