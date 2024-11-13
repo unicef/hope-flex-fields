@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 
 from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory
 
+from hope_flex_fields.mixin import ChildFieldMixin
 from hope_flex_fields.models import Fieldset
 from hope_flex_fields.registry import field_registry
 
@@ -18,7 +19,7 @@ class Parent(forms.ChoiceField):
         self.choices = (("AFG", "Parent #1"), ("UKR", "Parent #2"))
 
 
-class Child(forms.CharField):
+class Child(ChildFieldMixin, forms.CharField):
     def validate_with_parent(self, parent_value, value):
         if childs := VALID_CHILDS.get(parent_value):
             if value in childs:
