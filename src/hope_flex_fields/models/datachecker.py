@@ -1,31 +1,26 @@
 from io import BytesIO
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generator
 
 from django import forms
 from django.db import models
 from django.utils.translation import gettext as _
 
 from ..fields import FlexFormMixin
+from ..utils import memoized_method
 from ..xlsx import get_format_for_field, get_validation_for_field
-from .base import FlexForm, ValidatorMixin
+from .base import ValidatorMixin
 from .fieldset import Fieldset
 
 if TYPE_CHECKING:
+    from ..forms import FlexForm
     from .flexfield import FlexField
 
 
 def create_xls_importer(dc: "DataChecker"):
     import xlsxwriter
 
-    # pattern = xlsxwriter_options.get(
-    #     fld.name, xlsxwriter_options.get(fld.base_type(), "general")
-    # )
-    # fmt = workbook.add_format({"num_format": pattern})
-
     out = BytesIO()
-    workbook = xlsxwriter.Workbook(
-        out, {"in_memory": True, "default_date_format": "yyyy/mm/dd"}
-    )
+    workbook = xlsxwriter.Workbook(out, {"in_memory": True, "default_date_format": "yyyy/mm/dd"})
     # locked = workbook.add_format({"locked": True})
 
     header_format = workbook.add_format(
@@ -45,7 +40,7 @@ def create_xls_importer(dc: "DataChecker"):
     header_format.set_bottom_color("black")
     worksheet = workbook.add_worksheet()
 
-    for i, fld in enumerate(dc.get_fields()):
+    for i, (__, fld) in enumerate(dc.get_fields()):
         col = chr(ord("A") + i)
         worksheet.write(0, i, fld.name, header_format)
         f = None
@@ -56,8 +51,6 @@ def create_xls_importer(dc: "DataChecker"):
         if v := get_validation_for_field(fld):
             worksheet.data_validation("A1:Z9999", v)
 
-    # worksheet.protect("A1:AZZ1")
-    # worksheet.unprotect_range("A2:Z999999")
     workbook.close()
     out.seek(0)
     return out, workbook
@@ -70,9 +63,7 @@ class DataCheckerManager(models.Manager):
 
 class DataCheckerFieldset(models.Model):
     last_modified = models.DateTimeField(auto_now=True)
-    checker = models.ForeignKey(
-        "DataChecker", on_delete=models.CASCADE, related_name="members"
-    )
+    checker = models.ForeignKey("DataChecker", on_delete=models.CASCADE, related_name="members")
     fieldset = models.ForeignKey(Fieldset, on_delete=models.CASCADE)
     prefix = models.CharField(max_length=30, blank=True, default="")
     order = models.PositiveSmallIntegerField(default=0)
@@ -97,23 +88,40 @@ class DataChecker(ValidatorMixin, models.Model):
     def natural_key(self):
         return (self.name,)
 
-    def get_fields(self):
-        for fs in self.members.all():
-            for field in fs.fieldset.fields.filter():
-                yield field
+    @memoized_method()
+    def get_fields(self) -> Generator["FlexField", None, None]:
+        fs: DataCheckerFieldset
+        for fs in self.members.select_related("fieldset").all():
+            # for field in fs.fieldset.fields.select_related("definition").filter():
+            for field in fs.fieldset.get_fields():
+                yield fs, field
+
+    @memoized_method()
+    def get_field(self, name) -> "FlexField":
+        for __, field in self.get_fields():
+            if field.name == name:
+                return field
+
+    # for fs in self.members.all():
+    #     for field in fs.fieldset.fields.select_related("definition").filter():
+    #         if field.name == name:
+    #             return field
 
     def get_form(self) -> "type[FlexForm]":
+        from ..forms import FlexForm
+
         fields: dict[str, forms.Field] = {}
         field: "FlexField"
-        for fs in self.members.all():
-            for field in fs.fieldset.fields.filter():
-                fld: FlexFormMixin = field.get_field()
-                fld.label = f"{fs.prefix}{field.name}"
-                if "%s" in fs.prefix:
-                    full_name = fs.prefix % field.name
-                else:
-                    full_name = f"{fs.prefix}{field.name}"
+        # for fs in self.members.select_related("fieldset").all():
+        #     for field in fs.fieldset.fields.select_related("definition").filter():
+        for fs, field in self.get_fields():
+            fld: FlexFormMixin = field.get_field()
+            fld.label = f"{fs.prefix}{field.name}"
+            if "%s" in fs.prefix:
+                full_name = fs.prefix % field.name
+            else:
+                full_name = f"{fs.prefix}{field.name}"
 
-                fields[full_name] = fld
-        form_class_attrs = {"DataChecker": self, **dict(sorted(fields.items()))}
+            fields[full_name] = fld
+        form_class_attrs = {"datachecker": self, "validator": self, **dict(sorted(fields.items()))}
         return type(f"{self.name}DataChecker", (FlexForm,), form_class_attrs)

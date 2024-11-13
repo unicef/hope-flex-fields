@@ -2,11 +2,7 @@ from django import forms
 from django.urls import reverse
 
 import pytest
-from testutils.factories import (
-    FieldDefinitionFactory,
-    FieldsetFactory,
-    FlexFieldFactory,
-)
+from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory
 
 from hope_flex_fields.models import FieldDefinition, FlexField
 
@@ -22,7 +18,7 @@ def record(db):
         regex=".*",
         validation="true",
     )
-    fs1 = FlexFieldFactory(field=fd, name="int")
+    fs1 = FlexFieldFactory(definition=fd, name="int")
 
     return fs1
 
@@ -48,12 +44,12 @@ def test_fields_create(app):
     res = app.get(url)
     form = res.forms["flexfield_form"]
     form["name"] = "int"
-    form["field"] = fd.pk
+    form["definition"] = fd.pk
     form["fieldset"] = fs.pk
     res = form.submit()
     assert res.status_code == 302
     obj: FlexField = FlexField.objects.get(name="int")
-    assert obj.attrs == "{}"
+    assert obj.attributes == "{}"
 
 
 def test_fields_create_and_update(app, record):
@@ -64,7 +60,7 @@ def test_fields_create_and_update(app, record):
     res = app.get(url)
     form = res.forms["flexfield_form"]
     form["name"] = "int2"
-    form["field"] = fd.pk
+    form["definition"] = fd.pk
     form["fieldset"] = fs.pk
 
     res = form.submit("_continue")
@@ -73,14 +69,12 @@ def test_fields_create_and_update(app, record):
     form = res.forms["flexfield_form"]
     assert form["attrs"].value == '"{}"'
 
-    form["attrs"] = (
-        '{"max_value": 1, "min_value": 10, "required": false, "help_text": ""}'
-    )
+    form["attrs"] = '{"max_value": 1, "min_value": 10, "required": false, "help_text": ""}'
     res = form.submit("_continue")
     assert res.status_code == 302, res.context["adminform"].form.errors
 
     obj: FlexField = FlexField.objects.get(name="int2")
-    assert obj.attrs == {
+    assert obj.attributes == {
         "max_value": 1,
         "min_value": 10,
         "required": False,

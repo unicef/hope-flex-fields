@@ -28,7 +28,7 @@ class FieldDefinitionSerializer(BaseSerializer):
 
 
 class FlexFieldSerializer(BaseSerializer):
-    field = serializers.SlugRelatedField(read_only=True, slug_field="name")
+    definition = serializers.SlugRelatedField(read_only=True, slug_field="name")
 
     class Meta:
         model = FlexField
@@ -36,7 +36,7 @@ class FlexFieldSerializer(BaseSerializer):
             "last_modified",
             "name",
             "description",
-            "field",
+            "definition",
             "fieldset",
             "attrs",
             "regex",
@@ -56,9 +56,7 @@ class FieldsetSerializer(BaseSerializer):
 
 
 class DataCheckerSerializer(BaseSerializer):
-    fieldsets = serializers.SlugRelatedField(
-        many=True, read_only=True, slug_field="name"
-    )
+    fieldsets = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
 
     class Meta:
         model = DataChecker

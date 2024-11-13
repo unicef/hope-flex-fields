@@ -11,17 +11,13 @@ from hope_flex_fields.models import FieldDefinition, Fieldset
 
 @pytest.fixture
 def data(db):
-    from testutils.factories import (
-        FieldDefinitionFactory,
-        FieldsetFactory,
-        FlexFieldFactory,
-    )
+    from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory
 
     fd1 = FieldDefinitionFactory(field_type=forms.IntegerField, attrs={"min_value": 1})
     fd2 = FieldDefinitionFactory(field_type=forms.FloatField, attrs={"min_value": 1})
     fs = FieldsetFactory()
-    FlexFieldFactory(name="int", field=fd1, fieldset=fs, attrs={})
-    FlexFieldFactory(name="float", field=fd2, fieldset=fs, attrs={"required": True})
+    FlexFieldFactory(name="int", definition=fd1, fieldset=fs, attrs={})
+    FlexFieldFactory(name="float", definition=fd2, fieldset=fs, attrs={"required": True})
     return fs
 
 
@@ -66,6 +62,4 @@ def test_import_error(db, app, data):
     res = res.forms["import-form"].submit()
     assert res.status_code == 302
     res = res.follow()
-    assert (
-        "Problem installing fixture " in [m.message for m in res.context["messages"]][0]
-    )
+    assert "Problem installing fixture " in [m.message for m in res.context["messages"]][0]

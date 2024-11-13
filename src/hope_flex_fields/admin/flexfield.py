@@ -13,18 +13,18 @@ from ..models import FieldDefinition, FlexField
 class FieldsetFieldTabularInline(TabularInline):
     model = FlexField
     show_change_link = True
-    fields = ("name", "field", "attrs")
+    fields = ("name", "definition", "attrs")
 
 
 @register(FlexField)
-class FieldsetFieldAdmin(ExtraButtonsMixin, ModelAdmin):
-    list_display = ("fieldset", "field", "name")
-    list_filter = ("fieldset", "field")
+class FlexFieldAdmin(ExtraButtonsMixin, ModelAdmin):
+    list_display = ("fieldset", "definition", "name", "master")
+    list_filter = ("fieldset", "definition")
     search_fields = ("name",)
     form = FlexFieldForm
 
     fieldsets = (
-        ("", {"fields": ("name", "field", "fieldset")}),
+        ("", {"fields": ("name", "master", "definition", "fieldset")}),
         (
             "Overrides",
             {
@@ -33,6 +33,17 @@ class FieldsetFieldAdmin(ExtraButtonsMixin, ModelAdmin):
             },
         ),
     )
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change, **kwargs)
+        # form.base_fields["master"].widget.choices = ()
+        # form.base_fields["master"].choices = ()
+        return form
+
+    def get_readonly_fields(self, request, obj=None):
+        if not obj or not obj.fieldset:
+            return ["master"]
+        return self.readonly_fields
 
     def get_changeform_initial_data(self, request):
         initial = super().get_changeform_initial_data(request)
@@ -58,9 +69,7 @@ class FieldsetFieldAdmin(ExtraButtonsMixin, ModelAdmin):
             if form.is_valid():
                 self.message_user(request, "Valid", messages.SUCCESS)
             else:
-                self.message_user(
-                    request, "Please correct the errors below", messages.ERROR
-                )
+                self.message_user(request, "Please correct the errors below", messages.ERROR)
         else:
             form = form_class()
 

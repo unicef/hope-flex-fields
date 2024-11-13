@@ -8,12 +8,3 @@ if TYPE_CHECKING:
 
 class FlexFormMixin(forms.Field):
     flex_field: "FlexField" = None
-
-
-#
-# class OptionField(forms.ChoiceField):
-#     def __init__(self, *, endpoint=None, **kwargs):
-#         self.endpoint_nane = endpoint
-#         self.endpoint = Endpoint.objects.get(name=endpoint)
-#         kwargs.pop('choices', None)
-#         super().__init__(**kwargs)

@@ -1,6 +1,8 @@
+import functools
 import inspect
 import io
 import tempfile
+import weakref
 from io import StringIO
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -12,6 +14,8 @@ from django.utils.text import slugify
 
 from strategy_field.utils import fqn
 
+from hope_flex_fields.registry import field_registry
+
 if TYPE_CHECKING:
     from hope_flex_fields.models import FieldDefinition
 
@@ -20,17 +24,17 @@ def namefy(value):
     return slugify(value).replace("-", "_")
 
 
-def get_default_attrs():
+def get_common_attrs():
     return {"required": False, "help_text": ""}
 
 
-def get_kwargs_from_field_class(field, extra: dict | None = None):
+def get_kwargs_from_field_class(field: "str|forms.Field", extra: dict | None = None):
+    field = field_registry.get_class(field)
+
     sig: inspect.Signature = inspect.signature(field)
     arguments = extra or {}
     field_arguments = {
-        k.name: k.default
-        for __, k in sig.parameters.items()
-        if k.default not in [inspect.Signature.empty]
+        k.name: k.default for __, k in sig.parameters.items() if k.default not in [inspect.Signature.empty]
     }
     arguments.update(field_arguments)
     return arguments
@@ -41,7 +45,7 @@ def get_kwargs_from_formfield(field: forms.Field):
 
     fd = FieldDefinition.objects.get(name=type(field).__name__)
     ret = {}
-    for attr_name in fd.attrs.keys():
+    for attr_name in fd.attributes.keys():
         if attr_name in (
             "widget",
             "validators",
@@ -104,5 +108,26 @@ def create_default_fields(apps, schema_editor):
         fd.objects.get_or_create(
             name=name,
             field_type=fqn(fld),
-            defaults={"attrs": get_kwargs_from_field_class(fld, get_default_attrs())},
+            defaults={"attrs": get_kwargs_from_field_class(fld, get_common_attrs())},
         )
+
+
+def memoized_method(*lru_args, **lru_kwargs):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapped_func(self, *args, **kwargs):
+            # We're storing the wrapped method inside the instance. If we had
+            # a strong reference to self the instance would never die.
+            self_weak = weakref.ref(self)
+
+            @functools.wraps(func)
+            @functools.lru_cache(*lru_args, **lru_kwargs)
+            def cached_method(*args, **kwargs):
+                return func(self_weak(), *args, **kwargs)
+
+            setattr(self, func.__name__, cached_method)
+            return cached_method(*args, **kwargs)
+
+        return wrapped_func
+
+    return decorator
