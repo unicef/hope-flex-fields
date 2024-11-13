@@ -19,24 +19,20 @@ def test_sample_code(db):
     charfield = FieldDefinition.objects.get(field_type=forms.CharField)
     choicefield = FieldDefinition.objects.get(field_type=forms.ChoiceField)
 
-    FlexField.objects.get_or_create(name="name", fieldset=fs, field=charfield)
-    FlexField.objects.get_or_create(name="last_name", fieldset=fs, field=charfield)
+    FlexField.objects.get_or_create(name="name", fieldset=fs, definition=charfield)
+    FlexField.objects.get_or_create(name="last_name", fieldset=fs, definition=charfield)
     FlexField.objects.get_or_create(
         name="gender",
         fieldset=fs,
-        field=choicefield,
+        definition=choicefield,
         attrs={"choices": [["M", "M"], ["F", "F"], ["X", "X"]]},
     )
 
     errors = fs.validate(data)
-    assert errors == {
-        4: {"gender": ["Select a valid choice. 1 is not one of the available choices."]}
-    }
+    assert errors == {4: {"gender": ["Select a valid choice. 1 is not one of the available choices."]}}
 
     errors = fs.validate(data, fail_if_alien=True)
     assert errors == {
         1: {"-": ["Alien values found {'unknown'}"]},
-        4: {
-            "gender": ["Select a valid choice. 1 is not one of the available choices."]
-        },
+        4: {"gender": ["Select a valid choice. 1 is not one of the available choices."]},
     }

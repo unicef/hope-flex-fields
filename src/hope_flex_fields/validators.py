@@ -19,9 +19,7 @@ class ReValidator(BaseValidator):
             if not m:
                 raise ValueError()
         except ValueError:
-            raise ValidationError(
-                "Invalid format. Allowed Regex is '%s'" % self.rex.pattern
-            )
+            raise ValidationError("Invalid format. Allowed Regex is '%s'" % self.rex.pattern)
         return True
 
 

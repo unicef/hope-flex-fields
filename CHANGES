@@ -1,5 +1,11 @@
-0.5 (dev)
------
+0.6
+---
+* add attributes fetching strategies
+* add parent/child management
+
+
+0.5
+---
 * sort field names in Fieldset/Dispatcher generated form
 * Extracted code to create default FieldDefinition to be used out of migrations
 

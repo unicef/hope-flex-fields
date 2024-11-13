@@ -13,6 +13,7 @@ strict: false
 
 markdown_extensions:
   - admonition
+  - md_in_html
 
 theme:
   name: "material"

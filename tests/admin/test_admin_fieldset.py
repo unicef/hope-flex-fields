@@ -4,11 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 
 import pytest
-from testutils.factories import (
-    FieldDefinitionFactory,
-    FieldsetFactory,
-    FlexFieldFactory,
-)
+from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory
 
 from hope_flex_fields.models import Fieldset
 
@@ -20,8 +16,8 @@ def record(db):
     fd1 = FieldDefinitionFactory(field_type=forms.IntegerField, attrs={"min_value": 1})
     fd2 = FieldDefinitionFactory(field_type=forms.FloatField, attrs={"min_value": 1})
     fs = FieldsetFactory()
-    FlexFieldFactory(name="int", field=fd1, fieldset=fs, attrs={})
-    FlexFieldFactory(name="float", field=fd2, fieldset=fs, attrs={"required": True})
+    FlexFieldFactory(name="int", definition=fd1, fieldset=fs, attrs={})
+    FlexFieldFactory(name="float", definition=fd2, fieldset=fs, attrs={"required": True})
     return fs
 
 
@@ -73,9 +69,7 @@ def test_fieldset_create_from_content_type(app, record, model_class):
     res = res.forms["analyse-form"].submit("analyse")
     assert res.status_code == 200
     res.forms["analyse-form"]["name"] = "FS #1"
-    res.forms["analyse-form"]["content_type"] = ContentType.objects.get_for_model(
-        model_class
-    ).pk
+    res.forms["analyse-form"]["content_type"] = ContentType.objects.get_for_model(model_class).pk
     res = res.forms["analyse-form"].submit("analyse")
 
     res.forms["create-form"].submit("create")

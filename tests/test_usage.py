@@ -8,11 +8,7 @@ from hope_flex_fields.models import DataChecker, Fieldset
 
 @pytest.fixture
 def config(db):
-    from testutils.factories import (
-        FieldDefinitionFactory,
-        FieldsetFactory,
-        FlexFieldFactory,
-    )
+    from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory
 
     fd1 = FieldDefinitionFactory(field_type=forms.IntegerField, attrs={"min_value": 1})
     fd2 = FieldDefinitionFactory(
@@ -21,8 +17,8 @@ def config(db):
         validation="""if (value % 2 == 0) {result="Insert an odd number"}""",
     )
     fs = FieldsetFactory()
-    FlexFieldFactory(name="int", field=fd1, fieldset=fs, attrs={})
-    FlexFieldFactory(name="float", field=fd2, fieldset=fs, attrs={"required": True})
+    FlexFieldFactory(name="int", definition=fd1, fieldset=fs, attrs={})
+    FlexFieldFactory(name="float", definition=fd2, fieldset=fs, attrs={"required": True})
 
     dc = DataCheckerFactory()
     DataCheckerFieldsetFactory(checker=dc, fieldset=fs, prefix="aaa_")

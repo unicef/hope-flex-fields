@@ -5,10 +5,6 @@ from django.db import migrations
 from hope_flex_fields.utils import create_default_fields
 
 
-def remove_default_fields(apps, schema_editor):
-    pass
-
-
 class Migration(migrations.Migration):
     dependencies = [
         (
@@ -18,5 +14,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_default_fields, remove_default_fields),
+        migrations.RunPython(create_default_fields),
     ]

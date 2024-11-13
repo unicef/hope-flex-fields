@@ -4,6 +4,7 @@ from django.contrib.admin import ModelAdmin, register
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db.transaction import atomic
+from django.forms import inlineformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
@@ -12,14 +13,11 @@ from admin_extra_buttons.mixins import ExtraButtonsMixin
 
 from ..forms import FieldsetForm
 from ..models import Fieldset
-from .flexfield import FieldsetFieldTabularInline
 
 
 class FieldSetForm(forms.Form):
     name = forms.CharField()
-    content_type = forms.ModelChoiceField(
-        queryset=ContentType.objects.all(), required=True
-    )
+    content_type = forms.ModelChoiceField(queryset=ContentType.objects.all(), required=True)
 
     def clean_name(self):
         if Fieldset.objects.filter(name__iexact=self.cleaned_data["name"]).exists():
@@ -34,9 +32,7 @@ class FieldSetForm(forms.Form):
 class FieldSetForm2(forms.Form):
     name = forms.CharField(widget=forms.HiddenInput)
     config = forms.JSONField(widget=forms.HiddenInput)
-    content_type = forms.ModelChoiceField(
-        queryset=ContentType.objects.all(), widget=forms.HiddenInput
-    )
+    content_type = forms.ModelChoiceField(queryset=ContentType.objects.all(), widget=forms.HiddenInput)
 
     def save(self):
         with atomic():
@@ -53,8 +49,35 @@ class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
     search_fields = ("name",)
     list_display = ("name", "extends", "content_type")
     list_filter = ("content_type",)
-    inlines = [FieldsetFieldTabularInline]
     form = FieldsetForm
+
+    @button(label="Fields")
+    def all_fields(self, request, pk):
+        from hope_flex_fields.models import FlexField
+
+        ctx = self.get_common_context(request, pk, title="Fields")
+        fs: Fieldset = self.object
+
+        def cb(field, **kwargs):
+            formfield = field.formfield(**kwargs)
+            if field.name == "master":
+                formfield.queryset = formfield.queryset.filter(fieldset=fs)
+            return formfield
+
+        FieldFormset = inlineformset_factory(
+            Fieldset, FlexField, fields=("name", "definition", "master"), formfield_callback=cb
+        )
+        if request.method == "POST":
+            formset = FieldFormset(request.POST, instance=fs)
+            if formset.is_valid():
+                formset.save()
+                self.message_user(request, "Fields saved")
+                return HttpResponseRedirect("..")
+        else:
+            formset = FieldFormset(instance=fs)
+        ctx["formset"] = formset
+        ctx["media"] = self.media
+        return render(request, "flex_fields/fieldset/fields.html", ctx)
 
     @button()
     def create_from_content_type(self, request):
@@ -105,9 +128,7 @@ class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
             if form.is_valid():
                 self.message_user(request, "Valid", messages.SUCCESS)
             else:
-                self.message_user(
-                    request, "Please correct the errors below", messages.ERROR
-                )
+                self.message_user(request, "Please correct the errors below", messages.ERROR)
         else:
             form = form_class()
 
