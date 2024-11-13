@@ -1,6 +1,6 @@
 [project]
 name = "hope-flex-fields"
-version = "0.5.0"
+version = "0.6.0"
 description = ""
 authors = [
     {name = "sax", email = "s.apostolico@gmail.com"},
@@ -12,7 +12,7 @@ license = {text = "MIT"}
 
 dependencies = [
     "django-strategy-field>=3.1.0",
-    "django-regex>=0.5.0",
+    "django-regex>=0.6.0",
     "django-regex-field>=3.1.0",
     "django-admin-extra-buttons>=1.6.0",
     "django-jsoneditor>=0.2.4",
