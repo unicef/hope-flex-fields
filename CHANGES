@@ -1,5 +1,7 @@
-(dev)
------
+0.6
+---
+* add attributes fetching strategies
+* add parent/child management
 
 
 0.5
