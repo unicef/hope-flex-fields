@@ -42,7 +42,7 @@ repos:
         args:
           - src
           - tests
-        stages: [ push ]
+        stages: [ pre-push ]
 
       - id: check-forbidden
         args:
@@ -50,5 +50,5 @@ repos:
           - /\.showbrowser\(/
           - -p
           - /print\(111/
-        stages: [ commit ]
+        stages: [ pre-commit ]
         additional_dependencies: [ setuptools ]
