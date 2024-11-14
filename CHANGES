@@ -1,3 +1,8 @@
+0.6.2
+-----
+* removes wrong squashed migration
+
+
 0.6.1
 -----
 * fixes deps
