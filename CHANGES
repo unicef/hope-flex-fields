@@ -1,5 +1,10 @@
-0.6
----
+0.6.1
+-----
+* fixes deps
+
+
+0.6 (yank)
+----------
 * add attributes fetching strategies
 * add parent/child management
 
