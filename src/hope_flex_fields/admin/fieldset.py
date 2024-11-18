@@ -122,7 +122,7 @@ class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
     def test(self, request, pk):
         ctx = self.get_common_context(request, pk, title="Test")
         fs: Fieldset = ctx["original"]
-        form_class = fs.get_form()
+        form_class = fs.get_form_class()
         if request.method == "POST":
             form = form_class(request.POST)
             if form.is_valid():

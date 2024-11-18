@@ -1,9 +1,11 @@
 from io import BytesIO
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING, Generator, Generic, TypeVar
 
 from django import forms
 from django.db import models
 from django.utils.translation import gettext as _
+
+from deprecation import deprecated
 
 from ..fields import FlexFormMixin
 from ..utils import memoized_method
@@ -14,6 +16,8 @@ from .fieldset import Fieldset
 if TYPE_CHECKING:
     from ..forms import FlexForm
     from .flexfield import FlexField
+
+    F = TypeVar("F", bound="FlexForm")
 
 
 def create_xls_importer(dc: "DataChecker"):
@@ -106,8 +110,11 @@ class DataChecker(ValidatorMixin, models.Model):
     #     for field in fs.fieldset.fields.select_related("definition").filter():
     #         if field.name == name:
     #             return field
+    @deprecated("0.6.3", details="uses get_form_class()")
+    def get_form(self) -> "Generic[F]":
+        return self.get_form_class()
 
-    def get_form(self) -> "type[FlexForm]":
+    def get_form_class(self) -> "Generic[F]":
         from ..forms import FlexForm
 
         fields: dict[str, forms.Field] = {}
@@ -124,4 +131,4 @@ class DataChecker(ValidatorMixin, models.Model):
 
             fields[full_name] = fld
         form_class_attrs = {"datachecker": self, "validator": self, **dict(sorted(fields.items()))}
-        return type(f"{self.name}DataChecker", (FlexForm,), form_class_attrs)
+        return type(f"{self.name}DataCheckerForm", (FlexForm,), form_class_attrs)
