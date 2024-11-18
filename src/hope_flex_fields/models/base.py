@@ -121,7 +121,7 @@ class ValidatorMixin:
 
         return errors
 
-    def get_form(self):
+    def get_form_class(self):
         raise NotImplementedError
 
     def validate(
@@ -136,7 +136,7 @@ class ValidatorMixin:
         if not isinstance(data, (list, tuple, Generator)):
             data = [data]
         self.primary_keys = set()
-        form_class: type[FlexForm] = self.get_form()
+        form_class: type[FlexForm] = self.get_form_class()
         known_fields = set(sorted(form_class.declared_fields.keys()))
         ret = {}
         for i, row in enumerate(data, 1):

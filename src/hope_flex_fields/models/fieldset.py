@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any, Optional, TypedDict
+from typing import TYPE_CHECKING, Any, Generic, Optional, TypedDict, TypeVar
 
 from django import forms
 from django.contrib.contenttypes.models import ContentType
@@ -9,13 +9,17 @@ from django.forms import modelform_factory
 from django.utils.translation import gettext as _
 
 from deepdiff import DeepDiff
+from deprecation import deprecated
 
 from ..exceptions import FlexFieldCreationError
 from ..utils import get_kwargs_from_formfield
 from .base import ValidatorMixin
 
 if TYPE_CHECKING:
+    from ..forms import FlexForm
     from ..models import FlexField
+
+    F = TypeVar("F", bound=FlexForm)
 
 
 ContentTypeConfig = TypedDict(
@@ -137,7 +141,11 @@ class Fieldset(ValidatorMixin, models.Model):
         for f in self.fields.select_related("definition", "master").all():
             yield f
 
-    def get_form(self) -> "type":
+    @deprecated("0.6.3", details="uses get_form_class()")
+    def get_form(self) -> "Generic[F]":
+        return self.get_form_class()
+
+    def get_form_class(self) -> "Generic[F]":
         from ..forms import FlexForm
 
         fields: dict[str, forms.Field] = {}

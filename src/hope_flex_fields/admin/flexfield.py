@@ -36,8 +36,6 @@ class FlexFieldAdmin(ExtraButtonsMixin, ModelAdmin):
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change, **kwargs)
-        # form.base_fields["master"].widget.choices = ()
-        # form.base_fields["master"].choices = ()
         return form
 
     def get_readonly_fields(self, request, obj=None):
