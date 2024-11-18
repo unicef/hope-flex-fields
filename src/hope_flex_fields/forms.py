@@ -1,5 +1,8 @@
+import json
+
 from django import forms
 from django.core.exceptions import ValidationError
+from django.core.serializers.json import DjangoJSONEncoder
 from django.forms import ModelForm
 
 from jsoneditor.forms import JSONEditor
@@ -23,8 +26,7 @@ class FlexForm(forms.Form):
 
     def clean(self):
         super().clean()
-        for k, v in self.cleaned_data.items():
-            self.cleaned_data[k] = str(v)
+        self.cleaned_data = json.loads(json.dumps(self.cleaned_data, cls=DjangoJSONEncoder))
         return self.cleaned_data
 
     def initialize_parent_child(self, data: dict) -> None:

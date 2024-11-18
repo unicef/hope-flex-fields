@@ -1,3 +1,9 @@
+0.6.3
+-----
+* deprecate get_form()
+* fixes FlexForm seriliazation of cleaned_data
+
+
 0.6.2
 -----
 * removes wrong squashed migration

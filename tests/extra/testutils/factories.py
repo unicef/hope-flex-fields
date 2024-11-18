@@ -115,7 +115,7 @@ class DataCheckerFactory(AutoRegisterModelFactory):
 class DataCheckerFieldsetFactory(AutoRegisterModelFactory):
     checker = factory.SubFactory(DataCheckerFactory)
     fieldset = factory.SubFactory(FieldsetFactory)
-    prefix = "aaa"
+    prefix = ""
 
     class Meta:
         model = DataCheckerFieldset

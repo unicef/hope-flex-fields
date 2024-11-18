@@ -26,6 +26,7 @@ dependencies = [
     "jmespath>=1.0.1",
     "deepdiff>=8.0.1",
     "python-calamine>=0.2.3",
+    "deprecation>=2.1.0",
 ]
 [project.optional-dependencies]
 docs = [
