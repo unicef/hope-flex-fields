@@ -8,7 +8,7 @@ from django.forms import ModelForm
 from jsoneditor.forms import JSONEditor
 from strategy_field.utils import fqn
 
-from .models import FieldDefinition, Fieldset, FlexField
+from .models import DataCheckerFieldset, FieldDefinition, Fieldset, FlexField
 from .registry import field_registry
 from .utils import get_common_attrs, get_kwargs_from_field_class
 from .widgets import JavascriptEditor
@@ -88,4 +88,20 @@ class FieldsetForm(ModelForm):
             "description",
             "extends",
             "content_type",
+        )
+
+
+class DataCheckerFieldsetForm(ModelForm):
+    class Meta:
+        model = DataCheckerFieldset
+        exclude = ()
+        widgets = {
+            "override_group": forms.TextInput(attrs={"placeholder": "Enter group name or leave empty for root"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["override_default_value"].help_text = "Check to override the fieldset default group"
+        self.fields["override_group"].help_text = (
+            "Group name to use when override is checked. Leave empty for root level."
         )
