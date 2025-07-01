@@ -64,9 +64,17 @@ classDiagram
     ]
 
 ## Demo Application
-
+    pip install -e .
     python manage.py migrate
     python manage.py demo
     python manage.py runserver
+
+## Demo Application with UV
+    uv venv
+    uv sync
+    uv run pip install -e .
+    uv run python manage.py migrate
+    uv run python manage.py demo
+    uv run python manage.py runserver
 
 Navigate to http://localhost:8000/admin/ and login using any username/password
