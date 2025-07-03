@@ -109,27 +109,6 @@ class DataChecker(ValidatorMixin, models.Model):
 
                 yield fs, field, effective_group
 
-    def process_data_with_groups(self, data: dict) -> dict:
-        grouped_data = {}
-
-        for fs, field, group in self.get_fields_with_groups():
-            if "%s" in fs.prefix:
-                field_name = fs.prefix % field.name
-            else:
-                field_name = f"{fs.prefix}{field.name}"
-
-            if field_name in data:
-                field_value = data[field_name]
-
-                if group:
-                    if group not in grouped_data:
-                        grouped_data[group] = {}
-                    grouped_data[group][field.name] = field_value
-                else:
-                    grouped_data[field.name] = field_value
-
-        return grouped_data
-
     @memoized_method()
     def get_fields(self) -> Generator["FlexField"]:
         fs: DataCheckerFieldset
