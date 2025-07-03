@@ -112,3 +112,64 @@ class TestGroupFunctionality(TestCase):
         # Should be at root level
         self.assertIn("document_name", processed_data)
         self.assertEqual(processed_data["document_name"], "test_doc.pdf")
+
+    def test_process_data_with_groups_prefix_with_placeholder(self):
+        DataCheckerFieldset.objects.create(
+            checker=self.datachecker,
+            fieldset=self.documents_fieldset,
+            override_default_value=False,
+            prefix="doc_%s_",
+        )
+
+        input_data = {"doc_document_name_": "test_doc.pdf"}
+        processed_data = self.datachecker.process_data_with_groups(input_data)
+
+        self.assertIn("documents", processed_data)
+        self.assertEqual(processed_data["documents"]["document_name"], "test_doc.pdf")
+
+    def test_process_data_with_groups_prefix_without_placeholder(self):
+        DataCheckerFieldset.objects.create(
+            checker=self.datachecker,
+            fieldset=self.documents_fieldset,
+            override_default_value=False,
+            prefix="doc_",
+        )
+
+        input_data = {"doc_document_name": "test_doc.pdf"}
+        processed_data = self.datachecker.process_data_with_groups(input_data)
+
+        self.assertIn("documents", processed_data)
+        self.assertEqual(processed_data["documents"]["document_name"], "test_doc.pdf")
+
+    def test_process_data_with_groups_field_not_in_data(self):
+        DataCheckerFieldset.objects.create(
+            checker=self.datachecker,
+            fieldset=self.documents_fieldset,
+            override_default_value=False,
+        )
+
+        input_data = {"other_field": "some_value"}
+        processed_data = self.datachecker.process_data_with_groups(input_data)
+
+        # Should not contain the field since it's not in input data
+        self.assertNotIn("documents", processed_data)
+        self.assertEqual(processed_data, {})
+
+    def test_process_data_with_groups_multiple_fields_same_group(self):
+        DataCheckerFieldset.objects.create(
+            checker=self.datachecker,
+            fieldset=self.documents_fieldset,
+            override_default_value=False,
+        )
+
+        # Create another field in the same fieldset
+        FlexField.objects.create(
+            name="document_type", definition=self.field_def, fieldset=self.documents_fieldset
+        )
+
+        input_data = {"document_name": "test_doc.pdf", "document_type": "PDF"}
+        processed_data = self.datachecker.process_data_with_groups(input_data)
+
+        self.assertIn("documents", processed_data)
+        self.assertEqual(processed_data["documents"]["document_name"], "test_doc.pdf")
+        self.assertEqual(processed_data["documents"]["document_type"], "PDF")
