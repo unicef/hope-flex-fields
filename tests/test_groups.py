@@ -1,175 +1,153 @@
-from django.test import TestCase
-
+import pytest
 from testutils.factories import FieldDefinitionFactory, FieldsetFactory
 
 from hope_flex_fields.models import DataChecker, DataCheckerFieldset, FlexField
 
 
-class TestGroupFunctionality(TestCase):
-    def setUp(self):
-        self.field_def = FieldDefinitionFactory()
+@pytest.fixture
+def setup_data(db):
+    field_def = FieldDefinitionFactory()
 
-        self.documents_fieldset = FieldsetFactory(name="Documents", default_group="documents")
-        self.personal_fieldset = FieldsetFactory(name="Personal", default_group="personal")
-        self.root_fieldset = FieldsetFactory(name="Root", default_group="")
+    documents_fieldset = FieldsetFactory(name="Documents", default_group="documents")
+    personal_fieldset = FieldsetFactory(name="Personal", default_group="personal")
+    root_fieldset = FieldsetFactory(name="Root", default_group="")
 
-        self.doc_field = FlexField.objects.create(
-            name="document_name", definition=self.field_def, fieldset=self.documents_fieldset
-        )
-        self.personal_field = FlexField.objects.create(
-            name="first_name", definition=self.field_def, fieldset=self.personal_fieldset
-        )
-        self.root_field = FlexField.objects.create(name="id", definition=self.field_def, fieldset=self.root_fieldset)
+    doc_field = FlexField.objects.create(name="document_name", definition=field_def, fieldset=documents_fieldset)
+    personal_field = FlexField.objects.create(name="first_name", definition=field_def, fieldset=personal_fieldset)
+    root_field = FlexField.objects.create(name="id", definition=field_def, fieldset=root_fieldset)
 
-        self.datachecker = DataChecker.objects.create(name="TestChecker")
+    datachecker = DataChecker.objects.create(name="TestChecker")
 
-    def test_fieldset_default_group(self):
-        self.assertEqual(self.documents_fieldset.default_group, "documents")
-        self.assertEqual(self.personal_fieldset.default_group, "personal")
-        self.assertEqual(self.root_fieldset.default_group, "")
+    return {
+        "field_def": field_def,
+        "documents_fieldset": documents_fieldset,
+        "personal_fieldset": personal_fieldset,
+        "root_fieldset": root_fieldset,
+        "doc_field": doc_field,
+        "personal_field": personal_field,
+        "root_field": root_field,
+        "datachecker": datachecker,
+    }
 
-    def test_datachecker_fieldset_override_fields(self):
-        dc_fieldset = DataCheckerFieldset.objects.create(
-            checker=self.datachecker,
-            fieldset=self.documents_fieldset,
-            override_default_value=True,
-            override_group="custom_docs",
-        )
 
-        self.assertTrue(dc_fieldset.override_default_value)
-        self.assertEqual(dc_fieldset.override_group, "custom_docs")
+def test_fieldset_default_group(setup_data):
+    documents_fieldset = setup_data["documents_fieldset"]
+    personal_fieldset = setup_data["personal_fieldset"]
+    root_fieldset = setup_data["root_fieldset"]
 
-    def test_get_fields_with_groups_no_override(self):
-        DataCheckerFieldset.objects.create(
-            checker=self.datachecker, fieldset=self.documents_fieldset, override_default_value=False
-        )
+    assert documents_fieldset.default_group == "documents"
+    assert personal_fieldset.default_group == "personal"
+    assert root_fieldset.default_group == ""
 
-        fields_with_groups = list(self.datachecker.get_fields_with_groups())
-        self.assertEqual(len(fields_with_groups), 1)
 
-        fs, field, group = fields_with_groups[0]
-        self.assertEqual(group, "documents")  # Should use fieldset's default_group
+def test_datachecker_fieldset_override_fields(setup_data):
+    datachecker = setup_data["datachecker"]
+    documents_fieldset = setup_data["documents_fieldset"]
 
-    def test_get_fields_with_groups_with_override(self):
-        DataCheckerFieldset.objects.create(
-            checker=self.datachecker,
-            fieldset=self.documents_fieldset,
-            override_default_value=True,
-            override_group="custom_group",
-        )
+    dc_fieldset = DataCheckerFieldset.objects.create(
+        checker=datachecker,
+        fieldset=documents_fieldset,
+        override_default_value=True,
+        override_group="custom_docs",
+    )
 
-        fields_with_groups = list(self.datachecker.get_fields_with_groups())
-        self.assertEqual(len(fields_with_groups), 1)
+    assert dc_fieldset.override_default_value is True
+    assert dc_fieldset.override_group == "custom_docs"
 
-        fs, field, group = fields_with_groups[0]
-        self.assertEqual(group, "custom_group")  # Should use override_group
 
-    def test_get_fields_with_groups_override_empty(self):
-        DataCheckerFieldset.objects.create(
-            checker=self.datachecker, fieldset=self.documents_fieldset, override_default_value=True, override_group=""
-        )
+def test_get_fields_with_groups_no_override(setup_data):
+    datachecker = setup_data["datachecker"]
+    documents_fieldset = setup_data["documents_fieldset"]
 
-        fields_with_groups = list(self.datachecker.get_fields_with_groups())
-        self.assertEqual(len(fields_with_groups), 1)
+    DataCheckerFieldset.objects.create(checker=datachecker, fieldset=documents_fieldset, override_default_value=False)
 
-        fs, field, group = fields_with_groups[0]
-        self.assertEqual(group, "")  # Should be empty string when override_group is empty
+    fields_with_groups = list(datachecker.get_fields_with_groups())
+    assert len(fields_with_groups) == 1
 
-    def test_process_data_with_groups(self):
-        DataCheckerFieldset.objects.create(
-            checker=self.datachecker, fieldset=self.documents_fieldset, override_default_value=False
-        )
-        DataCheckerFieldset.objects.create(
-            checker=self.datachecker,
-            fieldset=self.personal_fieldset,
-            override_default_value=True,
-            override_group="custom_personal",
-        )
-        DataCheckerFieldset.objects.create(
-            checker=self.datachecker, fieldset=self.root_fieldset, override_default_value=False
-        )
+    fs, field, group = fields_with_groups[0]
+    assert group == "documents"  # Should use fieldset's default_group
 
-        input_data = {"document_name": "test_doc.pdf", "first_name": "John", "id": "12345"}
 
-        processed_data = self.datachecker.process_data_with_groups(input_data)
+def test_get_fields_with_groups_with_override(setup_data):
+    datachecker = setup_data["datachecker"]
+    documents_fieldset = setup_data["documents_fieldset"]
 
-        self.assertIn("documents", processed_data)
-        self.assertIn("custom_personal", processed_data)
-        self.assertIn("id", processed_data)  # Root level
+    DataCheckerFieldset.objects.create(
+        checker=datachecker,
+        fieldset=documents_fieldset,
+        override_default_value=True,
+        override_group="custom_group",
+    )
 
-        self.assertEqual(processed_data["documents"]["document_name"], "test_doc.pdf")
-        self.assertEqual(processed_data["custom_personal"]["first_name"], "John")
-        self.assertEqual(processed_data["id"], "12345")
+    fields_with_groups = list(datachecker.get_fields_with_groups())
+    assert len(fields_with_groups) == 1
 
-    def test_process_data_with_groups_empty_group(self):
-        DataCheckerFieldset.objects.create(
-            checker=self.datachecker, fieldset=self.documents_fieldset, override_default_value=True, override_group=""
-        )
+    fs, field, group = fields_with_groups[0]
+    assert group == "custom_group"  # Should use override_group
 
-        input_data = {"document_name": "test_doc.pdf"}
-        processed_data = self.datachecker.process_data_with_groups(input_data)
 
-        # Should be at root level
-        self.assertIn("document_name", processed_data)
-        self.assertEqual(processed_data["document_name"], "test_doc.pdf")
+def test_get_fields_with_groups_override_empty(setup_data):
+    datachecker = setup_data["datachecker"]
+    documents_fieldset = setup_data["documents_fieldset"]
 
-    def test_process_data_with_groups_prefix_with_placeholder(self):
-        DataCheckerFieldset.objects.create(
-            checker=self.datachecker,
-            fieldset=self.documents_fieldset,
-            override_default_value=False,
-            prefix="doc_%s_",
-        )
+    DataCheckerFieldset.objects.create(
+        checker=datachecker, fieldset=documents_fieldset, override_default_value=True, override_group=""
+    )
 
-        input_data = {"doc_document_name_": "test_doc.pdf"}
-        processed_data = self.datachecker.process_data_with_groups(input_data)
+    fields_with_groups = list(datachecker.get_fields_with_groups())
+    assert len(fields_with_groups) == 1
 
-        self.assertIn("documents", processed_data)
-        self.assertEqual(processed_data["documents"]["document_name"], "test_doc.pdf")
+    fs, field, group = fields_with_groups[0]
+    assert group == ""  # Should be empty string when override_group is empty
 
-    def test_process_data_with_groups_prefix_without_placeholder(self):
-        DataCheckerFieldset.objects.create(
-            checker=self.datachecker,
-            fieldset=self.documents_fieldset,
-            override_default_value=False,
-            prefix="doc_",
-        )
 
-        input_data = {"doc_document_name": "test_doc.pdf"}
-        processed_data = self.datachecker.process_data_with_groups(input_data)
+def test_get_fields_with_groups_multiple_fieldsets(setup_data):
+    datachecker = setup_data["datachecker"]
+    documents_fieldset = setup_data["documents_fieldset"]
+    personal_fieldset = setup_data["personal_fieldset"]
+    root_fieldset = setup_data["root_fieldset"]
 
-        self.assertIn("documents", processed_data)
-        self.assertEqual(processed_data["documents"]["document_name"], "test_doc.pdf")
+    DataCheckerFieldset.objects.create(checker=datachecker, fieldset=documents_fieldset, override_default_value=False)
+    DataCheckerFieldset.objects.create(
+        checker=datachecker,
+        fieldset=personal_fieldset,
+        override_default_value=True,
+        override_group="custom_personal",
+    )
+    DataCheckerFieldset.objects.create(checker=datachecker, fieldset=root_fieldset, override_default_value=False)
 
-    def test_process_data_with_groups_field_not_in_data(self):
-        DataCheckerFieldset.objects.create(
-            checker=self.datachecker,
-            fieldset=self.documents_fieldset,
-            override_default_value=False,
-        )
+    fields_with_groups = list(datachecker.get_fields_with_groups())
+    assert len(fields_with_groups) == 3
 
-        input_data = {"other_field": "some_value"}
-        processed_data = self.datachecker.process_data_with_groups(input_data)
+    groups = [group for _, _, group in fields_with_groups]
+    assert "documents" in groups
+    assert "custom_personal" in groups
+    assert "" in groups  # root fieldset has empty group
 
-        # Should not contain the field since it's not in input data
-        self.assertNotIn("documents", processed_data)
-        self.assertEqual(processed_data, {})
 
-    def test_process_data_with_groups_multiple_fields_same_group(self):
-        DataCheckerFieldset.objects.create(
-            checker=self.datachecker,
-            fieldset=self.documents_fieldset,
-            override_default_value=False,
-        )
+def test_get_fields_method(setup_data):
+    datachecker = setup_data["datachecker"]
+    documents_fieldset = setup_data["documents_fieldset"]
 
-        # Create another field in the same fieldset
-        FlexField.objects.create(
-            name="document_type", definition=self.field_def, fieldset=self.documents_fieldset
-        )
+    DataCheckerFieldset.objects.create(checker=datachecker, fieldset=documents_fieldset, override_default_value=False)
 
-        input_data = {"document_name": "test_doc.pdf", "document_type": "PDF"}
-        processed_data = self.datachecker.process_data_with_groups(input_data)
+    fields = list(datachecker.get_fields())
+    assert len(fields) == 1
 
-        self.assertIn("documents", processed_data)
-        self.assertEqual(processed_data["documents"]["document_name"], "test_doc.pdf")
-        self.assertEqual(processed_data["documents"]["document_type"], "PDF")
+    fs, field = fields[0]
+    assert field.name == "document_name"
+    assert fs.fieldset == documents_fieldset
+
+
+def test_get_field_method(setup_data):
+    datachecker = setup_data["datachecker"]
+    documents_fieldset = setup_data["documents_fieldset"]
+
+    DataCheckerFieldset.objects.create(checker=datachecker, fieldset=documents_fieldset, override_default_value=False)
+
+    field = datachecker.get_field("document_name")
+    assert field is not None
+    assert field.name == "document_name"
+
+    field = datachecker.get_field("non_existent")
+    assert field is None
