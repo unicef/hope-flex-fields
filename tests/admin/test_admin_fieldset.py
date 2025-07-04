@@ -24,8 +24,7 @@ def record(db):
 @pytest.fixture
 def record2(db):
     ct = ContentType.objects.get_for_model(User)
-    fs = Fieldset.objects.create_from_content_type("Test", ct)
-    return fs
+    return Fieldset.objects.create_from_content_type("Test", ct)
 
 
 def test_detect_changes(app, record2):

@@ -18,9 +18,7 @@ def record(db):
         regex=".*",
         validation="true",
     )
-    fs1 = FlexFieldFactory(definition=fd, name="int")
-
-    return fs1
+    return FlexFieldFactory(definition=fd, name="int")
 
 
 def test_field_test(app, record):

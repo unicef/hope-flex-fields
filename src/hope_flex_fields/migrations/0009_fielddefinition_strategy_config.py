@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("hope_flex_fields", "0008_fielddefinition_attributes_strategy_and_more"),
     ]

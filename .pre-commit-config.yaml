@@ -1,54 +1,26 @@
 repos:
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        stages: [pre-commit]
-  - repo: https://github.com/ambv/black
-    rev: 24.4.2
-    hooks:
-      - id: black
-        args: [--config=pyproject.toml]
-        exclude: "migrations|snapshots"
-        stages: [pre-commit]
-  - repo: https://github.com/PyCQA/flake8
-    rev: 7.1.0
-    hooks:
-      - id: flake8
-        args: [--config=.flake8]
-
-        additional_dependencies: [flake8-bugbear==22.9.23]
-        stages: [ pre-commit ]
-  - repo: https://github.com/PyCQA/bandit
-    rev: '1.7.9' # Update me!
-    hooks:
-      - id: bandit
-        args: ["-c", "bandit.yaml"]
-  - repo: https://github.com/twisted/towncrier
-    rev: 23.11.0
-    hooks:
-      - id: towncrier-check
-
-  - repo: https://github.com/saxix/pch
-    rev: '0.1'
-    hooks:
-      - id: check-missed-migrations
-        args:
-          - src
-        stages: [ pre-commit ]
-        additional_dependencies: [ setuptools ]
-
-      - id: check-untracked
-        args:
-          - src
-          - tests
-        stages: [ push ]
-
-      - id: check-forbidden
-        args:
-          - -p
-          - /\.showbrowser\(/
-          - -p
-          - /print\(111/
-        stages: [ commit ]
-        additional_dependencies: [ setuptools ]
+    -   repo: https://github.com/pre-commit/pre-commit-hooks
+        rev: v5.0.0
+        hooks:
+            -   id: end-of-file-fixer
+            -   id: trailing-whitespace
+    -   repo: https://github.com/python-jsonschema/check-jsonschema
+        rev: 0.31.0
+        hooks:
+            -   id: check-github-workflows
+                args: [ "--verbose" ]
+    -   repo: https://github.com/tox-dev/tox-ini-fmt
+        rev: "1.5.0"
+        hooks:
+            -   id: tox-ini-fmt
+                args: [ "-p", "lint" ]
+    -   repo: https://github.com/tox-dev/pyproject-fmt
+        rev: "v2.5.1"
+        hooks:
+            -   id: pyproject-fmt
+    -   repo: https://github.com/astral-sh/ruff-pre-commit
+        rev: "v0.9.4"
+        hooks:
+            -   id: ruff-format
+            -   id: ruff
+                args: [ "--fix", "--unsafe-fixes", "--exit-non-zero-on-fix" ]

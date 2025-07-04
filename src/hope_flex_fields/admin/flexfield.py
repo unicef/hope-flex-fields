@@ -35,8 +35,7 @@ class FlexFieldAdmin(ExtraButtonsMixin, ModelAdmin):
     )
 
     def get_form(self, request, obj=None, change=False, **kwargs):
-        form = super().get_form(request, obj, change, **kwargs)
-        return form
+        return super().get_form(request, obj, change, **kwargs)
 
     def get_readonly_fields(self, request, obj=None):
         if not obj or not obj.fieldset:
@@ -54,7 +53,7 @@ class FlexFieldAdmin(ExtraButtonsMixin, ModelAdmin):
         fd: FieldDefinition = ctx["original"]
         try:
             field = fd.get_field()
-        except Exception as e:
+        except Exception as e:  # noqa
             self.message_user(request, str(e))
             field = fd.get_field({})
 

@@ -132,4 +132,3 @@ CSP_IMG_SRC = ["'self'", "data:", "example.com"]
 CSP_EXCLUDE_URL_PREFIXES = ["/admin"]
 
 JSON_EDITOR_INIT_JS = "flex_fields/jsoneditor/jsoneditor-init.js"
-# JSON_EDITOR_CSS = 'flex_fields/jsoneditor/django-jsoneditor.css'

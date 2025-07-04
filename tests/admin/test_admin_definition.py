@@ -14,15 +14,13 @@ pytestmark = [pytest.mark.admin, pytest.mark.smoke, pytest.mark.django_db]
 
 @pytest.fixture
 def record(db):
-    fd1 = FieldDefinitionFactory(
+    return FieldDefinitionFactory(
         name="IntField",
         field_type=forms.IntegerField,
         attrs={"min_value": 1, "required": True},
         regex=".*",
         validation="true",
     )
-
-    return fd1
 
 
 def test_field_test(app, record):

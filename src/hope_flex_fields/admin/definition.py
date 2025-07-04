@@ -23,7 +23,7 @@ from ..utils import dumpdata_to_buffer, get_common_attrs, get_kwargs_from_field_
 
 
 @deconstructible
-class FixtureFileValidator(object):
+class FixtureFileValidator:
     error_messages = {
         "invalid_json": _("Invalid fixture file"),
     }
@@ -82,13 +82,6 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
             "",
             {"fields": (("name", "field_type", "validated"), ("attributes_strategy",), "description")},
         ),
-        # (
-        #     "Configuration",
-        #     {
-        #         "classes": ("collapse", "open"),
-        #         "fields": ("regex", "attrs", "validation"),
-        #     },
-        # ),
         (
             "Advanced",
             {
@@ -139,11 +132,6 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
         ctx["form"] = form
         return render(request, "admin/hope_flex_fields/import_config.html", ctx)
 
-    # def get_changeform_initial_data(self, request):
-    #     initial = super().get_changeform_initial_data(request)
-    #     # initial["attrs"] = get_default_attrs()
-    #     return initial
-
     @button()
     def configure(self, request, pk):
         ctx = self.get_common_context(request, pk, title="Configure")
@@ -190,7 +178,7 @@ class FieldDefinitionAdmin(ExtraButtonsMixin, ModelAdmin):
         fd: FieldDefinition = ctx["original"]
         try:
             field = fd.get_field()
-        except Exception as e:
+        except Exception as e:  # noqa
             self.message_user(request, str(e))
             field = fd.get_field({})
 

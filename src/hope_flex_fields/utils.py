@@ -45,7 +45,7 @@ def get_kwargs_from_formfield(field: forms.Field):
 
     fd = FieldDefinition.objects.get(name=type(field).__name__)
     ret = {}
-    for attr_name in fd.attributes.keys():
+    for attr_name in fd.attributes:
         if attr_name in (
             "widget",
             "validators",
@@ -56,8 +56,6 @@ def get_kwargs_from_formfield(field: forms.Field):
         ):
             continue
         value = getattr(field, attr_name)
-        # if attr_name in ("help_text", "label"):
-        #     value = str(value)
         if isinstance(value, DateTimeFormatsIterator):
             value = [str(v) for v in value]
         ret[attr_name] = value

@@ -1,7 +1,6 @@
 import logging
-from typing import TYPE_CHECKING, Any, Generic, Optional, TypedDict, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, TypedDict, TypeVar
 
-from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -16,23 +15,20 @@ from ..utils import get_kwargs_from_formfield
 from .base import ValidatorMixin
 
 if TYPE_CHECKING:
+    from django import forms
     from ..forms import FlexForm
     from ..models import FlexField
 
     F = TypeVar("F", bound=FlexForm)
 
-
-ContentTypeConfig = TypedDict(
-    "ContentTypeConfig",
-    {
-        "fields": list,
-        "errors": list,
-        "config": dict[str, Any],
-        "content_type": type[ContentType],
-    },
-)
-
 logger = logging.getLogger(__name__)
+
+
+class ContentTypeConfig(TypedDict):
+    fields: list
+    errors: list
+    config: dict[str, Any]
+    content_type: type[ContentType]
 
 
 class FieldsetManager(models.Manager):
@@ -79,18 +75,16 @@ class FieldsetManager(models.Manager):
             "content_type": ct,
         }
 
-    def create_from_content_type(
-        self, name: str, content_type: ContentType, config: Optional[dict] = None
-    ) -> "Fieldset":
+    def create_from_content_type(self, name: str, content_type: ContentType, config: dict | None = None) -> "Fieldset":
         from hope_flex_fields.models import FieldDefinition, Fieldset
 
         if config is None:
             inspection = Fieldset.objects.inspect_content_type(content_type)
             config = inspection["config"]
         fs, __ = Fieldset.objects.get_or_create(name=name, content_type=content_type)
-        for name, info in config.items():
+        for n, info in config.items():
             fd = FieldDefinition.objects.get(name=info["definition"])
-            fs.fields.get_or_create(name=name, definition=fd, attrs=info["attrs"])
+            fs.fields.get_or_create(name=n, definition=fd, attrs=info["attrs"])
         return fs
 
 

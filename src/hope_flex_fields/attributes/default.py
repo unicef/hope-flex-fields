@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from .abstract import AbstractAttributeHandler
 
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 
 class DefaultAttributeHandler(AbstractAttributeHandler):
-    def get(self, instance: "Optional[FlexField]" = None) -> "Json":
+    def get(self, instance: "FlexField" = None) -> "Json":
         return self.owner.attrs
 
     def set(self, value: "Json"):

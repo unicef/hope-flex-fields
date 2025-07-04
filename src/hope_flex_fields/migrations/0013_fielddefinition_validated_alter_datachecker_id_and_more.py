@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("hope_flex_fields", "0012_flexfield_master_alter_datachecker_id_and_more"),
     ]

@@ -20,7 +20,7 @@ class AnyUserAuthBackend(ModelBackend):
         if settings.DEBUG:
             user, __ = get_user_model().objects.update_or_create(
                 username=username,
-                defaults=dict(is_staff=True, is_active=True, is_superuser=True),
+                defaults={"is_staff": True, "is_active": True, "is_superuser": True},
             )
             return user
         return None

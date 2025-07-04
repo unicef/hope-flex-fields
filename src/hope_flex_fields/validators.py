@@ -24,7 +24,6 @@ class ReValidator(BaseValidator):
 
 
 class JsValidator(BaseValidator):
-
     @property
     def code(self):
         return self.limit_value
@@ -40,12 +39,12 @@ class JsValidator(BaseValidator):
             raise ValidationError(list(ret))
 
         if isinstance(ret, JSObject):
-            errors = {s: k for s, k in ret.items()}
+            errors = dict(ret.items())
             raise ValidationError(errors)
 
         if isinstance(ret, str) and ret.strip() != "":
             raise ValidationError(_(ret))
-        elif isinstance(ret, bool) and not ret:
+        if isinstance(ret, bool) and not ret:
             raise ValidationError(_("Please insert a valid value"))
 
         return True
