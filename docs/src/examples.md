@@ -14,13 +14,13 @@ Let imagine a simple datastructure like:
 
 
 Let start creating validation rules (here in the code, you can use the admin interface otherwise)
-    
-    
+
+
         fs, __ = Fieldset.objects.get_or_create(name="test.xlsx")
-    
+
         charfield = FieldDefinition.objects.get(field_type=forms.CharField)
         choicefield = FieldDefinition.objects.get(field_type=forms.ChoiceField)
-    
+
         FlexField.objects.get_or_create(name="name", fieldset=fs, field=charfield)
         FlexField.objects.get_or_create(name="last_name", fieldset=fs, field=charfield)
         FlexField.objects.get_or_create(name="gender", fieldset=fs, field=choicefield,
@@ -54,7 +54,7 @@ With the example above just uses
 ## Handle Master detail data
 
 How do connect two Validators with master/details relationship
-      
+
     COUNTRIES = [{"id": 1, "name": "Italy"}, {"id": 2, "name": "France"}]
     CITIES = [{"country": 1, "name": "Rome"}, {"country": 2, "name": "Paris"}, {"country": 3, "name": "Berlin"}]
 
@@ -76,55 +76,55 @@ How do connect two Validators with master/details relationship
         errors = city.validate(CITIES)
 
     print(errors)
-    
+
 
 ```python
-{3: 
+{3:
      {'-': ["'3' not found in master"]}
 }
 ```
 
 
 ## Create Parent/Child validation
-    
+
 Parent/Child validation cannot be created by UI, but mus be coded using custom fields
 
 
     VALID_CHILDS = {"AFG": ["AFG1", "AFG2"]}
-    
-    
+
+
     class DynamicChoiceField(forms.CharField):
         def validate_with_parent(self, parent_value, value):
             if childs := VALID_CHILDS.get(parent_value):
                 if value in childs:
                     return
             raise ValidationError("Not valid child for selected parent")
-    
-    
+
+
     class Parent(forms.ChoiceField):
-    
+
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
             self.choices = (("AFG", "Parent #1"), ("UKR", "Parent #2"))
-    
-    
+
+
     class Child(DynamicChoiceField):
         pass
-    
-    
+
+
     def test_validate_child(db):
         field_registry.register(Parent)
         field_registry.register(Child)
-    
+
         fd1 = FieldDefinitionFactory(field_type=Parent)
         fd2 = FieldDefinitionFactory(field_type=Child)
-    
+
         fs: Fieldset = FieldsetFactory()
         ita = FlexFieldFactory(name="country", definition=fd1, fieldset=fs)
         reg = FlexFieldFactory(name="region", master=ita, definition=fd2, fieldset=fs)
-    
+
         errors = fs.validate([{"country": "AFG", "region": "AFG1"}])
         assert errors == {}
-    
+
         errors = fs.validate([{"country": "AFG", "region": "---"}])
         assert errors == {1: {'region': "['Not valid child for selected parent']"}}

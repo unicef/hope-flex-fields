@@ -30,7 +30,7 @@ class FlexForm(forms.Form):
         return self.cleaned_data
 
     def initialize_parent_child(self, data: dict) -> None:
-        for __, field in self.fields.items():
+        for field in self.fields.values():
             if field.flex_field.master and hasattr(field, "validate_with_parent"):
                 parent_value = data.get(field.flex_field.master.name)
                 field.choices = field.get_choices_for_parent_value(parent_value)
@@ -39,25 +39,20 @@ class FlexForm(forms.Form):
 class FieldDefinitionForm(ModelForm):
     validation = forms.CharField(widget=JavascriptEditor(toolbar=False), required=False)
 
-    # attrs = forms.JSONField(
-    #     widget=JSONEditor(
-    #         init_options={"mode": "code", "modes": ["text", "code", "tree"]},
-    #         ace_options={"readOnly": False},
-    #     ),
-    #     required=True,
-    # )
-
     class Meta:
         model = FieldDefinition
-        exclude = ("attrs",)
+        fields = ("name", "description", "regex", "validation")
 
     def clean(self):
         super().clean()
         if not (ft := self.cleaned_data.get("field_type")) or ft not in field_registry:
             raise ValidationError({"field_type": "Invalid field type"})
-        if self.instance.pk:  # update
-            if self.instance.field_type and fqn(self.instance.field_type) != self.cleaned_data["field_type"]:
-                self.instance.attrs = get_common_attrs() | get_kwargs_from_field_class(self.cleaned_data["field_type"])
+        if (
+            self.instance.pk
+            and self.instance.field_type
+            and fqn(self.instance.field_type) != self.cleaned_data["field_type"]
+        ):
+            self.instance.attrs = get_common_attrs() | get_kwargs_from_field_class(self.cleaned_data["field_type"])
         return self.cleaned_data
 
 
@@ -73,10 +68,24 @@ class FlexFieldForm(ModelForm):
 
     class Meta:
         model = FlexField
-        exclude = ()
+        fields = (
+            "name",
+            "description",
+            "attrs",
+            "regex",
+            "validation",
+            "fieldset",
+            "definition",
+            "master",
+        )
 
 
 class FieldsetForm(ModelForm):
     class Meta:
         model = Fieldset
-        exclude = ()
+        fields = (
+            "name",
+            "description",
+            "extends",
+            "content_type",
+        )

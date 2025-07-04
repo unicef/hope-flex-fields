@@ -1,5 +1,6 @@
 from django import forms
 from django.urls import reverse
+from unittest.mock import patch
 
 import pytest
 from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory
@@ -18,9 +19,7 @@ def record(db):
         regex=".*",
         validation="true",
     )
-    fs1 = FlexFieldFactory(definition=fd, name="int")
-
-    return fs1
+    return FlexFieldFactory(definition=fd, name="int")
 
 
 def test_field_test(app, record):
@@ -80,3 +79,17 @@ def test_fields_create_and_update(app, record):
         "required": False,
         "help_text": "",
     }
+
+
+def test_test_method_exception_handling(app):
+    fd = FieldDefinitionFactory(
+        name="ExceptionField", field_type=forms.IntegerField, attrs={"invalid_attr": "invalid_value"}
+    )
+    flexfield = FlexFieldFactory(definition=fd, name="exception_field")
+
+    url = reverse("admin:hope_flex_fields_flexfield_test", args=[flexfield.pk])
+
+    with patch.object(flexfield, "get_field", side_effect=Exception("Test exception")):
+        res = app.get(url)
+        assert res.status_code == 200
+        assert "test" in res.forms

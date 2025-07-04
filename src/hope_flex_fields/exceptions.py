@@ -1,4 +1,4 @@
-class InvalidAttributes(Exception):
+class InvalidAttributesError(Exception):
     pass
 
 

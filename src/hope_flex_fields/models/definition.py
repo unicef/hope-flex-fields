@@ -30,7 +30,6 @@ if TYPE_CHECKING:
 
 
 class FieldDefinitionManager(BaseManager):
-
     def get_by_natural_key(self, name):
         return self.get(name=name)
 
@@ -50,7 +49,7 @@ class FieldDefinitionManager(BaseManager):
 
 
 class FieldDefinition(AbstractField):
-    """This class is the equivalent django.forms.Field class, used to create reusable field types"""
+    """Class equivalent to django.forms.Field class, used to create reusable field types."""
 
     field_type = StrategyClassField(registry=field_registry, null=False, blank=False)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
@@ -81,7 +80,7 @@ class FieldDefinition(AbstractField):
         base = self.attrs
         try:
             return base | self.attributes_strategy.get()
-        except Exception:
+        except Exception:  # noqa
             self.validated = False
         return base
 

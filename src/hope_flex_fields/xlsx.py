@@ -15,17 +15,15 @@ xlsxwriter_options = {
     "DecimalField": {"num_format": "#,##0.00"},
     "BooleanField": {"num_format": "boolean"},
     "NullBooleanField": {"num_format": "boolean"},
-    # 'EmailField': lambda value: 'HYPERLINK("mailto:%s","%s")' % (value, value),
-    # 'URLField': lambda value: 'HYPERLINK("%s","%s")' % (value, value),
     "CurrencyColumn": {"num_format": '"$"#,##0.00);[Red]("$"#,##0.00)'},
 }
 
 
 def get_format_for_field(fld: "FlexField"):
     base_type = fld.base_type()
-    # attrs = fld.get_merged_attrs()
     if base_type == "IntegerField":
         return {"num_format": "#,##"}
+    return None
 
 
 def get_validation_for_field(fld: "FlexField"):
@@ -43,10 +41,10 @@ def get_validation_for_field(fld: "FlexField"):
         if attrs.get("min_value") and attrs.get("max_value"):
             base["criteria"] = "between"
         return base
-    elif base_type == "BooleanField":
+    if base_type == "BooleanField":
         return {"validate": "list", "source": [True, False]}
-    elif base_type == "DateField":
+    if base_type == "DateField":
         return {}
-    elif base_type == "ChoiceField":
+    if base_type == "ChoiceField":
         return {"validate": "list", "source": [m[0] for m in attrs.get("choices", [])]}
     return {}

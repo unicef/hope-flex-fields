@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("contenttypes", "0002_remove_content_type_name"),
         ("hope_flex_fields", "0004_auto_20241009_0643"),
@@ -31,26 +30,18 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name="fielddefinition",
-            constraint=models.UniqueConstraint(
-                fields=("name",), name="fielddefinition_unique_name"
-            ),
+            constraint=models.UniqueConstraint(fields=("name",), name="fielddefinition_unique_name"),
         ),
         migrations.AddConstraint(
             model_name="fielddefinition",
-            constraint=models.UniqueConstraint(
-                fields=("slug",), name="fielddefinition_unique_slug"
-            ),
+            constraint=models.UniqueConstraint(fields=("slug",), name="fielddefinition_unique_slug"),
         ),
         migrations.AddConstraint(
             model_name="flexfield",
-            constraint=models.UniqueConstraint(
-                fields=("name", "fieldset"), name="flexfield_unique_name"
-            ),
+            constraint=models.UniqueConstraint(fields=("name", "fieldset"), name="flexfield_unique_name"),
         ),
         migrations.AddConstraint(
             model_name="flexfield",
-            constraint=models.UniqueConstraint(
-                fields=("slug", "fieldset"), name="flexfield_unique_slug"
-            ),
+            constraint=models.UniqueConstraint(fields=("slug", "fieldset"), name="flexfield_unique_slug"),
         ),
     ]

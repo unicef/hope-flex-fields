@@ -18,15 +18,14 @@ class Command(BaseCommand):
 
         hh = FieldsetFactory(name="household_with_individual")
         hh2 = FieldsetFactory(name="household_no_individual", extends=hh)
-        # choice = FieldDefinition.objects.get(name="ChoiceField")
         string = FieldDefinition.objects.get(name="CharField")
         integer = FieldDefinition.objects.get(name="IntegerField")
         boolean = FieldDefinition.objects.get(name="BooleanField")
-        RESIDENCE_STATUSES = ["CITIZEN", "REFUGEE", "MIGRANT", "IDP"]
+        RESIDENCE_STATUSES = ["CITIZEN", "REFUGEE", "MIGRANT", "IDP"]  # noqa
         residence_status = FieldDefinitionFactory(
             name="ResidenceStatus",
             field_type=forms.ChoiceField,
-            attrs={"choices": list(zip(RESIDENCE_STATUSES, RESIDENCE_STATUSES))},
+            attrs={"choices": list(zip(RESIDENCE_STATUSES, RESIDENCE_STATUSES, strict=True))},
         )
 
         FlexFieldFactory(fieldset=hh, name="residence_status_h_c", definition=residence_status)

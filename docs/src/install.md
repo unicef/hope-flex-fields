@@ -23,5 +23,5 @@ in your `settings.py`
         'admin_extra_buttons',
         'jsoneditor',
         'hope_flex_fields',
-    
+
     ]
