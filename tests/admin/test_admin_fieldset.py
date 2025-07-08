@@ -75,3 +75,11 @@ def test_fieldset_create_from_content_type(app, record, model_class):
     fs = Fieldset.objects.filter(name="FS #1").first()
     assert fs
     assert fs.fields.exists()
+
+
+def test_all_fields_method_inlineformset_factory(app, record):
+    url = reverse("admin:hope_flex_fields_fieldset_all_fields", args=[record.pk])
+
+    res = app.get(url)
+    assert res.status_code == 200
+    assert "formset" in res.context

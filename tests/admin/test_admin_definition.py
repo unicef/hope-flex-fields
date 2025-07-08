@@ -2,6 +2,7 @@ import json
 
 from django import forms
 from django.urls import reverse
+from unittest.mock import patch
 
 import pytest
 from strategy_field.utils import fqn
@@ -96,3 +97,16 @@ def test_fields_change_type(app, record):
         "required": False,
         "help_text": "",
     }
+
+
+def test_test_method_exception_handling(app):
+    fd = FieldDefinitionFactory(
+        name="ExceptionField", field_type=forms.IntegerField, attrs={"invalid_attr": "invalid_value"}
+    )
+
+    url = reverse("admin:hope_flex_fields_fielddefinition_test", args=[fd.pk])
+
+    with patch.object(fd, "get_field", side_effect=Exception("Test exception")):
+        res = app.get(url)
+        assert res.status_code == 200
+        assert "test" in res.forms
