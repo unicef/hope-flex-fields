@@ -94,7 +94,7 @@ class FieldsetForm(ModelForm):
 class DataCheckerFieldsetForm(ModelForm):
     class Meta:
         model = DataCheckerFieldset
-        fields = '__all__'
+        fields = ("fieldset", "prefix", "order", "override_group", "override_default_value")
         widgets = {
             "override_group": forms.TextInput(attrs={"placeholder": "Enter group name or leave empty for root"}),
         }
