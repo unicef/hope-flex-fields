@@ -13,6 +13,7 @@ from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 
 from ..file_handlers import HANDLERS
+from ..forms import DataCheckerFieldsetForm
 from ..models import DataChecker, DataCheckerFieldset, Fieldset
 from ..models.datachecker import create_xls_importer
 
@@ -57,7 +58,8 @@ class DataCheckerFieldsetFormset(forms.models.BaseInlineFormSet):
 class DataCheckerFieldsetTabularInline(TabularInline):
     model = DataCheckerFieldset
     formset = DataCheckerFieldsetFormset
-    fields = ("fieldset", "prefix", "order")
+    form = DataCheckerFieldsetForm
+    fields = ("fieldset", "prefix", "order", "override_group_default_value", "group")
 
     def get_ordering(self, request):
         return ["order"]

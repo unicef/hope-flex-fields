@@ -47,7 +47,7 @@ class InspectField:
 class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
     list_select_related = True
     search_fields = ("name",)
-    list_display = ("name", "extends", "content_type")
+    list_display = ("name", "extends", "content_type", "group")
     list_filter = ("content_type",)
     form = FieldsetForm
 

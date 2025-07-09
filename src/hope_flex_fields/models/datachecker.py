@@ -71,6 +71,8 @@ class DataCheckerFieldset(models.Model):
     fieldset = models.ForeignKey(Fieldset, on_delete=models.CASCADE)
     prefix = models.CharField(max_length=30, blank=True, default="")
     order = models.PositiveSmallIntegerField(default=0)
+    group = models.CharField(max_length=32, null=True, blank=True)
+    override_group_default_value = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.checker.name}"
@@ -94,6 +96,18 @@ class DataChecker(ValidatorMixin, models.Model):
 
     def natural_key(self):
         return (self.name,)
+
+    @memoized_method()
+    def get_fields_with_groups(self) -> Generator[tuple["DataCheckerFieldset", "FlexField", str]]:
+        fs: DataCheckerFieldset
+        for fs in self.members.select_related("fieldset").all():
+            for field in fs.fieldset.get_fields():
+                if fs.override_group_default_value:
+                    effective_group = fs.group if fs.group and fs.group.strip() else ""
+                else:
+                    effective_group = fs.fieldset.group
+
+                yield fs, field, effective_group
 
     @memoized_method()
     def get_fields(self) -> Generator["FlexField"]:
