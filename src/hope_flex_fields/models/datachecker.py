@@ -98,7 +98,7 @@ class DataChecker(ValidatorMixin, models.Model):
         return (self.name,)
 
     @memoized_method()
-    def get_fields_with_groups(self) -> Generator[tuple["DataCheckerFieldset", "FlexField", str], None, None]:
+    def get_fields_with_groups(self) -> Generator[tuple["DataCheckerFieldset", "FlexField", str]]:
         fs: DataCheckerFieldset
         for fs in self.members.select_related("fieldset").all():
             for field in fs.fieldset.get_fields():
