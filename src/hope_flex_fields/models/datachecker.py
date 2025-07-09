@@ -71,8 +71,8 @@ class DataCheckerFieldset(models.Model):
     fieldset = models.ForeignKey(Fieldset, on_delete=models.CASCADE)
     prefix = models.CharField(max_length=30, blank=True, default="")
     order = models.PositiveSmallIntegerField(default=0)
-    override_group = models.CharField(max_length=32, default="root")
-    override_default_value = models.BooleanField(default=False)
+    group = models.CharField(max_length=32, null=True, blank=True)
+    override_group_default_value = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.checker.name}"
@@ -102,10 +102,10 @@ class DataChecker(ValidatorMixin, models.Model):
         fs: DataCheckerFieldset
         for fs in self.members.select_related("fieldset").all():
             for field in fs.fieldset.get_fields():
-                if fs.override_default_value:
-                    effective_group = fs.override_group if fs.override_group else ""
+                if fs.override_group_default_value:
+                    effective_group = fs.group if fs.group and fs.group.strip() else ""
                 else:
-                    effective_group = fs.fieldset.default_group
+                    effective_group = fs.fieldset.group
 
                 yield fs, field, effective_group
 

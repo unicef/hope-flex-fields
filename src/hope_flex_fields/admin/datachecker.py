@@ -59,7 +59,7 @@ class DataCheckerFieldsetTabularInline(TabularInline):
     model = DataCheckerFieldset
     formset = DataCheckerFieldsetFormset
     form = DataCheckerFieldsetForm
-    fields = ("fieldset", "prefix", "order", "override_default_value", "override_group")
+    fields = ("fieldset", "prefix", "order", "override_group_default_value", "group")
 
     def get_ordering(self, request):
         return ["order"]
