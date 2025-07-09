@@ -1,21 +1,22 @@
+from collections.abc import Generator
 from io import BytesIO
-from typing import TYPE_CHECKING, Generator, Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
 
-from django import forms
 from django.db import models
 from django.utils.translation import gettext as _
 
 from deprecation import deprecated
 
-from ..fields import FlexFormMixin
 from ..utils import memoized_method
 from ..xlsx import get_format_for_field, get_validation_for_field
 from .base import ValidatorMixin
 from .fieldset import Fieldset
 
 if TYPE_CHECKING:
+    from django import forms
     from ..forms import FlexForm
     from .flexfield import FlexField
+    from ..fields import FlexFormMixin
 
     F = TypeVar("F", bound="FlexForm")
 
@@ -25,7 +26,6 @@ def create_xls_importer(dc: "DataChecker"):
 
     out = BytesIO()
     workbook = xlsxwriter.Workbook(out, {"in_memory": True, "default_date_format": "yyyy/mm/dd"})
-    # locked = workbook.add_format({"locked": True})
 
     header_format = workbook.add_format(
         {
@@ -71,10 +71,15 @@ class DataCheckerFieldset(models.Model):
     fieldset = models.ForeignKey(Fieldset, on_delete=models.CASCADE)
     prefix = models.CharField(max_length=30, blank=True, default="")
     order = models.PositiveSmallIntegerField(default=0)
+    group = models.CharField(max_length=32, null=True, blank=True)
+    override_group_default_value = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.checker.name}"
 
 
 class DataChecker(ValidatorMixin, models.Model):
-    """Used for complex validations to combine different fieldsets"""
+    """Used for complex validations to combine different fieldsets."""
 
     last_modified = models.DateTimeField(auto_now=True)
     name = models.CharField(max_length=255, unique=True)
@@ -93,7 +98,19 @@ class DataChecker(ValidatorMixin, models.Model):
         return (self.name,)
 
     @memoized_method()
-    def get_fields(self) -> Generator["FlexField", None, None]:
+    def get_fields_with_groups(self) -> Generator[tuple["DataCheckerFieldset", "FlexField", str]]:
+        fs: DataCheckerFieldset
+        for fs in self.members.select_related("fieldset").all():
+            for field in fs.fieldset.get_fields():
+                if fs.override_group_default_value:
+                    effective_group = fs.group if fs.group and fs.group.strip() else ""
+                else:
+                    effective_group = fs.fieldset.group
+
+                yield fs, field, effective_group
+
+    @memoized_method()
+    def get_fields(self) -> Generator["FlexField"]:
         fs: DataCheckerFieldset
         for fs in self.members.select_related("fieldset").all():
             # for field in fs.fieldset.fields.select_related("definition").filter():
@@ -105,11 +122,8 @@ class DataChecker(ValidatorMixin, models.Model):
         for __, field in self.get_fields():
             if field.name == name:
                 return field
+        return None
 
-    # for fs in self.members.all():
-    #     for field in fs.fieldset.fields.select_related("definition").filter():
-    #         if field.name == name:
-    #             return field
     @deprecated("0.6.3", details="uses get_form_class()")
     def get_form(self) -> "Generic[F]":
         return self.get_form_class()
@@ -123,10 +137,12 @@ class DataChecker(ValidatorMixin, models.Model):
         #     for field in fs.fieldset.fields.select_related("definition").filter():
         for fs, field in self.get_fields():
             fld: FlexFormMixin = field.get_field()
-            fld.label = f"{fs.prefix}{field.name}"
+            label = ((fld.flex_field.attributes or {}).get("label") or "").strip() or field.name
             if "%s" in fs.prefix:
+                fld.label = fs.prefix % label.replace("%", "%%")
                 full_name = fs.prefix % field.name
             else:
+                fld.label = f"{fs.prefix}{label}"
                 full_name = f"{fs.prefix}{field.name}"
 
             fields[full_name] = fld

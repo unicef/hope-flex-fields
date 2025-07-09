@@ -12,7 +12,7 @@ MASTER = [{"id": 1, "name": "Italy"}, {"id": 2, "name": "France"}, {"id": 3, "na
 DETAILS = [{"country_id": 1, "name": "Rome"}, {"country_id": 2, "name": "Paris"}, {"country_id": 3, "name": "Berlin"}]
 
 
-@pytest.fixture()
+@pytest.fixture
 def country_validator(db: Any) -> Fieldset:
     fs = FieldsetFactory(name="Country")
     FlexFieldFactory(name="id", fieldset=fs, definition__field_type=forms.IntegerField)
@@ -20,7 +20,7 @@ def country_validator(db: Any) -> Fieldset:
     return fs
 
 
-@pytest.fixture()
+@pytest.fixture
 def city_validator(db: Any) -> Fieldset:
     fs = FieldsetFactory()
     FlexFieldFactory(name="country_id", fieldset=fs, definition__field_type=forms.IntegerField)
@@ -28,7 +28,7 @@ def city_validator(db: Any) -> Fieldset:
     return fs
 
 
-@pytest.fixture()
+@pytest.fixture
 def checker(city_validator, country_validator) -> Fieldset:
     dc = DataCheckerFactory()
     dc.fieldsets.add(city_validator)

@@ -1,6 +1,6 @@
 # This is used by the action https://github.com/dorny/paths-filter
 dependencies: &dependencies
-  - 'pdm.lock'
+  - 'uv.lock'
   - 'pyproject.toml'
 
 python: &python

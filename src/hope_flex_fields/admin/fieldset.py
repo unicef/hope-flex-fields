@@ -39,7 +39,7 @@ class FieldSetForm2(forms.Form):
             return Fieldset.objects.create_from_content_type(**self.cleaned_data)
 
 
-class inspect_field:
+class InspectField:
     pass
 
 
@@ -47,7 +47,7 @@ class inspect_field:
 class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
     list_select_related = True
     search_fields = ("name",)
-    list_display = ("name", "extends", "content_type")
+    list_display = ("name", "extends", "content_type", "group")
     list_filter = ("content_type",)
     form = FieldsetForm
 
@@ -64,7 +64,7 @@ class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
                 formfield.queryset = formfield.queryset.filter(fieldset=fs)
             return formfield
 
-        FieldFormset = inlineformset_factory(
+        FieldFormset = inlineformset_factory(  # noqa
             Fieldset, FlexField, fields=("name", "definition", "master"), formfield_callback=cb
         )
         if request.method == "POST":
@@ -96,7 +96,6 @@ class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
                         },
                     )
             else:
-                # elif "create" in request.POST:
                 form = FieldSetForm2(request.POST, request.FILES)
                 form.is_valid()
                 form.save()

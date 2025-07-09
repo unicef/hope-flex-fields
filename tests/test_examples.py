@@ -7,8 +7,8 @@ from hope_flex_fields.models import FieldDefinition, Fieldset
 
 @pytest.mark.example
 def test_example_master_detail_data(db):
-    COUNTRIES = [{"id": 1, "name": "Italy"}, {"id": 2, "name": "France"}]
-    CITIES = [{"country": 1, "name": "Rome"}, {"country": 2, "name": "Paris"}, {"country": 3, "name": "Berlin"}]
+    COUNTRIES = [{"id": 1, "name": "Italy"}, {"id": 2, "name": "France"}]  # noqa
+    CITIES = [{"country": 1, "name": "Rome"}, {"country": 2, "name": "Paris"}, {"country": 3, "name": "Berlin"}]  # noqa
 
     num = FieldDefinition.objects.create(name="Int", field_type=forms.IntegerField)
     char = FieldDefinition.objects.create(name="Char", field_type=forms.CharField)

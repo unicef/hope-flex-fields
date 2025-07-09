@@ -57,7 +57,7 @@ class FlexField(AbstractField):
     def validate_attrs(self):
         try:
             self.get_field()
-        except Exception as e:
+        except Exception as e:  # noqa
             raise ValidationError(e)
 
     def clean(self):
@@ -100,6 +100,6 @@ class FlexField(AbstractField):
             fld = field_class(**kwargs)
             if self.definition.attributes_strategy.validators:
                 fld.validators.extend([v(fld) for v in self.definition.attributes_strategy.validators])
-        except Exception as e:  # pragma: no cover
+        except Exception as e:  # noqa pragma: no cover
             raise FlexFieldCreationError(f"Error creating field for FlexField {self.name}: {e}")
         return fld

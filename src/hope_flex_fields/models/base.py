@@ -1,20 +1,21 @@
 import logging
-from typing import Any, Generator, Iterable
+from typing import Any, Generator, Iterable, TYPE_CHECKING
 
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Model
 from django.utils.text import slugify
 
 from django_regex.fields import RegexField
 from django_regex.validators import RegexValidator
 
-#
+if TYPE_CHECKING:
+    from django.db.models import Model
+    from hope_flex_fields.forms import FlexForm
+
 logger = logging.getLogger(__name__)
 
 
 class BaseQuerySet(models.QuerySet["Model"]):
-
     def get(self, *args: Any, **kwargs: Any) -> "Model":
         try:
             return super().get(*args, **kwargs)
@@ -40,14 +41,6 @@ class AbstractField(models.Model):
     class Meta:
         abstract = True
 
-    @property
-    def attributes(self):
-        raise NotImplementedError
-
-    @attributes.setter
-    def attributes(self, value):
-        raise NotImplementedError
-
     def save(
         self,
         *args,
@@ -66,6 +59,14 @@ class AbstractField(models.Model):
             update_fields=update_fields,
         )
 
+    @property
+    def attributes(self):
+        raise NotImplementedError
+
+    @attributes.setter
+    def attributes(self, value):
+        raise NotImplementedError
+
 
 class ValidatorMixin:
     def __init__(self, *args, **kwargs):
@@ -74,7 +75,6 @@ class ValidatorMixin:
         self.form = None
         self.primary_keys = set()
         self.globals = {}
-        # self._collect_values = []
         self._collected_values = {}
         super().__init__(*args, **kwargs)
 
@@ -94,17 +94,18 @@ class ValidatorMixin:
 
     def is_duplicate(self, form):
         if self._primary_key_field_name:
-            if pk := form.cleaned_data[self._primary_key_field_name]:
-                if pk in self.primary_keys:
-                    return f"{pk} duplicated"
+            pk = form.cleaned_data[self._primary_key_field_name]
+            if pk in self.primary_keys:
+                return f"{pk} duplicated"
             self.primary_keys.add(form.cleaned_data[self._primary_key_field_name])
-            # self.primary_keys.add(str(pk).strip())
+        return None
 
     def is_valid_foreignkey(self, form):
         if self._master_fieldset:
             fk = form.cleaned_data[self._master_fieldset_col]
             if fk not in self._master_fieldset.primary_keys:
                 return f"'{fk}' not found in master"
+        return None
 
     def validate_parent_child(self, errors, data):
         for field_name, field in self.form.fields.items():
@@ -124,24 +125,22 @@ class ValidatorMixin:
     def get_form_class(self):
         raise NotImplementedError
 
-    def validate(
+    def validate(  # noqa
         self,
         data: Iterable,
         *,
         include_success: bool = False,
         fail_if_alien: bool = False,
     ):
-        from hope_flex_fields.forms import FlexForm
-
-        if not isinstance(data, (list, tuple, Generator)):
+        if not isinstance(data, list | tuple | Generator):
             data = [data]
         self.primary_keys = set()
         form_class: type[FlexForm] = self.get_form_class()
-        known_fields = set(sorted(form_class.declared_fields.keys()))
+        known_fields = set(form_class.declared_fields.keys())
         ret = {}
         for i, row in enumerate(data, 1):
             self.form: "FlexForm" = form_class(data=row)
-            posted_fields = set(sorted(row.keys()))
+            posted_fields = set(row.keys())
             fields_errors = {}
             row_errors = []
             if fail_if_alien and (diff := posted_fields.difference(known_fields)):
@@ -154,7 +153,7 @@ class ValidatorMixin:
             if err := self.is_valid_foreignkey(self.form):
                 row_errors.append(err)
 
-            for field_name in self._collected_values.keys():
+            for field_name in self._collected_values:
                 self._collected_values[field_name].append(self.form.cleaned_data[field_name])
             if row_errors:
                 fields_errors["-"] = row_errors

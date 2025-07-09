@@ -13,18 +13,19 @@ from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 
 from ..file_handlers import HANDLERS
+from ..forms import DataCheckerFieldsetForm
 from ..models import DataChecker, DataCheckerFieldset, Fieldset
 from ..models.datachecker import create_xls_importer
 
 
 @deconstructible
-class ValidatableFileValidator(object):
+class ValidatableFileValidator:
     error_messages = {
         "invalid_file": _("Unsupported file format '%s'"),
     }
 
     def __call__(self, f):
-        if Path(f.name).suffix not in HANDLERS.keys():
+        if Path(f.name).suffix not in HANDLERS:
             raise ValidationError(self.error_messages["invalid_file"] % Path(f.name).suffix)
 
 
@@ -45,7 +46,6 @@ class DataCheckerFieldsetFormset(forms.models.BaseInlineFormSet):
         for form in self.forms:
             if fs := form.cleaned_data.get("fieldset"):
                 prefix: str = form.cleaned_data["prefix"]
-                # fs_fields = {f"{prefix}{f}" for f in fs.get_fieldnames()}
                 if "%s" in prefix:
                     fs_fields = {prefix % f for f in fs.get_fieldnames()}
                 else:
@@ -58,7 +58,8 @@ class DataCheckerFieldsetFormset(forms.models.BaseInlineFormSet):
 class DataCheckerFieldsetTabularInline(TabularInline):
     model = DataCheckerFieldset
     formset = DataCheckerFieldsetFormset
-    fields = ("fieldset", "prefix", "order")
+    form = DataCheckerFieldsetForm
+    fields = ("fieldset", "prefix", "order", "override_group_default_value", "group")
 
     def get_ordering(self, request):
         return ["order"]
@@ -103,7 +104,6 @@ class DataCheckerAdmin(ExtraButtonsMixin, ModelAdmin):
             buffer.read(),
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        # return render(request, "flex_fields/datachecker/inspect.html", ctx)
 
     @button()
     def test(self, request, pk):

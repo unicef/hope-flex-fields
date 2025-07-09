@@ -126,10 +126,13 @@ STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CSP_DEFAULT_SRC = ["'self'", "cdnjs.cloudflare.com"]
-CSP_SCRIPT_SRC = ["'self'", "cdnjs.cloudflare.com"]
-CSP_IMG_SRC = ["'self'", "data:", "example.com"]
-CSP_EXCLUDE_URL_PREFIXES = ["/admin"]
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": ["'self'", "cdnjs.cloudflare.com"],
+        "img-src": ["'self'", "data:", "example.com"],
+        "script-src": ["'self'", "cdnjs.cloudflare.com"],
+    },
+    "EXCLUDE_URL_PREFIXES": ["/admin"],
+}
 
 JSON_EDITOR_INIT_JS = "flex_fields/jsoneditor/jsoneditor-init.js"
-# JSON_EDITOR_CSS = 'flex_fields/jsoneditor/django-jsoneditor.css'

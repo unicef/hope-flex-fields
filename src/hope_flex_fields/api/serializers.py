@@ -45,9 +45,6 @@ class FlexFieldSerializer(BaseSerializer):
 
 
 class FieldsetSerializer(BaseSerializer):
-    # fields = serializers.SlugRelatedField(
-    #     many=True, read_only=True, slug_field="name"
-    # )
     fields = FlexFieldSerializer(many=True)
 
     class Meta:

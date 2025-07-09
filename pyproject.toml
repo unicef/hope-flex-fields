@@ -1,93 +1,69 @@
 [project]
 name = "hope-flex-fields"
-version = "0.6.3"
+version = "0.7.0"
 description = ""
+readme = "README.md"
+license = { text = "MIT" }
+
 authors = [
-    {name = "sax", email = "s.apostolico@gmail.com"},
+  { name = "sax", email = "s.apostolico@gmail.com" },
 ]
 
 requires-python = ">=3.11"
-readme = "README.md"
-license = {text = "MIT"}
-
-dependencies = [
-    "django-strategy-field>=3.1.0",
-    "django-regex>=0.5.0",
-    "django-regex-field>=3.1.0",
-    "django-admin-extra-buttons>=1.6.0",
-    "django-jsoneditor>=0.2.4",
-    "djangorestframework>=3.15.1",
-    "mini-racer>=0.12.4",
-    "jsonpickle>=3.2.2",
-    "xlsxwriter>=3.2.0",
-    "django-adminactions>=2.3.0",
-    "requests>=2.32.3",
-    "responses>=0.25.3",
-    "jmespath>=1.0.1",
-    "deepdiff>=8.0.1",
-    "python-calamine>=0.2.3",
-    "deprecation>=2.1.0",
+classifiers = [
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
 ]
-[project.optional-dependencies]
-docs = [
-    "mkdocs>=1.6.1",
-    "mkdocs-material>=9.5.36",
-    "mkdocs-awesome-pages-plugin>=2.9.3",
-    "mkdocstrings-python",
+dependencies = [
+  "deepdiff",
+  "deprecation",
+  "django-admin-extra-buttons",
+  "django-adminactions",
+  "django-jsoneditor",
+  "django-regex",
+  "django-regex-field",
+  "django-strategy-field",
+  "djangorestframework",
+  "jmespath",
+  "jsonpickle",
+  "mini-racer",
+  "python-calamine",
+  "requests",
+  "xlsxwriter",
+]
+optional-dependencies.docs = [
+  "mkdocs",
+  "mkdocs-awesome-pages-plugin",
+  "mkdocs-material",
+  "mkdocstrings-python",
 ]
 
 [tool.uv]
 dev-dependencies = [
-    "bandit>=1.7.9",
-    "black>=24.4.2",
-    "bump2version>=1.0.1",
-    "django-csp>=3.8",
-    "django-factory-boy>=1.0.0",
-    "django-webtest>=1.9.11",
-    "django>=3",
-    "flake8-html>=0.4.3",
-    "flake8>=7.1.0",
-    "freezegun>=1.5.1",
-    "isort>=5.13.2",
-    "mypy>=1.10.1",
-    "pdbpp>=0.10.3",
-    "pre-commit>=3.7.1",
-    "pytest-cov>=5.0.0",
-    "pytest-django>=4.8.0",
-    "pytest>=8.2.2",
-    "responses>=0.25.3",
-    "pytest-xdist>=3.6.1",
-    "tox>=4.16.0",
-    "requests>=2.32.3",
+  "bandit",
+  "black",
+  "bump2version",
+  "django-csp",
+  "django-factory-boy",
+  "django-webtest",
+  "django",
+  "flake8-html",
+  "flake8",
+  "freezegun",
+  "isort",
+  "mypy",
+  "pdbpp",
+  "pre-commit",
+  "pytest-cov",
+  "pytest-django",
+  "pytest",
+  "responses",
+  "pytest-xdist",
+  "tox",
+  "requests",
 ]
-
-
-[tool.black]
-line-length = 120
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.git
-  | \.pytest_cache
-  | \.tox
-  | \.venv
-  | ~build
-  | build
-  | ops
-  | migrations
-)/
-'''
-
-[tool.isort]
-profile = "black"
-line_length = 120
-default_section = "THIRDPARTY"
-known_first_party = []
-known_django = "django"
-sections = ["FUTURE","STDLIB","DJANGO","THIRDPARTY","FIRSTPARTY","LOCALFOLDER"]
-include_trailing_comma = true
-skip = ["migrations", "snapshots", ".venv"]
-
 
 [tool.django-stubs]
 django_settings_module = "hope_dedup_engine.config.settings"

@@ -2,13 +2,16 @@ from unittest.mock import Mock
 
 from django.contrib.admin.sites import site
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
-from django.db.models.options import Options
-from django.urls import reverse
 
+from django.urls import reverse
+from typing import TYPE_CHECKING
 import pytest
 from admin_extra_buttons.handlers import ChoiceHandler
 from django_regex.utils import RegexList as _RegexList
 from testutils.factories import SuperUserFactory, get_factory_for_model
+
+if TYPE_CHECKING:
+    from django.db.models.options import Options
 
 pytestmark = [pytest.mark.admin, pytest.mark.smoke, pytest.mark.django_db]
 
@@ -45,7 +48,7 @@ def log_submit_error(res):
         return "Submit failed"
 
 
-def pytest_generate_tests(metafunc):
+def pytest_generate_tests(metafunc):  # noqa
     import django
 
     markers = metafunc.definition.own_markers
@@ -65,11 +68,10 @@ def pytest_generate_tests(metafunc):
             if hasattr(admin, "get_changelist_buttons"):
                 name = model._meta.object_name
                 assert admin.urls  # we need to force this call
-                # admin.get_urls()  # we need to force this call
                 buttons = admin.extra_button_handlers.values()
                 full_name = f"{model._meta.app_label}.{name}"
                 admin_name = f"{model._meta.app_label}.{admin.__class__.__name__}"
-                if not (full_name in excluded_models):
+                if full_name not in excluded_models:
                     for btn in buttons:
                         tid = f"{admin_name}:{btn.name}"
                         if tid not in excluded_buttons:
@@ -82,15 +84,14 @@ def pytest_generate_tests(metafunc):
         for model, admin in site._registry.items():
             name = model._meta.object_name
             full_name = f"{model._meta.app_label}.{name}"
-            if not (full_name in excluded_models):
+            if full_name not in excluded_models:
                 m.append(admin)
                 ids.append(f"{admin.__class__.__name__}:{full_name}")
         metafunc.parametrize("modeladmin", m, ids=ids)
 
 
-@pytest.fixture()
+@pytest.fixture
 def record(db, request):
-
     modeladmin = request.getfixturevalue("modeladmin")
     instance = modeladmin.model.objects.first()
     if not instance:
@@ -103,9 +104,8 @@ def record(db, request):
     return instance
 
 
-@pytest.fixture()
+@pytest.fixture
 def app(django_app_factory, mocked_responses):
-
     django_app = django_app_factory(csrf_checks=False)
     admin_user = SuperUserFactory(username="superuser")
     django_app.set_user(admin_user)
@@ -136,7 +136,7 @@ def test_admin_changelist(app, modeladmin, record):
 def show_error(res):
     errors = []
     for k, v in dict(res.context["adminform"].form.errors).items():
-        errors.append(f'{k}: {"".join(v)}')
+        errors.append(f"{k}: {''.join(v)}")
     return (f"Form submitting failed: {res.status_code}: {errors}",)
 
 
@@ -186,8 +186,7 @@ def test_admin_buttons(app, modeladmin, button_handler, record, monkeypatch):
     elif isinstance(button_handler, LinkHandler):
         btn = button_handler.get_button({"original": record})
         button_handler.func(None, btn)
-    else:
-        if len(button_handler.sig.parameters) == 2:
+        if len(button_handler.func_args) == 2:
             url = reverse(f"admin:{button_handler.url_name}")
         else:
             url = reverse(f"admin:{button_handler.url_name}", args=[record.pk])
