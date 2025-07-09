@@ -59,7 +59,9 @@ def test_get_fields_with_groups_no_override(setup_data):
     datachecker = setup_data["datachecker"]
     documents_fieldset = setup_data["documents_fieldset"]
 
-    DataCheckerFieldset.objects.create(checker=datachecker, fieldset=documents_fieldset, override_group_default_value=False)
+    DataCheckerFieldset.objects.create(
+        checker=datachecker, fieldset=documents_fieldset, override_group_default_value=False
+    )
 
     fields_with_groups = list(datachecker.get_fields_with_groups())
     assert len(fields_with_groups) == 1
@@ -137,7 +139,9 @@ def test_get_fields_with_groups_multiple_fieldsets(setup_data):
     personal_fieldset = setup_data["personal_fieldset"]
     root_fieldset = setup_data["root_fieldset"]
 
-    DataCheckerFieldset.objects.create(checker=datachecker, fieldset=documents_fieldset, override_group_default_value=False)
+    DataCheckerFieldset.objects.create(
+        checker=datachecker, fieldset=documents_fieldset, override_group_default_value=False
+    )
     DataCheckerFieldset.objects.create(
         checker=datachecker,
         fieldset=personal_fieldset,
@@ -159,7 +163,9 @@ def test_get_fields_method(setup_data):
     datachecker = setup_data["datachecker"]
     documents_fieldset = setup_data["documents_fieldset"]
 
-    DataCheckerFieldset.objects.create(checker=datachecker, fieldset=documents_fieldset, override_group_default_value=False)
+    DataCheckerFieldset.objects.create(
+        checker=datachecker, fieldset=documents_fieldset, override_group_default_value=False
+    )
 
     fields = list(datachecker.get_fields())
     assert len(fields) == 1
@@ -173,7 +179,9 @@ def test_get_field_method(setup_data):
     datachecker = setup_data["datachecker"]
     documents_fieldset = setup_data["documents_fieldset"]
 
-    DataCheckerFieldset.objects.create(checker=datachecker, fieldset=documents_fieldset, override_group_default_value=False)
+    DataCheckerFieldset.objects.create(
+        checker=datachecker, fieldset=documents_fieldset, override_group_default_value=False
+    )
 
     field = datachecker.get_field("document_name")
     assert field is not None

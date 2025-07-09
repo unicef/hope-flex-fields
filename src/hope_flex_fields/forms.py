@@ -102,6 +102,4 @@ class DataCheckerFieldsetForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["override_group_default_value"].help_text = "Check to override the fieldset default group"
-        self.fields[
-            "group"
-        ].help_text = "Group name to use when override is checked. Leave empty for root level."
+        self.fields["group"].help_text = "Group name to use when override is checked. Leave empty for root level."
