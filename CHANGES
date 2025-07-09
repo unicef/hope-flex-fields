@@ -1,3 +1,9 @@
+0.7.0
+-----
+* added flex fields groups
+* ruff
+
+
 0.6.3
 -----
 * deprecate get_form()
