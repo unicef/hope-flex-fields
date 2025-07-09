@@ -5,10 +5,10 @@ from django import forms
 import pytest
 from testutils.factories import DataCheckerFactory
 
-from hope_flex_fields.forms import FlexForm
 
 if TYPE_CHECKING:
     from hope_flex_fields.models import DataChecker, Fieldset
+    from hope_flex_fields.forms import FlexForm
 
 
 @pytest.fixture

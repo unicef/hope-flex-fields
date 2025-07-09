@@ -11,15 +11,6 @@ def test_jsvalidator():
     assert v(22)
 
 
-#
-# def test_jsvalidator_error():
-#     code = 'value=2'
-#     v = JsValidator(code)
-#     with pytest.raises(ValueError) as e:
-#         v(22)
-#     assert e.value.messages == [' Validator code must returns something']
-
-
 def test_jsvalidator_fail():
     code = "result=value==2"
     v = JsValidator(code)

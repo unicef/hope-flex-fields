@@ -20,13 +20,13 @@ def pytest_configure(config):
     django.setup()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mocked_responses():
     with responses.RequestsMock(assert_all_requests_are_fired=False) as rsps:
         yield rsps
 
 
-@pytest.fixture()
+@pytest.fixture
 def app(django_app_factory, mocked_responses):
     from testutils.factories import SuperUserFactory
 
@@ -37,7 +37,7 @@ def app(django_app_factory, mocked_responses):
     return django_app
 
 
-@pytest.fixture()
+@pytest.fixture
 def fieldset1(django_app_factory, mocked_responses):
     from testutils.factories import FieldsetFactory
 

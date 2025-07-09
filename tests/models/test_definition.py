@@ -1,5 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from unittest.mock import patch
 
 import pytest
 
@@ -44,3 +45,15 @@ def test_get_from_django_field(db, form_field):
     from hope_flex_fields.models import FieldDefinition
 
     assert FieldDefinition.objects.get_from_django_field(form_field)
+
+
+def test_attributes_property_with_exception(db):
+    from hope_flex_fields.models import FieldDefinition
+
+    fd = FieldDefinition(name="ExceptionField", field_type=forms.IntegerField, attrs={"base_attr": "base_value"})
+
+    with patch.object(fd.attributes_strategy, "get", side_effect=Exception("Strategy error")):
+        attrs = fd.attributes
+        assert attrs == {"base_attr": "base_value"}
+
+        assert fd.validated is False

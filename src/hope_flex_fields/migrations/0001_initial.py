@@ -9,107 +9,141 @@ import strategy_field.fields
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='DataChecker',
+            name="DataChecker",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('last_modified', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=255, unique=True)),
-                ('description', models.TextField(blank=True)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("last_modified", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=255, unique=True)),
+                ("description", models.TextField(blank=True)),
             ],
             options={
-                'verbose_name': 'DataChecker',
-                'verbose_name_plural': 'DataCheckers',
+                "verbose_name": "DataChecker",
+                "verbose_name_plural": "DataCheckers",
             },
             bases=(hope_flex_fields.models.base.ValidatorMixin, models.Model),
         ),
         migrations.CreateModel(
-            name='DataCheckerFieldset',
+            name="DataCheckerFieldset",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('last_modified', models.DateTimeField(auto_now=True)),
-                ('prefix', models.CharField(blank=True, default='', max_length=30)),
-                ('order', models.PositiveSmallIntegerField(default=0)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("last_modified", models.DateTimeField(auto_now=True)),
+                ("prefix", models.CharField(blank=True, default="", max_length=30)),
+                ("order", models.PositiveSmallIntegerField(default=0)),
             ],
         ),
         migrations.CreateModel(
-            name='FieldDefinition',
+            name="FieldDefinition",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('last_modified', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=255)),
-                ('description', models.TextField(blank=True, default='', max_length=500, null=True)),
-                ('attrs', models.JSONField(blank=True, default=dict)),
-                ('regex', django_regex.fields.RegexField(blank=True, null=True, validators=[django_regex.validators.RegexValidator()])),
-                ('validation', models.TextField(blank=True, default='', null=True)),
-                ('field_type', strategy_field.fields.StrategyClassField()),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("last_modified", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=255)),
+                ("description", models.TextField(blank=True, default="", max_length=500, null=True)),
+                ("attrs", models.JSONField(blank=True, default=dict)),
+                (
+                    "regex",
+                    django_regex.fields.RegexField(
+                        blank=True, null=True, validators=[django_regex.validators.RegexValidator()]
+                    ),
+                ),
+                ("validation", models.TextField(blank=True, default="", null=True)),
+                ("field_type", strategy_field.fields.StrategyClassField()),
             ],
             options={
-                'verbose_name': 'Field Definition',
-                'verbose_name_plural': 'Field Definitions',
+                "verbose_name": "Field Definition",
+                "verbose_name_plural": "Field Definitions",
             },
         ),
         migrations.CreateModel(
-            name='Fieldset',
+            name="Fieldset",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('last_modified', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=255, unique=True)),
-                ('description', models.TextField(blank=True)),
-                ('extends', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='hope_flex_fields.fieldset')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("last_modified", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=255, unique=True)),
+                ("description", models.TextField(blank=True)),
+                (
+                    "extends",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="hope_flex_fields.fieldset",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Fieldset',
-                'verbose_name_plural': 'Fieldsets',
+                "verbose_name": "Fieldset",
+                "verbose_name_plural": "Fieldsets",
             },
             bases=(hope_flex_fields.models.base.ValidatorMixin, models.Model),
         ),
         migrations.CreateModel(
-            name='FlexField',
+            name="FlexField",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('last_modified', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=255)),
-                ('description', models.TextField(blank=True, default='', max_length=500, null=True)),
-                ('attrs', models.JSONField(blank=True, default=dict)),
-                ('regex', django_regex.fields.RegexField(blank=True, null=True, validators=[django_regex.validators.RegexValidator()])),
-                ('validation', models.TextField(blank=True, default='', null=True)),
-                ('field', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='instances', to='hope_flex_fields.fielddefinition')),
-                ('fieldset', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='fields', to='hope_flex_fields.fieldset')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("last_modified", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=255)),
+                ("description", models.TextField(blank=True, default="", max_length=500, null=True)),
+                ("attrs", models.JSONField(blank=True, default=dict)),
+                (
+                    "regex",
+                    django_regex.fields.RegexField(
+                        blank=True, null=True, validators=[django_regex.validators.RegexValidator()]
+                    ),
+                ),
+                ("validation", models.TextField(blank=True, default="", null=True)),
+                (
+                    "field",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="instances",
+                        to="hope_flex_fields.fielddefinition",
+                    ),
+                ),
+                (
+                    "fieldset",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="fields",
+                        to="hope_flex_fields.fieldset",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Flex Field',
-                'verbose_name_plural': 'flex Fields',
+                "verbose_name": "Flex Field",
+                "verbose_name_plural": "flex Fields",
             },
         ),
         migrations.AddConstraint(
-            model_name='fielddefinition',
-            constraint=models.UniqueConstraint(fields=('name',), name='unique_name'),
+            model_name="fielddefinition",
+            constraint=models.UniqueConstraint(fields=("name",), name="unique_name"),
         ),
         migrations.AddField(
-            model_name='datacheckerfieldset',
-            name='checker',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='members', to='hope_flex_fields.datachecker'),
+            model_name="datacheckerfieldset",
+            name="checker",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="members", to="hope_flex_fields.datachecker"
+            ),
         ),
         migrations.AddField(
-            model_name='datacheckerfieldset',
-            name='fieldset',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='hope_flex_fields.fieldset'),
+            model_name="datacheckerfieldset",
+            name="fieldset",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="hope_flex_fields.fieldset"),
         ),
         migrations.AddField(
-            model_name='datachecker',
-            name='fieldsets',
-            field=models.ManyToManyField(through='hope_flex_fields.DataCheckerFieldset', to='hope_flex_fields.Fieldset'),
+            model_name="datachecker",
+            name="fieldsets",
+            field=models.ManyToManyField(
+                through="hope_flex_fields.DataCheckerFieldset", to="hope_flex_fields.Fieldset"
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='flexfield',
-            unique_together={('fieldset', 'name')},
+            name="flexfield",
+            unique_together={("fieldset", "name")},
         ),
     ]

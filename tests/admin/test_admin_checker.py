@@ -71,7 +71,7 @@ def dc(db):
 
 
 @pytest.fixture
-def rdi(db):
+def rdi(db):  # noqa
     from testutils.factories import (
         DataCheckerFieldsetFactory,
         FieldDefinitionFactory,
@@ -233,8 +233,6 @@ def test_datachecker_xls_importer(app, dc):
     url = reverse("admin:hope_flex_fields_datachecker_create_xls_importer", args=[dc.pk])
     res = app.get(url)
     assert res.status_code == 200
-    # with Path("aaaa.xlsx").open("wb") as f:
-    #     f.write(res.body)
 
 
 def test_datachecker_validate_unsupported(app, rdi):

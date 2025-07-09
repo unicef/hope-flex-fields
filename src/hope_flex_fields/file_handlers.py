@@ -8,7 +8,7 @@ def parse_xlsx(f: UploadedFile):
     rows = iter(workbook.get_sheet_by_index(0).to_python())
     headers = list(map(str, next(rows)))
     for row in rows:
-        yield dict(zip(headers, row))
+        yield dict(zip(headers, row, strict=True))
 
 
 HANDLERS = {".xlsx": parse_xlsx}

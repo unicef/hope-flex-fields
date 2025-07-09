@@ -34,6 +34,5 @@ class DataCheckerViewSet(Base, viewsets.ModelViewSet):
 
 
 class SyncViewSet(Base, viewsets.ModelViewSet):
-
     def list(self, request, *args, **kwargs):
         return HttpResponse(dumpdata_to_buffer(), content_type="application/json")

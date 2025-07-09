@@ -32,7 +32,7 @@ From the design point of view a high level comparison with Django components cou
 - Validate XLS against an existing [Datachecker](http://localhost:8000/hope_flex_fields/datachecker/)
 
 
-```mermaid 
+```mermaid
 
 classDiagram
     class AbstractField
@@ -42,7 +42,7 @@ classDiagram
     class DataChecker
     AbstractField <|-- FlexField
     AbstractField <|-- FieldDefinition
-    Fieldset *-- FlexField 
+    Fieldset *-- FlexField
     FlexField --> FieldDefinition
     DataChecker o-- Fieldset
 
@@ -60,7 +60,7 @@ classDiagram
         'admin_extra_buttons',
         'jsoneditor',
         'hope_flex_fields',
-    
+
     ]
 
 ## Demo Application

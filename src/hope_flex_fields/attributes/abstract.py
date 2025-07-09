@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -36,7 +36,7 @@ class AbstractAttributeHandler(metaclass=ABCMeta):
         raise ValidationError(frm.errors)
 
     @abstractmethod
-    def get(self, instance: "Optional[FlexField]" = None) -> "Json": ...
+    def get(self, instance: "FlexField" = None) -> "Json": ...
 
     @abstractmethod
     def set(self, value: "Json"): ...

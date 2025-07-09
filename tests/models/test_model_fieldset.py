@@ -6,10 +6,8 @@ from django.core.exceptions import ValidationError
 import pytest
 from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory
 
-from hope_flex_fields.models import Fieldset
-
 if TYPE_CHECKING:
-    from hope_flex_fields.models import FlexField
+    from hope_flex_fields.models import FlexField, Fieldset
 
 
 @pytest.fixture
