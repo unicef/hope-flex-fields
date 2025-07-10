@@ -1,6 +1,6 @@
 [project]
 name = "hope-flex-fields"
-version = "0.7.0"
+version = "0.7.1"
 description = ""
 readme = "README.md"
 license = { text = "MIT" }
