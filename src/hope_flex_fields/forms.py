@@ -88,6 +88,7 @@ class FieldsetForm(ModelForm):
             "description",
             "extends",
             "content_type",
+            "group",
         )
 
 
