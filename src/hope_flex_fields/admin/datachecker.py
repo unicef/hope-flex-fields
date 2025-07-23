@@ -4,10 +4,11 @@ from django import forms
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, TabularInline, register
 from django.core.exceptions import ValidationError
-from django.http import HttpResponse
+from django.http import FileResponse
 from django.shortcuts import render
 from django.utils.deconstruct import deconstructible
-from django.utils.translation import gettext as _
+from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
@@ -97,12 +98,14 @@ class DataCheckerAdmin(ExtraButtonsMixin, ModelAdmin):
 
     @button()
     def create_xls_importer(self, request, pk):
-        ctx = self.get_common_context(request, pk, title="Inspect")
-        dc: DataChecker = ctx["original"]
-        buffer, __ = create_xls_importer(dc)
-        return HttpResponse(
-            buffer.read(),
+        dc: DataChecker = self.get_object(request, pk)
+        filename = f"{slugify(dc.name)}.xlsx"
+        buffer = create_xls_importer(dc)
+        return FileResponse(
+            buffer,
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            filename=filename,
+            as_attachment=True,
         )
 
     @button()
