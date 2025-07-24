@@ -1,7 +1,6 @@
 from collections.abc import Generator
 from io import BytesIO
 from typing import TYPE_CHECKING, Generic, TypeVar
-
 from django.db import models
 from django.utils.translation import gettext as _
 
@@ -13,51 +12,13 @@ from .base import ValidatorMixin
 from .fieldset import Fieldset
 
 if TYPE_CHECKING:
+    from xlsxwriter import Format, Workbook
     from django import forms
     from ..forms import FlexForm
     from .flexfield import FlexField
     from ..fields import FlexFormMixin
 
     F = TypeVar("F", bound="FlexForm")
-
-
-def create_xls_importer(dc: "DataChecker"):
-    import xlsxwriter
-
-    out = BytesIO()
-    workbook = xlsxwriter.Workbook(out, {"in_memory": True, "default_date_format": "yyyy/mm/dd"})
-
-    header_format = workbook.add_format(
-        {
-            "bold": False,
-            "font_color": "black",
-            "font_size": 22,
-            "font_name": "Arial",
-            "align": "center",
-            "valign": "vcenter",
-            "indent": 1,
-        }
-    )
-    header_format.set_bg_color("#CFC122")
-    header_format.set_locked(True)
-    header_format.set_align("center")
-    header_format.set_bottom_color("black")
-    worksheet = workbook.add_worksheet()
-
-    for i, (__, fld) in enumerate(dc.get_fields()):
-        col = chr(ord("A") + i)
-        worksheet.write(0, i, fld.name, header_format)
-        f = None
-        if fmt := get_format_for_field(fld):
-            f = workbook.add_format(fmt)
-        worksheet.set_column(f"{col}1:{col}9999999", 40, f)
-
-        if v := get_validation_for_field(fld):
-            worksheet.data_validation("A1:Z9999", v)
-
-    workbook.close()
-    out.seek(0)
-    return out, workbook
 
 
 class DataCheckerManager(models.Manager):
@@ -148,3 +109,53 @@ class DataChecker(ValidatorMixin, models.Model):
             fields[full_name] = fld
         form_class_attrs = {"datachecker": self, "validator": self, **dict(sorted(fields.items()))}
         return type(f"{self.name}DataCheckerForm", (FlexForm,), form_class_attrs)
+
+
+def create_xls_importer(dc: "DataChecker") -> BytesIO:
+    import xlsxwriter
+
+    out = BytesIO()
+
+    with xlsxwriter.Workbook(out, {"in_memory": True, "default_date_format": "yyyy/mm/dd"}) as workbook:
+        worksheet = workbook.add_worksheet("Template")
+        header_format = _get_header_format(workbook)
+
+        for i, (fs, field) in enumerate(dc.get_fields()):
+            prefixed_name = fs.prefix % field.name if "%s" in fs.prefix else f"{fs.prefix}{field.name}"
+            worksheet.write(0, i, prefixed_name, header_format)
+
+            col = chr(ord("A") + i)
+            cell_format = _get_cell_format(workbook, field)
+            worksheet.set_column(f"{col}1:{col}9999999", 40, cell_format)
+
+            if v := get_validation_for_field(field):
+                worksheet.data_validation("A1:Z9999", v)
+
+    out.seek(0)
+    return out
+
+
+def _get_cell_format(workbook: "Workbook", field: "FlexField") -> "Format | None":
+    fmt = get_format_for_field(field)
+    if fmt:
+        return workbook.add_format(fmt)
+    return None
+
+
+def _get_header_format(workbook: "Workbook") -> "Format":
+    header_format = workbook.add_format(
+        {
+            "bold": False,
+            "font_color": "black",
+            "font_size": 22,
+            "font_name": "Arial",
+            "align": "center",
+            "valign": "vcenter",
+            "indent": 1,
+        }
+    )
+    header_format.set_bg_color("#CFC122")
+    header_format.set_locked(True)
+    header_format.set_align("center")
+    header_format.set_bottom_color("black")
+    return header_format
