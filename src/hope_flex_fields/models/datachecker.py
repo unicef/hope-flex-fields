@@ -58,7 +58,6 @@ class DataChecker(ValidatorMixin, models.Model):
     def natural_key(self):
         return (self.name,)
 
-    @memoized_method()
     def get_fields_with_groups(self) -> Generator[tuple["DataCheckerFieldset", "FlexField", str]]:
         fs: DataCheckerFieldset
         for fs in self.members.select_related("fieldset").all():
@@ -70,7 +69,6 @@ class DataChecker(ValidatorMixin, models.Model):
 
                 yield fs, field, effective_group
 
-    @memoized_method()
     def get_fields(self) -> Generator["FlexField"]:
         fs: DataCheckerFieldset
         for fs in self.members.select_related("fieldset").all():
