@@ -139,7 +139,7 @@ class ValidatorMixin:
         known_fields = set(form_class.declared_fields.keys())
         ret = {}
         for i, row in enumerate(data, 1):
-            self.form: "FlexForm" = form_class(data=row)
+            self.form: "FlexForm" = form_class(data=row, initial=row)
             posted_fields = set(row.keys())
             fields_errors = {}
             row_errors = []
