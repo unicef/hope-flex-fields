@@ -1,6 +1,10 @@
+0.7.5
+-----
+* added initial to form validation
+
 0.7.4
 -----
-* preserve existing values for file-like flex fields during validation
+* preserved existing values for file-like flex fields during validation
 
 
 0.7.3
