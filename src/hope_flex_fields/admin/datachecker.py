@@ -70,6 +70,7 @@ class DataCheckerFieldsetTabularInline(TabularInline):
 class DataCheckerAdmin(ExtraButtonsMixin, ModelAdmin):
     list_display = ("name",)
     inlines = [DataCheckerFieldsetTabularInline]
+    search_fields = ("name",)
 
     @button()
     def inspect(self, request, pk):
