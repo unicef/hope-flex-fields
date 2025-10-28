@@ -127,7 +127,7 @@ def create_xls_importer(dc: "DataChecker") -> BytesIO:
             worksheet.set_column(f"{col}1:{col}9999999", 40, cell_format)
 
             if v := get_validation_for_field(field):
-                worksheet.data_validation("A1:Z9999", v)
+                worksheet.data_validation(0, i, 999999, i, v)
 
     out.seek(0)
     return out
