@@ -92,18 +92,16 @@ class DataChecker(ValidatorMixin, models.Model):
 
         fields: dict[str, forms.Field] = {}
         field: "FlexField"
-        # for fs in self.members.select_related("fieldset").all():
-        #     for field in fs.fieldset.fields.select_related("definition").filter():
         for fs, field in self.get_fields():
             fld: FlexFormMixin = field.get_field()
             label = ((fld.flex_field.attributes or {}).get("label") or "").strip() or field.name
             if "%s" in fs.prefix:
-                fld.label = fs.prefix % label.replace("%", "%%")
+                prefix = fs.prefix.replace("%s", " ")
                 full_name = fs.prefix % field.name
             else:
-                fld.label = f"{fs.prefix}{label}"
+                prefix = fs.prefix.rstrip("_")
                 full_name = f"{fs.prefix}{field.name}"
-
+            fld.label = f"{prefix}: {label}" if prefix else label
             fields[full_name] = fld
         form_class_attrs = {"datachecker": self, "validator": self, **dict(sorted(fields.items()))}
         return type(f"{self.name}DataCheckerForm", (FlexForm,), form_class_attrs)
