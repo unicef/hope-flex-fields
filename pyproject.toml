@@ -40,6 +40,16 @@ optional-dependencies.docs = [
   "mkdocstrings-python",
 ]
 
+[tool.hatch.build.targets.sdist]
+include = [
+  "src/hope_flex_fields/**/*.*",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = [
+  "src/hope_flex_fields",
+]
+
 [tool.uv]
 dev-dependencies = [
   "bandit",
