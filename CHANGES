@@ -1,3 +1,8 @@
+0.7.6
+-----
+* used numeric row/col args for worksheet.datavalidation
+* tweaked flexfield labels for prefixed fieldsets
+
 0.7.5
 -----
 * added initial to form validation
