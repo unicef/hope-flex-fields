@@ -83,3 +83,26 @@ def test_all_fields_method_inlineformset_factory(app, record):
     res = app.get(url)
     assert res.status_code == 200
     assert "formset" in res.context
+
+
+def test_all_fields_duplicate_name_validation(app, record):
+    url = reverse("admin:hope_flex_fields_fieldset_all_fields", args=[record.pk])
+
+    res = app.get(url)
+    assert res.status_code == 200
+
+    form = None
+    for f in res.forms.values():
+        if "fields-INITIAL_FORMS" in f.fields:
+            form = f
+            break
+
+    assert form is not None
+    initial_forms = int(form["fields-INITIAL_FORMS"].value)
+    new_form_idx = initial_forms
+    form[f"fields-{new_form_idx}-name"] = "int"
+
+    res = form.submit()
+
+    assert res.status_code == 200
+    assert b"Field with this name already exists in the fieldset." in res.content
