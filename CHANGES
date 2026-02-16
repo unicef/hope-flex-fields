@@ -1,3 +1,7 @@
+0.7.7
+-----
+* enhance template
+
 0.7.6
 -----
 * used numeric row/col args for worksheet.datavalidation
