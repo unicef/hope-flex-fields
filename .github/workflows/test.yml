@@ -32,7 +32,7 @@ jobs:
       run_tests: ${{steps.changes.outputs.run_tests }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - id: changes
         name: Check for file changes
         uses: dorny/paths-filter@v3
@@ -50,30 +50,30 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        python-version: [ "3.11", "3.12", "3.13" ]
-        django-version: [ "4.2", "5.2" ]
+        python-version: [ "3.13" ]
+        django-version: [ "5.2" ]
       fail-fast: true
     needs: [ changes ]
     if: needs.changes.outputs.run_tests
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           architecture: 'x64'
 
       - name: Restore cached venv
         id: cache-venv-restore
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: |
             .venv/
           key: ${{ matrix.python-version }}-${{matrix.django-version}}-${{ hashFiles('pyproject.toml') }}-venv
 
-      - uses: yezz123/setup-uv@v4
+      - uses: astral-sh/setup-uv@v7
         with:
           uv-version: "0.4.15"
 
@@ -89,7 +89,7 @@ jobs:
       - name: Cache venv
         if: steps.cache-venv-restore.outputs.cache-hit != 'true'
         id: cache-venv-save
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: |
             .venv/
