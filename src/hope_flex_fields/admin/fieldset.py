@@ -69,6 +69,7 @@ class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
         )
         if request.method == "POST":
             formset = FieldFormset(request.POST, instance=fs)
+            self._check_duplicate_names_in_formset_forms(formset, fs)
             if formset.is_valid():
                 formset.save()
                 self.message_user(request, "Fields saved")
@@ -133,3 +134,15 @@ class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
 
         ctx["form"] = form
         return render(request, "flex_fields/test.html", ctx)
+
+    @staticmethod
+    def _check_duplicate_names_in_formset_forms(formset, fieldset: Fieldset):
+        existing_field_names = fieldset.get_fieldnames()
+        for form in formset.forms:
+            if (
+                form.instance.pk is None
+                and not form["DELETE"].value()
+                and (name := form["name"].value())
+                and name in existing_field_names
+            ):
+                form.add_error("name", "Field with this name already exists in the fieldset.")
