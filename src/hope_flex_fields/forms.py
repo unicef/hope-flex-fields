@@ -11,7 +11,6 @@ from strategy_field.utils import fqn
 from .models import DataCheckerFieldset, FieldDefinition, Fieldset, FlexField
 from .registry import field_registry
 from .utils import get_common_attrs, get_kwargs_from_field_class
-from .validators import fieldset_cross_validation
 from .widgets import JavascriptEditor
 
 
@@ -28,15 +27,19 @@ class FlexForm(forms.Form):
     def clean(self):
         cleaned = super().clean()
 
+        def apply(errors: dict[str | None, list[str]]) -> None:
+            for field, msgs in errors.items():
+                for m in msgs:
+                    self.add_error(field, m)
+
         if (fs := getattr(self, "fieldset", None)) is not None:
-            errors = fieldset_cross_validation(fs, cleaned)
-            for field, msg in (errors or {}).items():
-                if field == "-":  # non-field errors
-                    for m in msg if isinstance(msg, list) else [msg]:
-                        self.add_error(None, m)
-                else:
-                    for m in msg if isinstance(msg, list) else [msg]:
-                        self.add_error(field, m)
+            # The form is bound to a single Fieldset instance (no prefix mapping needed).
+            apply(fs.get_validation_errors(cleaned))
+        elif specs := getattr(self, "fieldset_specs", None):
+            # The form contains multiple fieldsets
+            # Where each fieldset uses bare field names but the form fields are prefixed.
+            for fs, bare_to_prefixed in specs:
+                apply(fs.get_validation_errors(cleaned, bare_to_prefixed=bare_to_prefixed))
 
         cleaned = json.loads(json.dumps(cleaned, cls=DjangoJSONEncoder))
         self.cleaned_data = cleaned

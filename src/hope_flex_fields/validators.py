@@ -51,7 +51,7 @@ class JsValidator(BaseValidator):
         return True
 
 
-def fieldset_cross_validation(fieldset, data: dict) -> dict:
+def fieldset_rules_validation(fieldset, data: dict) -> dict:
     code = (getattr(fieldset, "validation", "") or "").strip()
     if not code:
         return {}

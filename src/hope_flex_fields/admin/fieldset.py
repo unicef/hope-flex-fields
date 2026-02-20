@@ -59,7 +59,7 @@ class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
                 "classes": ("collapse", "open"),
                 "fields": ("validation",),
                 "description": (
-                    "Cross-field validation (JavaScript). "
+                    "Validation rules (JavaScript). "
                     "Write the function body with access to `data` variable; "
                     "`return true` or an errors object like `{field: 'message'}`."
                 ),

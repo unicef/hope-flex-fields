@@ -12,6 +12,7 @@ from deprecation import deprecated
 
 from ..exceptions import FlexFieldCreationError
 from ..utils import get_kwargs_from_formfield
+from ..validators import fieldset_rules_validation
 from .base import ValidatorMixin
 
 if TYPE_CHECKING:
@@ -157,3 +158,34 @@ class Fieldset(ValidatorMixin, models.Model):
         super().clean()
         if self.extends == self:
             raise ValidationError({"extends": "Cannot extends itself"})
+
+    def has_validation_rules(self) -> bool:
+        return bool((self.validation or "").strip())
+
+    def get_prefixed_field_map(self, prefix: str = "") -> dict[str, str]:
+        prefix = prefix or ""
+        if "%s" in prefix:
+            return {f.name: (prefix % f.name) for f in self.get_fields()}
+        return {f.name: f"{prefix}{f.name}" for f in self.get_fields()}
+
+    def get_validation_errors(
+        self,
+        cleaned: dict[str, Any],
+        bare_to_prefixed: dict[str, str] | None = None,
+    ) -> dict[str | None, list[str]]:
+        data = (
+            cleaned
+            if bare_to_prefixed is None
+            else {bare: cleaned.get(pref) for bare, pref in bare_to_prefixed.items()}
+        )
+        errors: dict[str | None, list[str]] = {}
+        for key, msg in (self.validate_rules(data) or {}).items():
+            field = None if key == "-" else (bare_to_prefixed.get(key, key) if bare_to_prefixed else key)
+            msgs = msg if isinstance(msg, list | tuple) else [msg]
+            errors.setdefault(field, []).extend(str(m) for m in msgs)
+        return errors
+
+    def validate_rules(self, data: dict[str, Any]) -> dict:
+        if not self.has_validation_rules():
+            return {}
+        return fieldset_rules_validation(self, data)
