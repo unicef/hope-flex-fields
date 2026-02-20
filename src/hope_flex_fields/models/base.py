@@ -8,9 +8,12 @@ from django.utils.text import slugify
 from django_regex.fields import RegexField
 from django_regex.validators import RegexValidator
 
+from ..validators import fieldset_cross_validation
+
 if TYPE_CHECKING:
     from django.db.models import Model
     from hope_flex_fields.forms import FlexForm
+
 
 logger = logging.getLogger(__name__)
 
@@ -125,6 +128,38 @@ class ValidatorMixin:
     def get_form_class(self):
         raise NotImplementedError
 
+    def get_fieldset_cross_validation_specs(self) -> list[tuple[object, dict[str, str]]]:
+        if not (members := getattr(self, "members", None)):
+            return []
+
+        specs: list[tuple[object, dict[str, str]]] = []
+        for m in members.select_related("fieldset").all():
+            fs = m.fieldset
+            if not (getattr(fs, "validation", "") or "").strip():
+                continue
+            prefix = m.prefix or ""
+            bare_to_prefixed = {
+                fld.name: ((prefix % fld.name) if "%s" in prefix else f"{prefix}{fld.name}") for fld in fs.get_fields()
+            }
+            specs.append((fs, bare_to_prefixed))
+
+        return specs
+
+    def apply_fieldset_cross_validation_specs(self, fieldset_specs, fields_errors) -> None:
+        cleaned = self.form.cleaned_data
+        for fs, bare_to_prefixed in fieldset_specs:
+            fieldset_data = {bare: cleaned.get(pref) for bare, pref in bare_to_prefixed.items()}
+            for bare_key, msg in fieldset_cross_validation(fs, fieldset_data).items():
+                key = "-" if bare_key == "-" else bare_to_prefixed.get(bare_key, bare_key)
+                msgs = msg if isinstance(msg, list) else [msg]
+                cur = fields_errors.get(key)
+                if cur is None:
+                    fields_errors[key] = list(msgs)
+                elif isinstance(cur, list):
+                    cur.extend(msgs)
+                else:
+                    fields_errors[key] = [cur, *msgs]
+
     def validate(  # noqa
         self,
         data: Iterable,
@@ -137,6 +172,7 @@ class ValidatorMixin:
         self.primary_keys = set()
         form_class: type[FlexForm] = self.get_form_class()
         known_fields = set(form_class.declared_fields.keys())
+        fieldset_cross_validation_specs = self.get_fieldset_cross_validation_specs()
         ret = {}
         for i, row in enumerate(data, 1):
             self.form: "FlexForm" = form_class(data=row, initial=row)
@@ -158,6 +194,8 @@ class ValidatorMixin:
             if row_errors:
                 fields_errors["-"] = row_errors
             self.validate_parent_child(fields_errors, row)
+
+            self.apply_fieldset_cross_validation_specs(fieldset_cross_validation_specs, fields_errors)
 
             if fields_errors:
                 ret[i] = fields_errors

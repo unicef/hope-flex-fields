@@ -95,6 +95,7 @@ class Fieldset(ValidatorMixin, models.Model):
     extends = models.ForeignKey("self", null=True, blank=True, on_delete=models.CASCADE)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
     group = models.CharField(max_length=32, blank=True, null=True)
+    validation = models.TextField(blank=True, null=True, default="")
 
     objects = FieldsetManager()
 

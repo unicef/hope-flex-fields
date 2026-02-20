@@ -11,6 +11,7 @@ from strategy_field.utils import fqn
 from .models import DataCheckerFieldset, FieldDefinition, Fieldset, FlexField
 from .registry import field_registry
 from .utils import get_common_attrs, get_kwargs_from_field_class
+from .validators import fieldset_cross_validation
 from .widgets import JavascriptEditor
 
 
@@ -25,9 +26,21 @@ class FlexForm(forms.Form):
             self.initialize_parent_child(self.initial)
 
     def clean(self):
-        super().clean()
-        self.cleaned_data = json.loads(json.dumps(self.cleaned_data, cls=DjangoJSONEncoder))
-        return self.cleaned_data
+        cleaned = super().clean()
+
+        if (fs := getattr(self, "fieldset", None)) is not None:
+            errors = fieldset_cross_validation(fs, cleaned)
+            for field, msg in (errors or {}).items():
+                if field == "-":  # non-field errors
+                    for m in msg if isinstance(msg, list) else [msg]:
+                        self.add_error(None, m)
+                else:
+                    for m in msg if isinstance(msg, list) else [msg]:
+                        self.add_error(field, m)
+
+        cleaned = json.loads(json.dumps(cleaned, cls=DjangoJSONEncoder))
+        self.cleaned_data = cleaned
+        return cleaned
 
     def initialize_parent_child(self, data: dict) -> None:
         for field in self.fields.values():
