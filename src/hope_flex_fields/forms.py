@@ -27,19 +27,18 @@ class FlexForm(forms.Form):
     def clean(self):
         cleaned = super().clean()
 
-        def apply(errors: dict[str | None, list[str]]) -> None:
+        def add_errors(errors: dict[str | None, list[str]]) -> None:
             for field, msgs in errors.items():
                 for m in msgs:
                     self.add_error(field, m)
 
-        if (fs := getattr(self, "fieldset", None)) is not None:
+        if fs := getattr(self, "fieldset", None):
             # The form is bound to a single Fieldset instance (no prefix mapping needed).
-            apply(fs.get_validation_errors(cleaned))
-        elif specs := getattr(self, "fieldset_specs", None):
+            add_errors(fs.get_validation_errors(cleaned))
+        for fs, m in getattr(self, "fieldset_specs", None) or ():
             # The form contains multiple fieldsets
             # Where each fieldset uses bare field names but the form fields are prefixed.
-            for fs, bare_to_prefixed in specs:
-                apply(fs.get_validation_errors(cleaned, bare_to_prefixed=bare_to_prefixed))
+            add_errors(fs.get_validation_errors(cleaned, bare_to_prefixed=m))
 
         cleaned = json.loads(json.dumps(cleaned, cls=DjangoJSONEncoder))
         self.cleaned_data = cleaned

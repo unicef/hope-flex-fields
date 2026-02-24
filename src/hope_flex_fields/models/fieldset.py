@@ -1,18 +1,22 @@
 import logging
+import json
 from typing import TYPE_CHECKING, Any, Generic, TypedDict, TypeVar
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.forms import modelform_factory
 from django.utils.translation import gettext as _
 
 from deepdiff import DeepDiff
 from deprecation import deprecated
+from py_mini_racer import JSEvalException
+
 
 from ..exceptions import FlexFieldCreationError
 from ..utils import get_kwargs_from_formfield
-from ..validators import fieldset_rules_validation
+from ..validators import JsValidator
 from .base import ValidatorMixin
 
 if TYPE_CHECKING:
@@ -186,6 +190,21 @@ class Fieldset(ValidatorMixin, models.Model):
         return errors
 
     def validate_rules(self, data: dict[str, Any]) -> dict:
-        if not self.has_validation_rules():
+        if not (code := (self.validation or "").strip()):
             return {}
-        return fieldset_rules_validation(self, data)
+
+        wrapped = f"(function(){{ var data = value;\n{code}\n}})()"
+
+        try:
+            payload = json.loads(json.dumps(data or {}, cls=DjangoJSONEncoder, ensure_ascii=False))
+        except (TypeError, ValueError) as e:
+            return {"-": [f"Validation data is not JSON-serializable: {e}"]}
+
+        try:
+            JsValidator(wrapped)(payload)
+        except JSEvalException as e:
+            return {"-": [f"JavaScript validation error: {e}"]}
+        except ValidationError as e:
+            return getattr(e, "message_dict", None) or {"-": e.messages}
+
+        return {}
