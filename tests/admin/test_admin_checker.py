@@ -325,3 +325,44 @@ def test_datachecker_single_identity_field_accepted(app, two_identity_fieldsets)
     res = res.forms["datachecker_form"].submit()
 
     assert res.status_code in (200, 302)
+
+
+@pytest.fixture
+def dc_with_two_identity_members(db):
+    """DataChecker that already has two IdentityField members saved via factory
+    (bypasses admin formset validation so the conflicting state can exist)."""
+    from testutils.factories import (
+        DataCheckerFactory,
+        DataCheckerFieldsetFactory,
+        FieldDefinitionFactory,
+        FieldsetFactory,
+        FlexFieldFactory,
+    )
+
+    fd_id = FieldDefinitionFactory(field_type=IdentityField)
+    fs1 = FieldsetFactory(name="IDSet-A")
+    fs2 = FieldsetFactory(name="IDSet-B")
+    FlexFieldFactory(name="uid_a", definition=fd_id, fieldset=fs1, attrs={"required": False})
+    FlexFieldFactory(name="uid_b", definition=fd_id, fieldset=fs2, attrs={"required": False})
+
+    dc = DataCheckerFactory()
+    DataCheckerFieldsetFactory(checker=dc, fieldset=fs1, prefix="a_")
+    DataCheckerFieldsetFactory(checker=dc, fieldset=fs2, prefix="b_")
+    return dc
+
+
+def test_datachecker_deleted_inline_skips_identity_check(app, dc_with_two_identity_members):
+    """A formset row marked for DELETE is skipped by DataCheckerFieldsetFormset.clean().
+
+    Without the ``continue`` the two IdentityField members would trigger the
+    'Only one IdentityField is allowed' error even though one is being removed.
+    """
+    dc = dc_with_two_identity_members
+    url = reverse("admin:hope_flex_fields_datachecker_change", args=[dc.pk])
+    res = app.get(url)
+    # Mark the first existing member for deletion — clean() must skip it.
+    res.forms["datachecker_form"]["members-0-DELETE"] = True
+    res = res.forms["datachecker_form"].submit()
+
+    assert b"Only one IdentityField is allowed per DataChecker" not in res.content
+    assert res.status_code in (200, 302)
