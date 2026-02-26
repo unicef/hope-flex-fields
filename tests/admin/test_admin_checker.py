@@ -256,6 +256,7 @@ def test_datachecker_validate_xls(app, rdi):
 
 # ── ValidatableFileValidator unit tests ──────────────────────────────────────
 
+
 def test_validatable_file_validator_accepts_supported_format():
     """No error is raised for a file whose extension is in HANDLERS."""
     from hope_flex_fields.admin.datachecker import ValidatableFileValidator
@@ -282,6 +283,7 @@ def test_validatable_file_validator_rejects_unsupported_format():
 
 
 # ── IdentityField enforcement in DataCheckerFieldsetFormset ──────────────────
+
 
 @pytest.fixture
 def two_identity_fieldsets(db):
