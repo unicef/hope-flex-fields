@@ -137,14 +137,16 @@ class ValidatorMixin:
         if not isinstance(data, list | tuple | Generator):
             data = [data]
         self.primary_keys = set()
-
-        self._primary_key_field_name = None
         form_class: type[FlexForm] = self.get_form_class()
         known_fields = set(form_class.declared_fields.keys())
-        for field_name, field_instance in form_class.declared_fields.items():
-            if isinstance(field_instance, IdentityField):
-                self.set_primary_key_col(field_name)
-                break
+        # Auto-detect IdentityField only when no primary key column was manually
+        # configured via set_primary_key_col().  This preserves the existing
+        # master-detail pattern where callers set the column explicitly.
+        if not self._primary_key_field_name:
+            for field_name, field_instance in form_class.declared_fields.items():
+                if isinstance(field_instance, IdentityField):
+                    self.set_primary_key_col(field_name)
+                    break
 
         ret = {}
         for i, row in enumerate(data, 1):
