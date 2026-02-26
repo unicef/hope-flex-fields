@@ -60,6 +60,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Set up Python ${{ matrix.python-version }}
+        id: setup-python
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
@@ -71,7 +72,7 @@ jobs:
         with:
           path: |
             .venv/
-          key: ${{ matrix.python-version }}-${{matrix.django-version}}-${{ hashFiles('pyproject.toml') }}-venv
+          key: ${{ steps.setup-python.outputs.python-version }}-${{ matrix.django-version }}-${{ hashFiles('pyproject.toml') }}-venv
 
       - uses: astral-sh/setup-uv@v7
         with:
@@ -80,11 +81,11 @@ jobs:
       - name: Test
         continue-on-error: false
         run: |
-          python3 -m venv .venv
+          python -m venv .venv --upgrade
           uv export -q --no-hashes  -o requirements.txt
-          .venv/bin/pip install -r requirements.txt
-          .venv/bin/pip install "django>=${{matrix.django-version}}"
-          .venv/bin/pytest tests --create-db --cov --junit-xml junit-${{ matrix.python-version }}-${{matrix.django-version}}.xml
+          .venv/bin/python -m pip install -r requirements.txt
+          .venv/bin/python -m pip install "django>=${{matrix.django-version}}"
+          .venv/bin/python -m pytest tests --create-db --cov --junit-xml junit-${{ matrix.python-version }}-${{matrix.django-version}}.xml
 
       - name: Cache venv
         if: steps.cache-venv-restore.outputs.cache-hit != 'true'
@@ -93,7 +94,7 @@ jobs:
         with:
           path: |
             .venv/
-          key: ${{ matrix.python-version }}-${{matrix.django-version}}-${{ hashFiles('pyproject.toml') }}-venv
+          key: ${{ steps.setup-python.outputs.python-version }}-${{matrix.django-version}}-${{ hashFiles('pyproject.toml') }}-venv
 
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
