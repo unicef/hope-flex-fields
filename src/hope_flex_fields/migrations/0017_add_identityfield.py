@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     dependencies = [
         (
             "hope_flex_fields",
-            "0015_alter_datachecker_id_alter_datacheckerfieldset_id_and_more",
+            "0016_fieldset_validation",
         ),
     ]
 
