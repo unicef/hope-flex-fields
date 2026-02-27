@@ -79,4 +79,4 @@ def test_sync(admin_user, data, mocked_responses):
     mocked_responses.get("http://testserver/api/sync/", json=data)
     response = client.get("http://testserver/api/sync/")
     out = loaddata_from_buffer(response)
-    assert "Processed 33 object(s).\nInstalled 33 object(s) from 1 fixture(s)" in out
+    assert "Processed 34 object(s).\nInstalled 34 object(s) from 1 fixture(s)" in out
