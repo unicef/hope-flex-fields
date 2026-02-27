@@ -51,6 +51,22 @@ class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
     list_filter = ("content_type",)
     form = FieldsetForm
 
+    fieldsets = (
+        ("", {"fields": ("name", "description", "extends", "content_type", "group")}),
+        (
+            "Validation",
+            {
+                "classes": ("collapse", "open"),
+                "fields": ("validation",),
+                "description": (
+                    "Validation rules (JavaScript). "
+                    "Write the function body with access to `data` variable; "
+                    "`return true` or an errors object like `{field: 'message'}`."
+                ),
+            },
+        ),
+    )
+
     @button(label="Fields")
     def all_fields(self, request, pk):
         from hope_flex_fields.models import FlexField

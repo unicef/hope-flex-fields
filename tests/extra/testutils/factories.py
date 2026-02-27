@@ -87,6 +87,7 @@ class ContentTypeFactory(AutoRegisterModelFactory):
 class FieldsetFactory(AutoRegisterModelFactory):
     name = factory.Sequence(lambda d: "Fieldset-%s" % d)
     extends = None
+    validation = ""
 
     class Meta:
         model = Fieldset

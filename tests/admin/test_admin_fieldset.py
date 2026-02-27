@@ -13,11 +13,15 @@ pytestmark = [pytest.mark.admin, pytest.mark.smoke, pytest.mark.django_db]
 
 @pytest.fixture
 def record(db):
-    fd1 = FieldDefinitionFactory(field_type=forms.IntegerField, attrs={"min_value": 1})
-    fd2 = FieldDefinitionFactory(field_type=forms.FloatField, attrs={"min_value": 1})
+    fd_int = FieldDefinitionFactory(field_type=forms.IntegerField, attrs={"min_value": 1})
+    fd_float = FieldDefinitionFactory(field_type=forms.FloatField, attrs={"min_value": 1})
+    fd_text = FieldDefinitionFactory(field_type=forms.CharField, attrs={"required": False})
+
     fs = FieldsetFactory()
-    FlexFieldFactory(name="int", definition=fd1, fieldset=fs, attrs={})
-    FlexFieldFactory(name="float", definition=fd2, fieldset=fs, attrs={"required": True})
+    FlexFieldFactory(name="int", definition=fd_int, fieldset=fs, attrs={})
+    FlexFieldFactory(name="float", definition=fd_float, fieldset=fs, attrs={"required": True})
+    FlexFieldFactory(name="document_number", definition=fd_text, fieldset=fs, attrs={"required": False})
+    FlexFieldFactory(name="country", definition=fd_text, fieldset=fs, attrs={"required": False})
     return fs
 
 
@@ -33,17 +37,34 @@ def test_detect_changes(app, record2):
 
 
 def test_fieldset_test(app, record):
+    record.validation = """
+        return data.document_number && !data.country
+        ? ({ country: "country is required when document number is provided." })
+        : true;
+        """.strip()
+    record.save(update_fields=["validation"])
+
     url = reverse("admin:hope_flex_fields_fieldset_test", args=[record.pk])
     res = app.get(url)
-    res.forms["test"]["int"] = "1"
-    res = res.forms["test"].submit()
-    messages = [s.message for s in res.context["messages"]]
-    assert messages == ["Please correct the errors below"]
 
-    res.forms["test"]["float"] = "1.1"
-    res = res.forms["test"].submit()
-    messages = [s.message for s in res.context["messages"]]
-    assert messages == ["Valid"]
+    def submit(**data):
+        form = res.forms["test"]
+        for k, v in data.items():
+            form[k] = v
+        return form.submit()
+
+    res = submit(int="1")
+    assert [m.message for m in res.context["messages"]] == ["Please correct the errors below"]
+
+    res = submit(int="1", float="1.1", document_number="", country="")
+    assert [m.message for m in res.context["messages"]] == ["Valid"]
+
+    res = submit(int="1", float="1.1", document_number="ABC", country="")
+    assert [m.message for m in res.context["messages"]] == ["Please correct the errors below"]
+    assert b"country is required when document number is provided." in res.content
+
+    res = submit(int="1", float="1.1", document_number="ABC", country="CL")
+    assert [m.message for m in res.context["messages"]] == ["Valid"]
 
 
 def test_fieldset_unique_name(app, record):
