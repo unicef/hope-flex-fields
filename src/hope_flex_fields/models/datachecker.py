@@ -103,7 +103,20 @@ class DataChecker(ValidatorMixin, models.Model):
                 full_name = f"{fs.prefix}{field.name}"
             fld.label = f"{prefix}: {label}" if prefix else label
             fields[full_name] = fld
-        form_class_attrs = {"datachecker": self, "validator": self, **dict(sorted(fields.items()))}
+
+        members = self.members.select_related("fieldset").order_by("order").all()
+        fieldset_specs = [
+            (m.fieldset, m.fieldset.get_prefixed_field_map(m.prefix or ""))
+            for m in members
+            if m.fieldset.has_validation_rules()
+        ]
+        form_class_attrs = {
+            "datachecker": self,
+            "validator": self,
+            "fieldset_specs": fieldset_specs,
+            **dict(sorted(fields.items())),
+        }
+
         return type(f"{self.name}DataCheckerForm", (FlexForm,), form_class_attrs)
 
 
