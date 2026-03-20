@@ -15,6 +15,12 @@ class IdentityField(forms.CharField):
 
     Rules enforced by the system:
     - At most one IdentityField may exist per DataChecker.
-    - During validation, values are automatically checked for uniqueness
+    - The field is read-only (disabled): its value is set at import time and
+      cannot be changed through normal form editing.
+    - During import validation, values are automatically checked for uniqueness
       across the dataset (duplicate values produce a validation error).
     """
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("disabled", True)
+        super().__init__(*args, **kwargs)
