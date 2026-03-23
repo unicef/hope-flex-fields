@@ -43,7 +43,7 @@ def test_collected_values_handling():
 @pytest.mark.django_db
 def test_identity_field_auto_detected_as_pk():
     """validate() discovers an IdentityField in the form and uses it as the PK column."""
-    from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory
+    from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory  # noqa
 
     fd_uid = FieldDefinitionFactory(field_type=IdentityField)
     fd_name = FieldDefinitionFactory(field_type=forms.CharField)
@@ -61,7 +61,7 @@ def test_identity_field_auto_detected_as_pk():
 @pytest.mark.django_db
 def test_identity_field_duplicate_detected():
     """validate() reports a duplicate error when two rows share the same IdentityField value."""
-    from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory
+    from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory  # noqa
 
     fd_uid = FieldDefinitionFactory(field_type=IdentityField)
     fd_name = FieldDefinitionFactory(field_type=forms.CharField)
@@ -79,7 +79,7 @@ def test_identity_field_duplicate_detected():
 @pytest.mark.django_db
 def test_explicit_pk_not_overridden_by_identity_field():
     """set_primary_key_col() takes precedence — IdentityField auto-detection is skipped."""
-    from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory
+    from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory  # noqa
 
     fd_uid = FieldDefinitionFactory(field_type=IdentityField)
     fd_seq = FieldDefinitionFactory(field_type=forms.IntegerField)

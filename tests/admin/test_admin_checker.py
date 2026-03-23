@@ -16,7 +16,7 @@ pytestmark = [pytest.mark.admin, pytest.mark.smoke, pytest.mark.django_db]
 
 @pytest.fixture
 def record(db):
-    from testutils.factories import (
+    from testutils.factories import (  # noqa
         DataCheckerFieldsetFactory,
         FieldDefinitionFactory,
         FieldsetFactory,
@@ -38,7 +38,7 @@ def record(db):
 
 @pytest.fixture
 def dc(db):
-    from testutils.factories import (
+    from testutils.factories import (  # noqa
         DataCheckerFieldsetFactory,
         FieldDefinitionFactory,
         FieldsetFactory,
@@ -74,7 +74,7 @@ def dc(db):
 
 @pytest.fixture
 def rdi(db):  # noqa
-    from testutils.factories import (
+    from testutils.factories import (  # noqa
         DataCheckerFieldsetFactory,
         FieldDefinitionFactory,
         FieldsetFactory,
@@ -259,7 +259,7 @@ def test_datachecker_validate_xls(app, rdi):
 
 def test_validatable_file_validator_accepts_supported_format():
     """No error is raised for a file whose extension is in HANDLERS."""
-    from hope_flex_fields.admin.datachecker import ValidatableFileValidator
+    from hope_flex_fields.admin.datachecker import ValidatableFileValidator  # noqa
 
     validator = ValidatableFileValidator()
 
@@ -271,7 +271,7 @@ def test_validatable_file_validator_accepts_supported_format():
 
 def test_validatable_file_validator_rejects_unsupported_format():
     """ValidationError is raised for a file whose extension is not in HANDLERS."""
-    from hope_flex_fields.admin.datachecker import ValidatableFileValidator
+    from hope_flex_fields.admin.datachecker import ValidatableFileValidator  # noqa
 
     validator = ValidatableFileValidator()
 
@@ -288,7 +288,7 @@ def test_validatable_file_validator_rejects_unsupported_format():
 @pytest.fixture
 def two_identity_fieldsets(db):
     """Two fieldsets that each contain one IdentityField flex-field."""
-    from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory
+    from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory  # noqa
 
     fd_id = FieldDefinitionFactory(field_type=IdentityField)
     fs1 = FieldsetFactory(name="IDFieldset1")
@@ -331,7 +331,7 @@ def test_datachecker_single_identity_field_accepted(app, two_identity_fieldsets)
 def dc_with_two_identity_members(db):
     """DataChecker that already has two IdentityField members saved via factory
     (bypasses admin formset validation so the conflicting state can exist)."""
-    from testutils.factories import (
+    from testutils.factories import (  # noqa
         DataCheckerFactory,
         DataCheckerFieldsetFactory,
         FieldDefinitionFactory,

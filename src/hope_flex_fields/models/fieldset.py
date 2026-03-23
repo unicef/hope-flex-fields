@@ -41,7 +41,7 @@ class FieldsetManager(models.Manager):
         return self.get(name=name)
 
     def inspect_content_type(self, ct: ContentType) -> ContentTypeConfig:
-        from hope_flex_fields.models import FieldDefinition, FlexField
+        from hope_flex_fields.models import FieldDefinition, FlexField  # noqa
 
         model_class = ct.model_class()
         model_form = modelform_factory(model_class, exclude=(model_class._meta.pk.name,))
@@ -81,7 +81,7 @@ class FieldsetManager(models.Manager):
         }
 
     def create_from_content_type(self, name: str, content_type: ContentType, config: dict | None = None) -> "Fieldset":
-        from hope_flex_fields.models import FieldDefinition, Fieldset
+        from hope_flex_fields.models import FieldDefinition, Fieldset  # noqa
 
         if config is None:
             inspection = Fieldset.objects.inspect_content_type(content_type)
@@ -147,7 +147,7 @@ class Fieldset(ValidatorMixin, models.Model):
         return self.get_form_class()
 
     def get_form_class(self) -> "Generic[F]":
-        from ..forms import FlexForm
+        from ..forms import FlexForm  # noqa
 
         fields: dict[str, forms.Field] = {}
         field: "FlexField"

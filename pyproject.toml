@@ -9,12 +9,17 @@ authors = [
   { name = "sax", email = "s.apostolico@gmail.com" },
 ]
 
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 classifiers = [
+  "Environment :: Web Environment",
+  "Framework :: Django",
+  "Framework :: Django :: 5.2",
+  "Framework :: Django :: 6.0",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
   "deepdiff",
@@ -33,7 +38,32 @@ dependencies = [
   "requests",
   "xlsxwriter",
 ]
-optional-dependencies.docs = [
+
+[dependency-groups]
+dev = [
+  "bandit",
+  "black",
+  "bump2version",
+  "django-csp",
+  "django-factory-boy",
+  "django-webtest",
+  "flake8",
+  "flake8-html",
+  "freezegun",
+  "isort",
+  "mypy",
+  "pdbpp",
+  "pre-commit",
+  "pytest",
+  "pytest-cov",
+  "pytest-django",
+  "pytest-xdist",
+  "requests",
+  "responses",
+  "tox",
+]
+
+docs = [
   "mkdocs",
   "mkdocs-awesome-pages-plugin",
   "mkdocs-material",
@@ -48,31 +78,6 @@ include = [
 [tool.hatch.build.targets.wheel]
 packages = [
   "src/hope_flex_fields",
-]
-
-[tool.uv]
-dev-dependencies = [
-  "bandit",
-  "black",
-  "bump2version",
-  "django-csp",
-  "django-factory-boy",
-  "django-webtest",
-  "django",
-  "flake8-html",
-  "flake8",
-  "freezegun",
-  "isort",
-  "mypy",
-  "pdbpp",
-  "pre-commit",
-  "pytest-cov",
-  "pytest-django",
-  "pytest",
-  "responses",
-  "pytest-xdist",
-  "tox",
-  "requests",
 ]
 
 [tool.django-stubs]
