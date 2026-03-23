@@ -69,7 +69,7 @@ class FieldsetAdmin(ExtraButtonsMixin, ModelAdmin):
 
     @button(label="Fields")
     def all_fields(self, request, pk):
-        from hope_flex_fields.models import FlexField
+        from hope_flex_fields.models import FlexField  # noqa
 
         ctx = self.get_common_context(request, pk, title="Fields")
         fs: Fieldset = self.object

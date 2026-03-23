@@ -1,4 +1,3 @@
-from collections.abc import Generator
 from io import BytesIO
 from typing import TYPE_CHECKING, Generic, TypeVar
 from django.db import models
@@ -10,6 +9,7 @@ from ..utils import memoized_method
 from ..xlsx import get_format_for_field, get_validation_for_field
 from .base import ValidatorMixin
 from .fieldset import Fieldset
+from collections.abc import Generator  # noqa: TC003
 
 if TYPE_CHECKING:
     from xlsxwriter import Format, Workbook
@@ -88,7 +88,7 @@ class DataChecker(ValidatorMixin, models.Model):
         return self.get_form_class()
 
     def get_form_class(self) -> "Generic[F]":
-        from ..forms import FlexForm
+        from ..forms import FlexForm  # noqa
 
         fields: dict[str, forms.Field] = {}
         field: "FlexField"
@@ -121,7 +121,7 @@ class DataChecker(ValidatorMixin, models.Model):
 
 
 def create_xls_importer(dc: "DataChecker") -> BytesIO:
-    import xlsxwriter
+    import xlsxwriter  # noqa
 
     out = BytesIO()
 

@@ -132,7 +132,7 @@ class ValidatorMixin:
         include_success: bool = False,
         fail_if_alien: bool = False,
     ):
-        from ..fields import IdentityField
+        from ..fields import IdentityField  # noqa
 
         if not isinstance(data, list | tuple | Generator):
             data = [data]

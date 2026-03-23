@@ -17,7 +17,7 @@ class FieldRegistry(Registry):
             if isinstance(item, str):
                 try:
                     clazz = import_by_name(item)
-                except (ImportError, ValueError):
+                except (ImportError, ValueError):  # noqa
                     raise KeyError(item)
             else:
                 clazz = item
@@ -34,7 +34,7 @@ class FieldRegistry(Registry):
         if isinstance(y, str):
             try:
                 y = import_by_name(y)
-            except (ImportError, ValueError):
+            except (ImportError, ValueError):  # noqa
                 return False
         return super().__contains__(y)
 

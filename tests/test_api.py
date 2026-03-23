@@ -11,7 +11,7 @@ from hope_flex_fields.utils import loaddata_from_buffer
 
 @pytest.fixture
 def data(db):
-    from testutils.factories import (
+    from testutils.factories import (  # noqa
         DataCheckerFieldsetFactory,
         FieldDefinitionFactory,
         FieldsetFactory,

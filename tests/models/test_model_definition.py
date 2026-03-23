@@ -5,7 +5,7 @@ import pytest
 
 
 def test_validate_attributes(db):
-    from hope_flex_fields.models import FieldDefinition
+    from hope_flex_fields.models import FieldDefinition  # noqa
 
     fd = FieldDefinition(name="IntField", field_type=forms.IntegerField, attrs={"cccc": "abc"})
     with pytest.raises(ValidationError):
@@ -13,7 +13,7 @@ def test_validate_attributes(db):
 
 
 def test_configuration(db):
-    from hope_flex_fields.models import FieldDefinition
+    from hope_flex_fields.models import FieldDefinition  # noqa
 
     fd = FieldDefinition(name="IntField", field_type=forms.IntegerField, attrs={"min_value": 10})
     field = fd.get_field()
@@ -23,7 +23,7 @@ def test_configuration(db):
 
 
 def test_override(db):
-    from hope_flex_fields.models import FieldDefinition, FlexField
+    from hope_flex_fields.models import FieldDefinition, FlexField  # noqa
 
     fd = FieldDefinition(name="IntField", field_type=forms.IntegerField, validation="true", regex=".*")
     fld = FlexField(definition=fd, validation="false", regex=r"\d")
@@ -41,6 +41,6 @@ def test_override(db):
 
 @pytest.mark.parametrize("form_field", [forms.CharField(), forms.CharField])
 def test_get_from_django_field(db, form_field):
-    from hope_flex_fields.models import FieldDefinition
+    from hope_flex_fields.models import FieldDefinition  # noqa
 
     assert FieldDefinition.objects.get_from_django_field(form_field)
