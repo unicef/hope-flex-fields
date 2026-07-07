@@ -1,5 +1,5 @@
 from io import BytesIO
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 from django.db import models
 from django.utils.translation import gettext as _
 
@@ -118,6 +118,41 @@ class DataChecker(ValidatorMixin, models.Model):
         }
 
         return type(f"{self.name}DataCheckerForm", (FlexForm,), form_class_attrs)
+
+    def get_file_field_names(self, *, with_prefix: bool = True) -> set[str]:
+        """Return the (optionally prefixed) names of fields that hold file data.
+
+        The names match those produced by :meth:`get_form_class`, so callers can
+        use them to key into cleaned/validated data.
+        """
+        names: set[str] = set()
+        field: "FlexField"
+        for fs, field in self.get_fields():
+            if not field.is_file:
+                continue
+            if "%s" in fs.prefix:
+                full_name = fs.prefix % field.name
+            else:
+                full_name = f"{fs.prefix}{field.name}"
+            names.add(full_name if with_prefix else field.name)
+        return names
+
+    def split_data(self, data: dict[str, Any]) -> dict[str, dict[str, Any]]:
+        """Split a data mapping into text ``fields`` and binary ``files``.
+
+        The distinction is driven by each flex field's ``is_file`` attribute, so
+        every consumer gets a consistent text/file separation without having to
+        know how field types are configured.
+        """
+        file_names = self.get_file_field_names()
+        fields: dict[str, Any] = {}
+        files: dict[str, Any] = {}
+        for key, value in data.items():
+            if key in file_names:
+                files[key] = value
+            else:
+                fields[key] = value
+        return {"fields": fields, "files": files}
 
 
 def create_xls_importer(dc: "DataChecker") -> BytesIO:

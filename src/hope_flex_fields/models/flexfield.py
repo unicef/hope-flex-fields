@@ -54,6 +54,20 @@ class FlexField(AbstractField):
     def base_type(self):
         return self.definition.field_type.__name__
 
+    @property
+    def is_file(self) -> bool:
+        """Whether this field stores binary/file data rather than text.
+
+        Used by the data checker to route cleaned values into the proper
+        storage (text fields vs. file blob).
+        """
+        from django import forms
+
+        try:
+            return isinstance(self.get_field(), forms.FileField)
+        except FlexFieldCreationError:
+            return False
+
     def validate_attrs(self):
         try:
             self.get_field()
