@@ -58,6 +58,16 @@ def test_flexfield_is_file_flag(file_and_text_fieldset):
     assert fields == {"photo": True, "full_name": False}
 
 
+def test_flexfield_is_file_false_when_field_cannot_be_built(db):
+    from unittest.mock import patch
+
+    from hope_flex_fields.exceptions import FlexFieldCreationError
+
+    field = FlexFieldFactory()
+    with patch.object(field, "get_field", side_effect=FlexFieldCreationError("boom")):
+        assert field.is_file is False
+
+
 @pytest.mark.parametrize(
     ("prefix", "expected"),
     [("", "photo"), ("member_", "member_photo"), ("%s_", "photo_")],
