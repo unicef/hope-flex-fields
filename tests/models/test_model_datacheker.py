@@ -1,5 +1,6 @@
 import pytest
 from django import forms
+from hope_flex_fields.registry import field_registry
 
 from testutils.factories import (
     DataCheckerFactory,
@@ -41,8 +42,6 @@ def test_datachecker_fieldset_specs_map_matches_form_field_names(fs, prefix: str
 
 @pytest.fixture
 def file_and_text_fieldset(db):
-    from hope_flex_fields.registry import field_registry
-
     if forms.FileField not in field_registry:
         field_registry.register(forms.FileField)
 

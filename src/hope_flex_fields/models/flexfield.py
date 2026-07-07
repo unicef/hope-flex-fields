@@ -1,5 +1,6 @@
 import logging
 
+from django import forms
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import UniqueConstraint
@@ -61,8 +62,6 @@ class FlexField(AbstractField):
         Used by the data checker to route cleaned values into the proper
         storage (text fields vs. file blob).
         """
-        from django import forms
-
         try:
             return isinstance(self.get_field(), forms.FileField)
         except FlexFieldCreationError:
