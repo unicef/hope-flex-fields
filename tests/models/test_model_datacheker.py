@@ -1,9 +1,7 @@
 import pytest
-from unittest.mock import patch
 
 from django import forms
 
-from hope_flex_fields.exceptions import FlexFieldCreationError
 from hope_flex_fields.registry import field_registry
 
 from testutils.factories import (
@@ -60,12 +58,6 @@ def file_and_text_fieldset(db):
 def test_flexfield_is_file_flag(file_and_text_fieldset):
     fields = {f.name: f.is_file for f in file_and_text_fieldset.get_fields()}
     assert fields == {"photo": True, "full_name": False}
-
-
-def test_flexfield_is_file_false_when_field_cannot_be_built(db):
-    field = FlexFieldFactory()
-    with patch.object(field, "get_field", side_effect=FlexFieldCreationError("boom")):
-        assert field.is_file is False
 
 
 @pytest.mark.parametrize(

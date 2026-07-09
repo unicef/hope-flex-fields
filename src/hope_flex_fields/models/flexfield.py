@@ -62,10 +62,7 @@ class FlexField(AbstractField):
         Used by the data checker to route cleaned values into the proper
         storage (text fields vs. file blob).
         """
-        try:
-            return isinstance(self.get_field(), forms.FileField)
-        except FlexFieldCreationError:
-            return False
+        return issubclass(self.definition.field_type, forms.FileField)
 
     def validate_attrs(self):
         try:
