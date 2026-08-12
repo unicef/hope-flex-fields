@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch
 
 from django import forms
 
@@ -85,17 +86,15 @@ def test_datachecker_split_data_separates_files_from_text(file_and_text_fieldset
     }
 
 
-def test_datachecker_split_data_uses_provided_file_names(file_and_text_fieldset, mocker):
+def test_datachecker_split_data_uses_provided_file_names(file_and_text_fieldset):
     dc = DataCheckerFactory()
     DataCheckerFieldsetFactory(checker=dc, fieldset=file_and_text_fieldset, prefix="", order=0)
-    get_file_field_names = mocker.patch.object(dc, "get_file_field_names")
-
-    split = dc.split_data(
-        {"full_name": "Jane", "photo": "blob", "extra": "x"},
-        file_field_names={"photo"},
-    )
-
-    get_file_field_names.assert_not_called()
+    with patch.object(dc, "get_file_field_names") as get_file_field_names:
+        split = dc.split_data(
+            {"full_name": "Jane", "photo": "blob", "extra": "x"},
+            file_field_names={"photo"},
+        )
+        get_file_field_names.assert_not_called()
     assert split == {
         "fields": {"full_name": "Jane", "extra": "x"},
         "files": {"photo": "blob"},
