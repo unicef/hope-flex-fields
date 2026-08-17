@@ -15,7 +15,7 @@ def pytest_configure(config):
     os.environ["ADMINS"] = "admin@demo.org"
     os.environ["CAPTCHA_TEST_MODE"] = "true"
     os.environ["DJANGO_SETTINGS_MODULE"] = "demo.settings"
-    import django
+    import django  # noqa
 
     django.setup()
 
@@ -28,7 +28,7 @@ def mocked_responses():
 
 @pytest.fixture
 def app(django_app_factory, mocked_responses):
-    from testutils.factories import SuperUserFactory
+    from testutils.factories import SuperUserFactory  # noqa
 
     django_app = django_app_factory(csrf_checks=False)
     admin_user = SuperUserFactory(username="superuser")
@@ -39,10 +39,10 @@ def app(django_app_factory, mocked_responses):
 
 @pytest.fixture
 def fieldset1(django_app_factory, mocked_responses):
-    from testutils.factories import FieldsetFactory
+    from testutils.factories import FieldsetFactory  # noqa
 
     FieldsetFactory()
-    from testutils.factories import SuperUserFactory
+    from testutils.factories import SuperUserFactory  # noqa
 
     django_app = django_app_factory(csrf_checks=False)
     admin_user = SuperUserFactory(username="superuser")

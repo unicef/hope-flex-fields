@@ -1,12 +1,14 @@
 from pathlib import Path
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 
 import pytest
 from testutils.factories import DataCheckerFactory
 from webtest import Upload
 
+from hope_flex_fields.fields import IdentityField
 from hope_flex_fields.models import Fieldset
 
 pytestmark = [pytest.mark.admin, pytest.mark.smoke, pytest.mark.django_db]
@@ -14,7 +16,7 @@ pytestmark = [pytest.mark.admin, pytest.mark.smoke, pytest.mark.django_db]
 
 @pytest.fixture
 def record(db):
-    from testutils.factories import (
+    from testutils.factories import (  # noqa
         DataCheckerFieldsetFactory,
         FieldDefinitionFactory,
         FieldsetFactory,
@@ -36,7 +38,7 @@ def record(db):
 
 @pytest.fixture
 def dc(db):
-    from testutils.factories import (
+    from testutils.factories import (  # noqa
         DataCheckerFieldsetFactory,
         FieldDefinitionFactory,
         FieldsetFactory,
@@ -72,7 +74,7 @@ def dc(db):
 
 @pytest.fixture
 def rdi(db):  # noqa
-    from testutils.factories import (
+    from testutils.factories import (  # noqa
         DataCheckerFieldsetFactory,
         FieldDefinitionFactory,
         FieldsetFactory,
@@ -250,3 +252,117 @@ def test_datachecker_validate_xls(app, rdi):
     res.forms["validate-form"]["file"] = Upload("rdi.xlsx", data)
     res = res.forms["validate-form"].submit()
     assert res.status_code == 200
+
+
+# ── ValidatableFileValidator unit tests ──────────────────────────────────────
+
+
+def test_validatable_file_validator_accepts_supported_format():
+    """No error is raised for a file whose extension is in HANDLERS."""
+    from hope_flex_fields.admin.datachecker import ValidatableFileValidator  # noqa
+
+    validator = ValidatableFileValidator()
+
+    class _File:
+        name = "data.xlsx"
+
+    validator(_File())  # must not raise
+
+
+def test_validatable_file_validator_rejects_unsupported_format():
+    """ValidationError is raised for a file whose extension is not in HANDLERS."""
+    from hope_flex_fields.admin.datachecker import ValidatableFileValidator  # noqa
+
+    validator = ValidatableFileValidator()
+
+    class _File:
+        name = "data.csv"
+
+    with pytest.raises(ValidationError):
+        validator(_File())
+
+
+# ── IdentityField enforcement in DataCheckerFieldsetFormset ──────────────────
+
+
+@pytest.fixture
+def two_identity_fieldsets(db):
+    """Two fieldsets that each contain one IdentityField flex-field."""
+    from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory  # noqa
+
+    fd_id = FieldDefinitionFactory(field_type=IdentityField)
+    fs1 = FieldsetFactory(name="IDFieldset1")
+    fs2 = FieldsetFactory(name="IDFieldset2")
+    FlexFieldFactory(name="uid1", definition=fd_id, fieldset=fs1, attrs={"required": False})
+    FlexFieldFactory(name="uid2", definition=fd_id, fieldset=fs2, attrs={"required": False})
+    return fs1, fs2
+
+
+def test_datachecker_multiple_identity_fields_rejected(app, two_identity_fieldsets):
+    """Saving a DataChecker with two IdentityFields across its fieldsets is rejected."""
+    fs1, fs2 = two_identity_fieldsets
+    url = reverse("admin:hope_flex_fields_datachecker_add")
+    res = app.get(url)
+    res.forms["datachecker_form"]["name"] = "DC-MultiID"
+    res.forms["datachecker_form"]["members-0-fieldset"] = fs1.pk
+    res.forms["datachecker_form"]["members-0-prefix"] = "a_"
+    res.forms["datachecker_form"]["members-1-fieldset"] = fs2.pk
+    res.forms["datachecker_form"]["members-1-prefix"] = "b_"
+    res = res.forms["datachecker_form"].submit()
+
+    assert res.status_code == 200
+    assert b"Only one IdentityField is allowed per DataChecker" in res.content
+
+
+def test_datachecker_single_identity_field_accepted(app, two_identity_fieldsets):
+    """Saving a DataChecker with exactly one IdentityField across its fieldsets succeeds."""
+    fs1, _fs2 = two_identity_fieldsets
+    url = reverse("admin:hope_flex_fields_datachecker_add")
+    res = app.get(url)
+    res.forms["datachecker_form"]["name"] = "DC-SingleID"
+    res.forms["datachecker_form"]["members-0-fieldset"] = fs1.pk
+    res.forms["datachecker_form"]["members-0-prefix"] = "a_"
+    res = res.forms["datachecker_form"].submit()
+
+    assert res.status_code in (200, 302)
+
+
+@pytest.fixture
+def dc_with_two_identity_members(db):
+    """DataChecker that already has two IdentityField members saved via factory
+    (bypasses admin formset validation so the conflicting state can exist)."""
+    from testutils.factories import (  # noqa
+        DataCheckerFactory,
+        DataCheckerFieldsetFactory,
+        FieldDefinitionFactory,
+        FieldsetFactory,
+        FlexFieldFactory,
+    )
+
+    fd_id = FieldDefinitionFactory(field_type=IdentityField)
+    fs1 = FieldsetFactory(name="IDSet-A")
+    fs2 = FieldsetFactory(name="IDSet-B")
+    FlexFieldFactory(name="uid_a", definition=fd_id, fieldset=fs1, attrs={"required": False})
+    FlexFieldFactory(name="uid_b", definition=fd_id, fieldset=fs2, attrs={"required": False})
+
+    dc = DataCheckerFactory()
+    DataCheckerFieldsetFactory(checker=dc, fieldset=fs1, prefix="a_")
+    DataCheckerFieldsetFactory(checker=dc, fieldset=fs2, prefix="b_")
+    return dc
+
+
+def test_datachecker_deleted_inline_skips_identity_check(app, dc_with_two_identity_members):
+    """A formset row marked for DELETE is skipped by DataCheckerFieldsetFormset.clean().
+
+    Without the ``continue`` the two IdentityField members would trigger the
+    'Only one IdentityField is allowed' error even though one is being removed.
+    """
+    dc = dc_with_two_identity_members
+    url = reverse("admin:hope_flex_fields_datachecker_change", args=[dc.pk])
+    res = app.get(url)
+    # Mark the first existing member for deletion — clean() must skip it.
+    res.forms["datachecker_form"]["members-0-DELETE"] = True
+    res = res.forms["datachecker_form"].submit()
+
+    assert b"Only one IdentityField is allowed per DataChecker" not in res.content
+    assert res.status_code in (200, 302)

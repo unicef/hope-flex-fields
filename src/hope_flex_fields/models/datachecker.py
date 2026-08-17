@@ -1,6 +1,5 @@
-from collections.abc import Generator
 from io import BytesIO
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 from django.db import models
 from django.utils.translation import gettext as _
 
@@ -10,6 +9,7 @@ from ..utils import memoized_method
 from ..xlsx import get_format_for_field, get_validation_for_field
 from .base import ValidatorMixin
 from .fieldset import Fieldset
+from collections.abc import Collection, Generator  # noqa: TC003
 
 if TYPE_CHECKING:
     from xlsxwriter import Format, Workbook
@@ -88,7 +88,7 @@ class DataChecker(ValidatorMixin, models.Model):
         return self.get_form_class()
 
     def get_form_class(self) -> "Generic[F]":
-        from ..forms import FlexForm
+        from ..forms import FlexForm  # noqa
 
         fields: dict[str, forms.Field] = {}
         field: "FlexField"
@@ -103,12 +103,66 @@ class DataChecker(ValidatorMixin, models.Model):
                 full_name = f"{fs.prefix}{field.name}"
             fld.label = f"{prefix}: {label}" if prefix else label
             fields[full_name] = fld
-        form_class_attrs = {"datachecker": self, "validator": self, **dict(sorted(fields.items()))}
+
+        members = self.members.select_related("fieldset").order_by("order").all()
+        fieldset_specs = [
+            (m.fieldset, m.fieldset.get_prefixed_field_map(m.prefix or ""))
+            for m in members
+            if m.fieldset.has_validation_rules()
+        ]
+        form_class_attrs = {
+            "datachecker": self,
+            "validator": self,
+            "fieldset_specs": fieldset_specs,
+            **dict(sorted(fields.items())),
+        }
+
         return type(f"{self.name}DataCheckerForm", (FlexForm,), form_class_attrs)
+
+    @memoized_method()
+    def get_file_field_names(self, *, with_prefix: bool = True) -> set[str]:
+        """Return the (optionally prefixed) names of fields that hold file data.
+
+        The names match those produced by :meth:`get_form_class`, so callers can
+        use them to key into cleaned/validated data.
+        """
+        names: set[str] = set()
+        field: "FlexField"
+        for fs, field in self.get_fields():
+            if not field.is_file:
+                continue
+            if "%s" in fs.prefix:
+                full_name = fs.prefix % field.name
+            else:
+                full_name = f"{fs.prefix}{field.name}"
+            names.add(full_name if with_prefix else field.name)
+        return names
+
+    def split_data(
+        self,
+        data: dict[str, Any],
+        *,
+        file_field_names: Collection[str] | None = None,
+    ) -> dict[str, dict[str, Any]]:
+        """Split a data mapping into text ``fields`` and binary ``files``.
+
+        The distinction is driven by each flex field's ``is_file`` attribute, so
+        every consumer gets a consistent text/file separation without having to
+        know how field types are configured.
+        """
+        file_names = set(file_field_names) if file_field_names is not None else self.get_file_field_names()
+        fields: dict[str, Any] = {}
+        files: dict[str, Any] = {}
+        for key, value in data.items():
+            if key in file_names:
+                files[key] = value
+            else:
+                fields[key] = value
+        return {"fields": fields, "files": files}
 
 
 def create_xls_importer(dc: "DataChecker") -> BytesIO:
-    import xlsxwriter
+    import xlsxwriter  # noqa
 
     out = BytesIO()
 

@@ -1,6 +1,12 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = [
+  "hatch-vcs>=0.4",
+  "hatchling>=1.25,<1.26",
+]
+
 [project]
 name = "hope-flex-fields"
-version = "0.7.6"
 description = ""
 readme = "README.md"
 license = { text = "MIT" }
@@ -9,13 +15,19 @@ authors = [
   { name = "sax", email = "s.apostolico@gmail.com" },
 ]
 
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 classifiers = [
+  "Environment :: Web Environment",
+  "Framework :: Django",
+  "Framework :: Django :: 5.2",
+  "Framework :: Django :: 6.0",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
+dynamic = [ "version" ]
 dependencies = [
   "deepdiff",
   "deprecation",
@@ -33,37 +45,47 @@ dependencies = [
   "requests",
   "xlsxwriter",
 ]
-optional-dependencies.docs = [
+
+[dependency-groups]
+dev = [
+  "bandit",
+  "black",
+  "django-csp",
+  "django-factory-boy",
+  "django-webtest",
+  "flake8",
+  "flake8-html",
+  "freezegun",
+  "isort",
+  "mypy",
+  "pdbpp",
+  "pre-commit",
+  "pytest",
+  "pytest-cov",
+  "pytest-django",
+  "pytest-xdist",
+  "requests",
+  "responses",
+  "tox",
+]
+
+docs = [
   "mkdocs",
   "mkdocs-awesome-pages-plugin",
   "mkdocs-material",
   "mkdocstrings-python",
 ]
 
-[tool.uv]
-dev-dependencies = [
-  "bandit",
-  "black",
-  "bump2version",
-  "django-csp",
-  "django-factory-boy",
-  "django-webtest",
-  "django",
-  "flake8-html",
-  "flake8",
-  "freezegun",
-  "isort",
-  "mypy",
-  "pdbpp",
-  "pre-commit",
-  "pytest-cov",
-  "pytest-django",
-  "pytest",
-  "responses",
-  "pytest-xdist",
-  "tox",
-  "requests",
+[tool.hatch]
+build.hooks.vcs.version-file = "src/hope_flex_fields/version.py"
+build.targets.sdist.ignore-vcs = true
+build.targets.sdist.include = [
+  "src/hope_flex_fields/**/*.*",
 ]
+build.targets.wheel.packages = [
+  "src/hope_flex_fields",
+]
+version.source = "vcs"
 
 [tool.django-stubs]
 django_settings_module = "hope_dedup_engine.config.settings"

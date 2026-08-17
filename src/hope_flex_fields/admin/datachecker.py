@@ -13,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from admin_extra_buttons.decorators import button
 from admin_extra_buttons.mixins import ExtraButtonsMixin
 
+from ..fields import IdentityField
 from ..file_handlers import HANDLERS
 from ..forms import DataCheckerFieldsetForm
 from ..models import DataChecker, DataCheckerFieldset, Fieldset
@@ -43,8 +44,12 @@ class FileForm(forms.Form):
 class DataCheckerFieldsetFormset(forms.models.BaseInlineFormSet):
     def clean(self):
         all_fields = set()
+        identity_field_count = 0
         fs: Fieldset
         for form in self.forms:
+            if form.cleaned_data.get("DELETE"):
+                continue
+
             if fs := form.cleaned_data.get("fieldset"):
                 prefix: str = form.cleaned_data["prefix"]
                 if "%s" in prefix:
@@ -54,6 +59,13 @@ class DataCheckerFieldsetFormset(forms.models.BaseInlineFormSet):
                 if all_fields.intersection(fs_fields):
                     raise forms.ValidationError("Field names are not unique")
                 all_fields.update(fs_fields)
+
+                for field in fs.get_fields():
+                    if issubclass(field.definition.field_type, IdentityField):
+                        identity_field_count += 1
+
+        if identity_field_count > 1:
+            raise forms.ValidationError("Only one IdentityField is allowed per DataChecker.")
 
 
 class DataCheckerFieldsetTabularInline(TabularInline):

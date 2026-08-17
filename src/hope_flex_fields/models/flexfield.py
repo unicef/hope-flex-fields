@@ -1,5 +1,6 @@
 import logging
 
+from django import forms
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import UniqueConstraint
@@ -53,6 +54,15 @@ class FlexField(AbstractField):
 
     def base_type(self):
         return self.definition.field_type.__name__
+
+    @property
+    def is_file(self) -> bool:
+        """Whether this field stores binary/file data rather than text.
+
+        Used by the data checker to route cleaned values into the proper
+        storage (text fields vs. file blob).
+        """
+        return issubclass(self.definition.field_type, forms.FileField)
 
     def validate_attrs(self):
         try:

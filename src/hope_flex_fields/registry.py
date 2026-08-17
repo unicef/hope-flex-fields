@@ -3,6 +3,8 @@ from django import forms
 from strategy_field.registry import Registry
 from strategy_field.utils import fqn, import_by_name
 
+from .fields import IdentityField
+
 
 class FieldRegistry(Registry):
     def get_name(self, entry):
@@ -15,7 +17,7 @@ class FieldRegistry(Registry):
             if isinstance(item, str):
                 try:
                     clazz = import_by_name(item)
-                except (ImportError, ValueError):
+                except (ImportError, ValueError):  # noqa
                     raise KeyError(item)
             else:
                 clazz = item
@@ -32,7 +34,7 @@ class FieldRegistry(Registry):
         if isinstance(y, str):
             try:
                 y = import_by_name(y)
-            except (ImportError, ValueError):
+            except (ImportError, ValueError):  # noqa
                 return False
         return super().__contains__(y)
 
@@ -63,3 +65,4 @@ field_registry.register(forms.TimeField)
 field_registry.register(forms.URLField)
 field_registry.register(forms.UUIDField)
 field_registry.register(forms.JSONField)
+field_registry.register(IdentityField)
