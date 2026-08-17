@@ -1,7 +1,36 @@
-0.8 (in dev)
-------------
+0.9
+---
+* enhanced DataChecker's split_data method to accept optional file field names
+
+0.8.5
+-----
+* fix dynamic version
+
+0.8.4
+-----
 * added support to python 3.14
 * added support to django 6
+* added file handling capabilities to DataChecker and FlexField
+* enhanced IdentityField to be read-only and disabled
+* modernized codebase
+
+0.8.3
+-----
+* fix release workflow
+
+0.8.2
+-----
+* fix release workflow
+
+0.8.1
+-----
+* fix migrations
+
+0.8.0
+-----
+* added IdentityField for collision detection support
+* added fieldset cross-field JavaScript validation with error handling
+* fix CI venv cache
 
 
 0.7.7
