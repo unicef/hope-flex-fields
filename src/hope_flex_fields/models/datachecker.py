@@ -9,7 +9,7 @@ from ..utils import memoized_method
 from ..xlsx import get_format_for_field, get_validation_for_field
 from .base import ValidatorMixin
 from .fieldset import Fieldset
-from collections.abc import Generator  # noqa: TC003
+from collections.abc import Collection, Generator  # noqa: TC003
 
 if TYPE_CHECKING:
     from xlsxwriter import Format, Workbook
@@ -119,6 +119,7 @@ class DataChecker(ValidatorMixin, models.Model):
 
         return type(f"{self.name}DataCheckerForm", (FlexForm,), form_class_attrs)
 
+    @memoized_method()
     def get_file_field_names(self, *, with_prefix: bool = True) -> set[str]:
         """Return the (optionally prefixed) names of fields that hold file data.
 
@@ -137,14 +138,19 @@ class DataChecker(ValidatorMixin, models.Model):
             names.add(full_name if with_prefix else field.name)
         return names
 
-    def split_data(self, data: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    def split_data(
+        self,
+        data: dict[str, Any],
+        *,
+        file_field_names: Collection[str] | None = None,
+    ) -> dict[str, dict[str, Any]]:
         """Split a data mapping into text ``fields`` and binary ``files``.
 
         The distinction is driven by each flex field's ``is_file`` attribute, so
         every consumer gets a consistent text/file separation without having to
         know how field types are configured.
         """
-        file_names = self.get_file_field_names()
+        file_names = set(file_field_names) if file_field_names is not None else self.get_file_field_names()
         fields: dict[str, Any] = {}
         files: dict[str, Any] = {}
         for key, value in data.items():
