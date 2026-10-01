@@ -3,7 +3,7 @@ from django import forms
 from strategy_field.registry import Registry
 from strategy_field.utils import fqn, import_by_name
 
-from .fields import IdentityField
+from .fields import FlexImageField, IdentityField
 
 
 class FieldRegistry(Registry):
@@ -65,4 +65,5 @@ field_registry.register(forms.TimeField)
 field_registry.register(forms.URLField)
 field_registry.register(forms.UUIDField)
 field_registry.register(forms.JSONField)
+field_registry.register(FlexImageField)
 field_registry.register(IdentityField)

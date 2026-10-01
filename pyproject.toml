@@ -59,6 +59,7 @@ dev = [
   "isort",
   "mypy",
   "pdbpp",
+  "pillow",
   "pre-commit",
   "pytest",
   "pytest-cov",
