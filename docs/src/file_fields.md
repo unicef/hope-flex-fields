@@ -30,8 +30,9 @@ to, so it is the only place that can store the payload and produce a new referen
 A `clean()` that returned the file would put bytes into data meant to stay JSON.
 
 !!! note
-    Uploads are validated by `django.forms.ImageField`, which needs
-    [Pillow](https://pypi.org/project/pillow/) installed.
+    Uploads are validated by `django.forms.ImageField`, which relies on
+    [Pillow](https://pypi.org/project/pillow/). It is installed as a dependency
+    of this library.
 
 ## Serving payloads
 

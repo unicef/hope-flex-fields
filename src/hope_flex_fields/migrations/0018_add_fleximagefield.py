@@ -5,28 +5,29 @@
 # is repointed instead of a second one being created. The update goes through the
 # queryset so that the old field_type is never deserialized, which would fail as soon
 # as the project drops its own class.
+#
+# The values are fixed rather than derived from the field class, so that later changes
+# to the class or to the attribute helpers cannot alter what this migration writes.
 
 from django.db import migrations
-from django.utils.text import slugify
 
-from strategy_field.utils import fqn
-
-from hope_flex_fields.fields import FlexImageField
-from hope_flex_fields.utils import get_common_attrs, get_kwargs_from_field_class
+FIELD_NAME = "FlexImageField"
+FIELD_SLUG = "fleximagefield"
+FIELD_TYPE = "hope_flex_fields.fields.FlexImageField"
+FIELD_ATTRS = {"required": False, "help_text": "", "max_length": None, "allow_empty_file": False}
 
 
 def add_flex_image_field(apps, schema_editor):
     field_definition = apps.get_model("hope_flex_fields", "FieldDefinition")
-    name = FlexImageField.__name__
-    existing = field_definition.objects.filter(name=name)
+    existing = field_definition.objects.filter(name=FIELD_NAME)
     if existing.exists():
-        existing.update(field_type=fqn(FlexImageField))
+        existing.update(field_type=FIELD_TYPE)
         return
     field_definition.objects.create(
-        name=name,
-        slug=slugify(name),
-        field_type=fqn(FlexImageField),
-        attrs=get_kwargs_from_field_class(FlexImageField, get_common_attrs()),
+        name=FIELD_NAME,
+        slug=FIELD_SLUG,
+        field_type=FIELD_TYPE,
+        attrs=FIELD_ATTRS,
     )
 
 

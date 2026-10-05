@@ -9,7 +9,7 @@
   kept for one release and are not registered by default: a project still migrating away from them
   registers them itself, so that swapping the field type and migrating the data can happen in
   either order
-* note: FlexImageField validates uploads through django.forms.ImageField and therefore needs Pillow
+* added Pillow as a dependency: FlexImageField validates uploads through django.forms.ImageField, which needs it
 
 0.9
 ---
