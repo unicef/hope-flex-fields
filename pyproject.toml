@@ -41,6 +41,7 @@ dependencies = [
   "jmespath",
   "jsonpickle",
   "mini-racer",
+  "pillow",
   "python-calamine",
   "requests",
   "xlsxwriter",
