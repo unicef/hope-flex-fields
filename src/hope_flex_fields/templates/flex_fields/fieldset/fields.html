@@ -1,17 +1,24 @@
 {% extends "admin_extra_buttons/action_page.html" %}
 {% block content %}
     {{ media }}
-    {{ original }}
+    <h2>{{ original }}</h2>
     <form method="post">
         {% csrf_token %}
         {{ formset.management_form }}
         <table>
+            <th>Field Name</th>
+            <th>Type</th>
+            <th>Master</th>
+            <th>Edit Link</th>
+            <td>Delete</td>
             {% for e in formset %}
                 <tr>
                     {{ e.id }}
                     <td>{{ e.name.errors }}{{ e.name }}</td>
                     <td>{{ e.definition.errors }}{{ e.definition }}</td>
-                    <td>{{ e.DELETE }}</td>
+                    <td>
+                        {{ e.master }}
+                    </td>
                     <td>
                         <a class="inlinechangelink related-widget-wrapper-link change-related"
 {#                           data-href-template="/admin/hope_flex_fields/fielddefinition/__fk__/change/?_to_field=id&amp;_popup=1"#}
@@ -21,9 +28,8 @@
                             edit
                         </a>
                     </td>
-                <td>
-                    {{ e.master }}
-                </td>
+
+                    <td>{{ e.DELETE }}</td>
                 </tr>
             {% endfor %}
         </table>

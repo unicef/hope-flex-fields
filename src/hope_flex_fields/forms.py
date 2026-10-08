@@ -25,9 +25,24 @@ class FlexForm(forms.Form):
             self.initialize_parent_child(self.initial)
 
     def clean(self):
-        super().clean()
-        self.cleaned_data = json.loads(json.dumps(self.cleaned_data, cls=DjangoJSONEncoder))
-        return self.cleaned_data
+        cleaned = super().clean()
+
+        def add_errors(errors: dict[str | None, list[str]]) -> None:
+            for field, msgs in errors.items():
+                for m in msgs:
+                    self.add_error(field, m)
+
+        if fs := getattr(self, "fieldset", None):
+            # The form is bound to a single Fieldset instance (no prefix mapping needed).
+            add_errors(fs.get_validation_errors(cleaned))
+        for fs, m in getattr(self, "fieldset_specs", None) or ():
+            # The form contains multiple fieldsets
+            # Where each fieldset uses bare field names but the form fields are prefixed.
+            add_errors(fs.get_validation_errors(cleaned, bare_to_prefixed=m))
+
+        cleaned = json.loads(json.dumps(cleaned, cls=DjangoJSONEncoder))
+        self.cleaned_data = cleaned
+        return cleaned
 
     def initialize_parent_child(self, data: dict) -> None:
         for field in self.fields.values():

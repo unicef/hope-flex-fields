@@ -7,7 +7,6 @@ from io import StringIO
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from django import forms
 from django.core.management import call_command
 from django.forms.fields import DateTimeFormatsIterator
 from django.utils.text import slugify
@@ -17,6 +16,7 @@ from strategy_field.utils import fqn
 from hope_flex_fields.registry import field_registry
 
 if TYPE_CHECKING:
+    from django.forms import Field
     from hope_flex_fields.models import FieldDefinition
 
 
@@ -28,20 +28,20 @@ def get_common_attrs():
     return {"required": False, "help_text": ""}
 
 
-def get_kwargs_from_field_class(field: "str|forms.Field", extra: dict | None = None):
+def get_kwargs_from_field_class(field: "Field", extra: dict | None = None):
     field = field_registry.get_class(field)
 
     sig: inspect.Signature = inspect.signature(field)
     arguments = extra or {}
     field_arguments = {
-        k.name: k.default for __, k in sig.parameters.items() if k.default not in [inspect.Signature.empty]
+        k.name: k.default for __, k in sig.parameters.items() if k.default is not inspect.Signature.empty
     }
     arguments.update(field_arguments)
     return arguments
 
 
-def get_kwargs_from_formfield(field: forms.Field):
-    from hope_flex_fields.models import FieldDefinition
+def get_kwargs_from_formfield(field: "Field"):
+    from hope_flex_fields.models import FieldDefinition  # noqa
 
     fd = FieldDefinition.objects.get(name=type(field).__name__)
     ret = {}
@@ -97,7 +97,7 @@ def loaddata_from_buffer(buf):
 
 
 def create_default_fields(apps, schema_editor):
-    from hope_flex_fields.registry import field_registry
+    from hope_flex_fields.registry import field_registry  # noqa
 
     fd: "FieldDefinition" = apps.get_model("hope_flex_fields", "FieldDefinition")
 

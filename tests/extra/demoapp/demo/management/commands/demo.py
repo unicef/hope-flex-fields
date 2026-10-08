@@ -12,9 +12,9 @@ class Command(BaseCommand):
     requires_system_checks = []
 
     def handle(self, *args: Any, **options: Any) -> None:
-        from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory
+        from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory  # noqa
 
-        from hope_flex_fields.models import FieldDefinition
+        from hope_flex_fields.models import FieldDefinition  # noqa
 
         hh = FieldsetFactory(name="household_with_individual")
         hh2 = FieldsetFactory(name="household_no_individual", extends=hh)

@@ -5,7 +5,7 @@ from hope_flex_fields.exceptions import FlexFieldCreationError
 
 
 def sync_content_types(sender, **kwargs):
-    from hope_flex_fields.models import Fieldset, FlexField
+    from hope_flex_fields.models import Fieldset, FlexField  # noqa
 
     fs: Fieldset
     ff: FlexField
