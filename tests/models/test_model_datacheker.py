@@ -24,6 +24,48 @@ def fs(db):
 
 
 @pytest.mark.parametrize(
+    ("attrs", "expected_label"),
+    [
+        ('{"label": "Document number"}', "Document number"),
+        ("not-json", "document_number"),
+        ("", "document_number"),
+        ("   ", "document_number"),
+        ("[]", "document_number"),
+        ("null", "document_number"),
+        ('"text"', "document_number"),
+        ("42", "document_number"),
+        ("true", "document_number"),
+        ([], "document_number"),
+        (42, "document_number"),
+    ],
+    ids=[
+        "json_string",
+        "plain_string",
+        "empty_string",
+        "whitespace_string",
+        "json_array",
+        "json_null",
+        "json_scalar_string",
+        "json_number",
+        "json_boolean",
+        "list",
+        "integer",
+    ],
+)
+def test_get_form_class_accepts_non_mapping_attributes(fs, attrs: object, expected_label: str):
+    field = fs.fields.get(name="document_number")
+    field.attrs = attrs
+    field.save(update_fields=["attrs"])
+
+    dc = DataCheckerFactory()
+    DataCheckerFieldsetFactory(checker=dc, fieldset=fs, prefix="", order=0)
+
+    form_class = dc.get_form_class()
+
+    assert form_class.base_fields["document_number"].label == expected_label
+
+
+@pytest.mark.parametrize(
     ("prefix", "fmt"),
     [("%s_", "{name}_"), ("member_", "member_{name}")],
     ids=["template_suffix", "concat_prefix"],

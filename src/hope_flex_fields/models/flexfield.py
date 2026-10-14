@@ -1,3 +1,4 @@
+import json
 import logging
 
 from django import forms
@@ -15,6 +16,24 @@ from .definition import FieldDefinition
 from .fieldset import Fieldset
 
 logger = logging.getLogger(__name__)
+
+
+def _attrs_mapping(value: object) -> dict:
+    """Return field attributes as a dict.
+
+    JSON values are sometimes stored as a string. Calling ``.get`` on that
+    string raises ``AttributeError`` while building a datachecker form.
+    """
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, str) and value.strip():
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            return {}
+        if isinstance(parsed, dict):
+            return parsed
+    return {}
 
 
 class FieldsetFieldManager(models.Manager):
@@ -79,8 +98,7 @@ class FlexField(AbstractField):
 
     def get_merged_attrs(self):
         attrs = dict(**self.definition.get_attributes(self))
-        if isinstance(self.attributes, dict):
-            attrs.update(self.attrs)
+        attrs.update(_attrs_mapping(self.attributes))
         return attrs
 
     def get_field(self, override_attrs=None, **extra) -> "FlexFormMixin":
