@@ -20,6 +20,8 @@ from django.urls.conf import include
 
 from rest_framework import routers
 
+from demo.views import flex_file
+
 from hope_flex_fields.api.views import (
     DataCheckerViewSet,
     FieldDefinitionViewSet,
@@ -38,5 +40,6 @@ router.register(r"sync", SyncViewSet, basename="sync")
 
 urlpatterns = [
     path("api/", include(router.urls)),
+    path("flex-file/<uuid:pk>/", flex_file, name="flex_file"),
     path("", admin.site.urls),
 ]

@@ -7,7 +7,7 @@ from strategy_field.utils import fqn
 
 
 def test_validate_attributes(db):
-    from hope_flex_fields.models import FieldDefinition
+    from hope_flex_fields.models import FieldDefinition  # noqa
 
     fd = FieldDefinition.objects.create(name="IntField", field_type=forms.IntegerField, attrs={})
     fd.refresh_from_db()
@@ -28,7 +28,7 @@ def test_validate_attributes(db):
 
 
 def test_validate_custom_strategy(db, mocked_responses):
-    from hope_flex_fields.models import FieldDefinition
+    from hope_flex_fields.models import FieldDefinition  # noqa
 
     mocked_responses.add(
         mocked_responses.GET,

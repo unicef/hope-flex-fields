@@ -1,17 +1,22 @@
 import logging
+import json
 from typing import TYPE_CHECKING, Any, Generic, TypedDict, TypeVar
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.forms import modelform_factory
 from django.utils.translation import gettext as _
 
 from deepdiff import DeepDiff
 from deprecation import deprecated
+from py_mini_racer import JSEvalException
+
 
 from ..exceptions import FlexFieldCreationError
 from ..utils import get_kwargs_from_formfield
+from ..validators import JsValidator
 from .base import ValidatorMixin
 
 if TYPE_CHECKING:
@@ -36,7 +41,7 @@ class FieldsetManager(models.Manager):
         return self.get(name=name)
 
     def inspect_content_type(self, ct: ContentType) -> ContentTypeConfig:
-        from hope_flex_fields.models import FieldDefinition, FlexField
+        from hope_flex_fields.models import FieldDefinition, FlexField  # noqa
 
         model_class = ct.model_class()
         model_form = modelform_factory(model_class, exclude=(model_class._meta.pk.name,))
@@ -76,7 +81,7 @@ class FieldsetManager(models.Manager):
         }
 
     def create_from_content_type(self, name: str, content_type: ContentType, config: dict | None = None) -> "Fieldset":
-        from hope_flex_fields.models import FieldDefinition, Fieldset
+        from hope_flex_fields.models import FieldDefinition, Fieldset  # noqa
 
         if config is None:
             inspection = Fieldset.objects.inspect_content_type(content_type)
@@ -95,6 +100,7 @@ class Fieldset(ValidatorMixin, models.Model):
     extends = models.ForeignKey("self", null=True, blank=True, on_delete=models.CASCADE)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, blank=True, null=True)
     group = models.CharField(max_length=32, blank=True, null=True)
+    validation = models.TextField(blank=True, null=True, default="")
 
     objects = FieldsetManager()
 
@@ -141,7 +147,7 @@ class Fieldset(ValidatorMixin, models.Model):
         return self.get_form_class()
 
     def get_form_class(self) -> "Generic[F]":
-        from ..forms import FlexForm
+        from ..forms import FlexForm  # noqa
 
         fields: dict[str, forms.Field] = {}
         field: "FlexField"
@@ -156,3 +162,49 @@ class Fieldset(ValidatorMixin, models.Model):
         super().clean()
         if self.extends == self:
             raise ValidationError({"extends": "Cannot extends itself"})
+
+    def has_validation_rules(self) -> bool:
+        return bool((self.validation or "").strip())
+
+    def get_prefixed_field_map(self, prefix: str = "") -> dict[str, str]:
+        prefix = prefix or ""
+        if "%s" in prefix:
+            return {f.name: (prefix % f.name) for f in self.get_fields()}
+        return {f.name: f"{prefix}{f.name}" for f in self.get_fields()}
+
+    def get_validation_errors(
+        self,
+        cleaned: dict[str, Any],
+        bare_to_prefixed: dict[str, str] | None = None,
+    ) -> dict[str | None, list[str]]:
+        data = (
+            cleaned
+            if bare_to_prefixed is None
+            else {bare: cleaned.get(pref) for bare, pref in bare_to_prefixed.items()}
+        )
+        errors: dict[str | None, list[str]] = {}
+        for key, msg in (self.validate_rules(data) or {}).items():
+            field = None if key == "-" else (bare_to_prefixed.get(key, key) if bare_to_prefixed else key)
+            msgs = msg if isinstance(msg, list | tuple) else [msg]
+            errors.setdefault(field, []).extend(str(m) for m in msgs)
+        return errors
+
+    def validate_rules(self, data: dict[str, Any]) -> dict:
+        if not (code := (self.validation or "").strip()):
+            return {}
+
+        wrapped = f"(function(){{ var data = value;\n{code}\n}})()"
+
+        try:
+            payload = json.loads(json.dumps(data or {}, cls=DjangoJSONEncoder, ensure_ascii=False))
+        except (TypeError, ValueError) as e:
+            return {"-": [f"Validation data is not JSON-serializable: {e}"]}
+
+        try:
+            JsValidator(wrapped)(payload)
+        except JSEvalException as e:
+            return {"-": [f"JavaScript validation error: {e}"]}
+        except ValidationError as e:
+            return getattr(e, "message_dict", None) or {"-": e.messages}
+
+        return {}

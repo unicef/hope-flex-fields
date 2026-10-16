@@ -17,3 +17,5 @@ uv.lock
 !.gitignore
 !.coveragerc
 !.pre-commit-config.yaml
+
+src/hope_flex_fields/version.py

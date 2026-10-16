@@ -6,7 +6,7 @@ import pytest
 
 
 def test_validate_attrs_with_exception(db):
-    from hope_flex_fields.models import FieldDefinition, FlexField
+    from hope_flex_fields.models import FieldDefinition, FlexField  # noqa
 
     fd = FieldDefinition(name="ExceptionField", field_type=forms.IntegerField, attrs={"invalid_attr": "invalid_value"})
     flexfield = FlexField(definition=fd, name="exception_field", fieldset_id=1)
@@ -18,8 +18,8 @@ def test_validate_attrs_with_exception(db):
 
 
 def test_get_field_with_exception(db):
-    from hope_flex_fields.models import FieldDefinition, FlexField
-    from hope_flex_fields.exceptions import FlexFieldCreationError
+    from hope_flex_fields.models import FieldDefinition, FlexField  # noqa
+    from hope_flex_fields.exceptions import FlexFieldCreationError  # noqa
 
     fd = FieldDefinition(name="ExceptionField", field_type=forms.IntegerField, attrs={"invalid_attr": "invalid_value"})
     flexfield = FlexField(definition=fd, name="exception_field", fieldset_id=1)

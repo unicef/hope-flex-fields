@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture
 def dc(db):
-    from testutils.factories import (
+    from testutils.factories import (  # noqa
         DataCheckerFieldsetFactory,
         FieldDefinitionFactory,
         FieldsetFactory,

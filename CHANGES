@@ -1,3 +1,55 @@
+0.10
+----
+* added FlexImageField/FlexImageInput, the canonical image field: its value is a `flexfile:<uuid>`
+  reference to a payload the project stores, not the payload itself
+* added hope_flex_fields.references with is_reference, parse_reference, format_reference,
+  is_data_uri, flex_file_src and the DATA_URI_FORMAT/DATA_URI_PREFIX/DEFAULT_MIMETYPE constants
+* added the FILE_URL_NAME configuration entry, the route flex_file_src builds payload URLs from
+* deprecated Base64ImageField/Base64ImageInput, which inline the payload as a `data:` URI. They are
+  kept for one release and are not registered by default: a project still migrating away from them
+  registers them itself, so that swapping the field type and migrating the data can happen in
+  either order
+* added Pillow as a dependency: FlexImageField validates uploads through django.forms.ImageField, which needs it
+
+0.9
+---
+* enhanced DataChecker's split_data method to accept optional file field names
+
+0.8.5
+-----
+* fix dynamic version
+
+0.8.4
+-----
+* added support to python 3.14
+* added support to django 6
+* added file handling capabilities to DataChecker and FlexField
+* enhanced IdentityField to be read-only and disabled
+* modernized codebase
+
+0.8.3
+-----
+* fix release workflow
+
+0.8.2
+-----
+* fix release workflow
+
+0.8.1
+-----
+* fix migrations
+
+0.8.0
+-----
+* added IdentityField for collision detection support
+* added fieldset cross-field JavaScript validation with error handling
+* fix CI venv cache
+
+
+0.7.7
+-----
+* enhance template
+
 0.7.6
 -----
 * used numeric row/col args for worksheet.datavalidation

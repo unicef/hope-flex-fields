@@ -26,6 +26,11 @@ def config(db):
     return {"fs": fs}
 
 
+@pytest.fixture
+def fs(config) -> "Fieldset":
+    return config["fs"]
+
+
 def test_validate_row(config):
     data = {"int": 1, "float": 1.1, "str": "string"}
     fs: Fieldset = config["fs"]
@@ -95,3 +100,75 @@ def test_cannot_extends_self(config):
     fs: Fieldset = config["fs"]
     fs.extends = fs
     pytest.raises(ValidationError, fs.clean)
+
+
+MSG_COUNTRY_REQUIRED = "country is required when document number is provided."
+VALIDATION_COUNTRY_REQUIRED = f"""
+return data.document_number && !data.country
+  ? ({{ country: "{MSG_COUNTRY_REQUIRED}" }})
+  : true;
+""".strip()
+
+
+@pytest.mark.parametrize(
+    ("document_number", "country", "expected"),
+    [
+        ("", "", {}),
+        ("ABC", "", {"country": [MSG_COUNTRY_REQUIRED]}),
+        ("ABC", "CL", {}),
+    ],
+    ids=["no_document_number_ok", "document_number_requires_country", "country_provided_ok"],
+)
+def test_validate_rules_country_required(fs: "Fieldset", document_number: str, country: str, expected: dict):
+    fs.validation = VALIDATION_COUNTRY_REQUIRED
+    assert fs.has_validation_rules()
+
+    assert fs.validate_rules({"document_number": document_number, "country": country}) == expected
+
+
+@pytest.mark.parametrize(
+    ("validation_code", "data", "expected"),
+    [
+        ("return 123;", {"anything": "ok"}, {}),
+        ("boom();", {"anything": "ok"}, None),
+        ("return true;", {"x": object()}, None),
+    ],
+    ids=["non_object_return_is_ok", "js_exception_is_non_field_error", "non_serializable_data_is_non_field_error"],
+)
+def test_validate_rules_engine_failures_are_non_field_errors(
+    fs: "Fieldset", validation_code: str, data: dict, expected
+):
+    fs.validation = validation_code
+    ret = fs.validate_rules(data)
+
+    if expected is not None:
+        assert ret == expected
+    else:
+        assert ret["-"]
+        assert isinstance(ret.get("-"), list)
+
+
+@pytest.mark.parametrize(
+    ("prefix", "expected_format"),
+    [
+        ("", "{name}"),
+        ("pfx_", "pfx_{name}"),
+        ("grp__%s", "grp__{name}"),
+        ("A_%s_B", "A_{name}_B"),
+    ],
+)
+def test_get_prefixed_field_map(fs: "Fieldset", prefix: str, expected_format: str):
+    names = [f.name for f in fs.get_fields()]
+    assert fs.get_prefixed_field_map(prefix) == {n: expected_format.format(name=n) for n in names}
+
+
+def test_get_validation_errors_maps_prefixed_and_non_field(fs: "Fieldset"):
+    fs.validation = VALIDATION_COUNTRY_REQUIRED
+
+    m = {"document_number": "m_document_number", "country": "m_country"}
+    assert fs.get_validation_errors({"m_document_number": "ABC", "m_country": ""}, bare_to_prefixed=m) == {
+        "m_country": [MSG_COUNTRY_REQUIRED]
+    }
+
+    fs.validation = 'return {"-": "General validation failure"};'
+    assert fs.get_validation_errors({"x": 1}) == {None: ["General validation failure"]}
