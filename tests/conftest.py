@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 import responses
+from django.conf import settings
 
 
 def pytest_configure(config):
@@ -18,6 +19,9 @@ def pytest_configure(config):
     import django  # noqa
 
     django.setup()
+
+    # PBKDF2 is deliberately slow; every UserFactory and test login would pay for it.
+    settings.PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 
 
 @pytest.fixture
