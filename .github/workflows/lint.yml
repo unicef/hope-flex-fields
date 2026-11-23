@@ -29,10 +29,10 @@ jobs:
       lint: ${{steps.changes.outputs.lint }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - id: changes
         name: Check for file changes
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         with:
           base: ${{ github.ref }}
           token: ${{ github.token }}
@@ -47,14 +47,14 @@ jobs:
     if: needs.changes.outputs.lint
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: 3.13
           architecture: 'x64'
-      - uses: yezz123/setup-uv@v4.1
+      - uses: astral-sh/setup-uv@v7
 
       - name: Install deps
         run: uv sync --group dev

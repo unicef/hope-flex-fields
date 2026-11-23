@@ -6,14 +6,17 @@ from django import forms
 import pytest
 from testutils.factories import DataCheckerFactory, FieldsetFactory, FlexFieldFactory
 
-from hope_flex_fields.models import Fieldset
+import typing
+
+if typing.TYPE_CHECKING:
+    from hope_flex_fields.models import Fieldset
 
 MASTER = [{"id": 1, "name": "Italy"}, {"id": 2, "name": "France"}, {"id": 3, "name": "Germany"}]
 DETAILS = [{"country_id": 1, "name": "Rome"}, {"country_id": 2, "name": "Paris"}, {"country_id": 3, "name": "Berlin"}]
 
 
 @pytest.fixture
-def country_validator(db: Any) -> Fieldset:
+def country_validator(db: Any) -> "Fieldset":
     fs = FieldsetFactory(name="Country")
     FlexFieldFactory(name="id", fieldset=fs, definition__field_type=forms.IntegerField)
     FlexFieldFactory(name="name", fieldset=fs, definition__field_type=forms.CharField)
@@ -21,7 +24,7 @@ def country_validator(db: Any) -> Fieldset:
 
 
 @pytest.fixture
-def city_validator(db: Any) -> Fieldset:
+def city_validator(db: Any) -> "Fieldset":
     fs = FieldsetFactory()
     FlexFieldFactory(name="country_id", fieldset=fs, definition__field_type=forms.IntegerField)
     FlexFieldFactory(name="name", fieldset=fs, definition__field_type=forms.CharField)
@@ -29,7 +32,7 @@ def city_validator(db: Any) -> Fieldset:
 
 
 @pytest.fixture
-def checker(city_validator, country_validator) -> Fieldset:
+def checker(city_validator, country_validator) -> "Fieldset":
     dc = DataCheckerFactory()
     dc.fieldsets.add(city_validator)
     dc.fieldsets.add(country_validator)

@@ -67,7 +67,7 @@ class FieldDefinitionFactory(AutoRegisterModelFactory):
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
         if "attrs" in kwargs:
-            from hope_flex_fields.utils import get_kwargs_from_field_class
+            from hope_flex_fields.utils import get_kwargs_from_field_class  # noqa
 
             attrs = get_kwargs_from_field_class(kwargs["field_type"])
             attrs.update(**kwargs["attrs"])
@@ -87,6 +87,7 @@ class ContentTypeFactory(AutoRegisterModelFactory):
 class FieldsetFactory(AutoRegisterModelFactory):
     name = factory.Sequence(lambda d: "Fieldset-%s" % d)
     extends = None
+    validation = ""
 
     class Meta:
         model = Fieldset

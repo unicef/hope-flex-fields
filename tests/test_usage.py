@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture
 def config(db):
-    from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory
+    from testutils.factories import FieldDefinitionFactory, FieldsetFactory, FlexFieldFactory  # noqa
 
     fd1 = FieldDefinitionFactory(field_type=forms.IntegerField, attrs={"min_value": 1})
     fd2 = FieldDefinitionFactory(

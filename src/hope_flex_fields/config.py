@@ -6,6 +6,8 @@ CONFIG = {
     "API_AUTHENTICATION_CLASSES": ["rest_framework.authentication.BasicAuthentication"],
     "API_TOKEN": "",
     "MASTER_URL": None,
+    # route serving the payload of a file-typed field, reversed with its file id
+    "FILE_URL_NAME": None,
 }
 
 CONFIG.update(**getattr(settings, "FLEX_FIELDS_CONFIG", {}))

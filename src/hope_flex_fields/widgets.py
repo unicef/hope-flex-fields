@@ -1,4 +1,35 @@
+from typing import Any
+
 from django import forms
+
+from hope_flex_fields.references import flex_file_src
+
+
+class FlexImageInput(forms.ClearableFileInput):
+    """Render a file-typed flex field whose value is a reference, not a file.
+
+    ``ClearableFileInput`` expects the initial value to be a ``FieldFile`` it can
+    take a ``url`` from. Here it is a plain reference string, so both the test
+    for an existing value and the preview URL go through the reference helpers.
+    """
+
+    template_name = "flex_fields/flex_image_widget.html"
+
+    def is_initial(self, value: Any) -> bool:
+        return bool(value)
+
+    def get_context(self, name: str, value: Any, attrs: dict[str, Any] | None) -> dict[str, Any]:
+        context = super().get_context(name, value, attrs)
+        context["widget"]["image_src"] = flex_file_src(value)
+        return context
+
+
+class Base64ImageInput(FlexImageInput):
+    """Deprecated: superseded by :class:`FlexImageInput`, kept for one release.
+
+    It inherits the new rendering, which already handles inline ``data:`` URIs, so
+    that a project can swap the field type and migrate its data in either order.
+    """
 
 
 class JavascriptEditor(forms.Textarea):
